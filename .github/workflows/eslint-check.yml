@@ -1,0 +1,32 @@
+name: ESLint
+
+on:
+  push:
+    branches:
+      - 'main'
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  eslint:
+    name: Run eslint check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          yarn install
+
+      - name: Run ESLint
+        run: yarn lint
+
+      - name: Install codex-ui dependencies
+        run: |
+          yarn install
+        working-directory: ./codex-ui
+
+      - name: Run ESLint on codex-ui
+        run: yarn lint
+        working-directory: ./codex-ui
