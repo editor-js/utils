@@ -5,60 +5,57 @@
  * Possible log levels
  */
 export declare enum LogLevels {
-    VERBOSE = "VERBOSE",
-    INFO = "INFO",
-    WARN = "WARN",
-    ERROR = "ERROR"
+  VERBOSE = 'VERBOSE',
+  INFO = 'INFO',
+  WARN = 'WARN',
+  ERROR = 'ERROR'
 }
 /**
- * @typedef {object} ChainData
- * @property {object} data - data that will be passed to the success or fallback
- * @property {Function} function - function's that must be called asynchronously
+ * data - data that will be passed to the success or fallback
+ * function - function's that must be called asynchronously
  * @interface ChainData
  */
 export interface ChainData {
-    data?: object;
-    function: (...args: any[]) => any;
+  data?: object;
+  function: (...args: any[]) => any;
 }
 /**
  * Editor.js utils
  */
 /**
  * Returns basic key codes as constants
- *
  * @returns {{}}
  */
 export declare const keyCodes: {
-    BACKSPACE: number;
-    TAB: number;
-    ENTER: number;
-    SHIFT: number;
-    CTRL: number;
-    ALT: number;
-    ESC: number;
-    SPACE: number;
-    LEFT: number;
-    UP: number;
-    DOWN: number;
-    RIGHT: number;
-    DELETE: number;
-    META: number;
-    SLASH: number;
+  BACKSPACE: number;
+  TAB: number;
+  ENTER: number;
+  SHIFT: number;
+  CTRL: number;
+  ALT: number;
+  ESC: number;
+  SPACE: number;
+  LEFT: number;
+  UP: number;
+  DOWN: number;
+  RIGHT: number;
+  DELETE: number;
+  META: number;
+  SLASH: number;
 };
 /**
  * Return mouse buttons codes
  */
 export declare const mouseButtons: {
-    LEFT: number;
-    WHEEL: number;
-    RIGHT: number;
-    BACKWARD: number;
-    FORWARD: number;
+  LEFT: number;
+  WHEEL: number;
+  RIGHT: number;
+  BACKWARD: number;
+  FORWARD: number;
 };
 /**
  * Set current log level
- *
- * @param {LogLevels} logLevel - log level to set
+ * @param logLevel - log level to set
  */
 export declare function setLogLevel(logLevel: LogLevels): void;
 /**
@@ -71,117 +68,101 @@ export declare const log: any;
 export declare const logLabeled: any;
 /**
  * Return string representation of the object type
- *
- * @param {*} object - object to get type
- * @returns {string}
+ * @param object - object to get type
+ * @returns
  */
 export declare function typeOf(object: any): string;
 /**
  * Check if passed variable is a function
- *
- * @param {*} fn - function to check
- * @returns {boolean}
+ * @param fn - function to check
+ * @returns
  */
 export declare function isFunction(fn: any): fn is (...args: any[]) => any;
 /**
  * Checks if passed argument is an object
- *
- * @param {*} v - object to check
- * @returns {boolean}
+ * @param v - object to check
+ * @returns
  */
 export declare function isObject(v: any): v is object;
 /**
  * Checks if passed argument is a string
- *
- * @param {*} v - variable to check
- * @returns {boolean}
+ * @param v - variable to check
+ * @returns
  */
 export declare function isString(v: any): v is string;
 /**
  * Checks if passed argument is boolean
- *
- * @param {*} v - variable to check
- * @returns {boolean}
+ * @param v - variable to check
+ * @returns
  */
 export declare function isBoolean(v: any): v is boolean;
 /**
  * Checks if passed argument is number
- *
- * @param {*} v - variable to check
- * @returns {boolean}
+ * @param v - variable to check
+ * @returns
  */
 export declare function isNumber(v: any): v is number;
 /**
  * Checks if passed argument is undefined
- *
- * @param {*} v - variable to check
- * @returns {boolean}
+ * @param v - variable to check
+ * @returns
  */
 export declare function isUndefined(v: any): v is undefined;
 /**
  * Check if passed function is a class
- *
- * @param {Function} fn - function to check
- * @returns {boolean}
+ * @param fn - function to check
+ * @returns
  */
 export declare function isClass(fn: any): boolean;
 /**
  * Checks if object is empty
- *
- * @param {object} object - object to check
- * @returns {boolean}
+ * @param object - object to check
+ * @returns
  */
 export declare function isEmpty(object: object): boolean;
 /**
  * Check if passed object is a Promise
- *
- * @param  {*}  object - object to check
- * @returns {boolean}
+ * @param  object - object to check
+ * @returns
  */
 export declare function isPromise(object: any): object is Promise<any>;
 /**
  * Returns true if passed key code is printable (a-Z, 0-9, etc) character.
- *
- * @param {number} keyCode - key code
- * @returns {boolean}
+ * @param keyCode - key code
+ * @returns
  */
 export declare function isPrintableKey(keyCode: number): boolean;
 /**
  * Fires a promise sequence asynchronously
- *
- * @param {ChainData[]} chains - list or ChainData's
- * @param {Function} success - success callback
- * @param {Function} fallback - callback that fires in case of errors
- * @returns {Promise}
+ * @param chains - list or ChainData's
+ * @param success - success callback
+ * @param fallback - callback that fires in case of errors
+ * @returns
  * @deprecated use PromiseQueue.ts instead
  */
 export declare function sequence(chains: ChainData[], success?: (data: object) => void, fallback?: (data: object) => void): Promise<void>;
 /**
  * Make array from array-like collection
- *
- * @param {ArrayLike} collection - collection to convert to array
- * @returns {Array}
+ * @param collection - collection to convert to array
+ * @returns
  */
 export declare function array(collection: ArrayLike<any>): any[];
 /**
  * Delays method execution
- *
- * @param {Function} method - method to execute
- * @param {number} timeout - timeout in ms
+ * @param method - method to execute
+ * @param timeout - timeout in ms
  */
 export declare function delay(method: (...args: any[]) => any, timeout: number): () => void;
 /**
  * Get file extension
- *
- * @param {File} file - file
- * @returns {string}
+ * @param file - file
+ * @returns
  */
 export declare function getFileExtension(file: File): string;
 /**
  * Check if string is MIME type
- *
- * @param {string} type - string to check
- * @returns {boolean}
+ * @param type - string to check
+ * @returns
  */
 export declare function isValidMimeType(type: string): boolean;
 /**
@@ -189,16 +170,14 @@ export declare function isValidMimeType(type: string): boolean;
  * Call method after passed time
  *
  * Note that this method returns Function and declared variable need to be called
- *
- * @param {Function} func - function that we're throttling
- * @param {number} wait - time in milliseconds
- * @param {boolean} immediate - call now
- * @returns {Function}
+ * @param func - function that we're throttling
+ * @param wait - time in milliseconds
+ * @param immediate - call now
+ * @returns
  */
 export declare function debounce(func: (...args: unknown[]) => void, wait?: number, immediate?: boolean): () => void;
 /**
  * Returns a function, that, when invoked, will only be triggered at most once during a given window of time.
- *
  * @param func - function to throttle
  * @param wait - function will be called only once for that period
  * @param options - Normally, the throttled function will run as much as it can
@@ -207,12 +186,11 @@ export declare function debounce(func: (...args: unknown[]) => void, wait?: numb
  *                  `{leading: false}`. To disable execution on the trailing edge, ditto.
  */
 export declare function throttle(func: any, wait: any, options?: {
-    leading?: boolean;
-    trailing?: boolean;
+  leading?: boolean;
+  trailing?: boolean;
 }): () => void;
 /**
  * Copies passed text to the clipboard
- *
  * @param text - text to copy
  */
 export declare function copyTextToClipboard(text: any): void;
@@ -220,21 +198,19 @@ export declare function copyTextToClipboard(text: any): void;
  * Returns object with os name as key and boolean as value. Shows current user OS
  */
 export declare function getUserOS(): {
-    [key: string]: boolean;
+  [key: string]: boolean;
 };
 /**
  * Capitalizes first letter of the string
- *
- * @param {string} text - text to capitalize
- * @returns {string}
+ * @param text - text to capitalize
+ * @returns
  */
 export declare function capitalize(text: string): string;
 /**
  * Merge to objects recursively
- *
- * @param {object} target - merge target
- * @param {object[]} sources - merge sources
- * @returns {object}
+ * @param target - merge target
+ * @param sources - merge sources
+ * @returns
  */
 export declare function deepMerge<T extends object>(target: any, ...sources: any[]): T;
 /**
@@ -242,47 +218,40 @@ export declare function deepMerge<T extends object>(target: any, ...sources: any
  *
  * Note! This is a simple solution, it can give false-positive results.
  * To detect touch devices more carefully, use 'touchstart' event listener
- *
  * @see http://www.stucox.com/blog/you-cant-detect-a-touchscreen/
  * @returns {boolean}
  */
 export declare const isTouchSupported: boolean;
 /**
  * Make shortcut command more human-readable
- *
- * @param {string} shortcut — string like 'CMD+B'
+ * @param shortcut — string like 'CMD+B'
  */
 export declare function beautifyShortcut(shortcut: string): string;
 /**
  * Returns valid URL. If it is going outside and valid, it returns itself
  * If url has `one slash`, then it concatenates with window location origin
  * or when url has `two lack` it appends only protocol
- *
- * @param {string} url - url to prettify
+ * @param url - url to prettify
  */
 export declare function getValidUrl(url: string): string;
 /**
  * Create a block id
- *
- * @returns {string}
+ * @returns
  */
 export declare function generateBlockId(): string;
 /**
  * Opens new Tab with passed URL
- *
- * @param {string} url - URL address to redirect
+ * @param url - URL address to redirect
  */
 export declare function openTab(url: string): void;
 /**
  * Returns random generated identifier
- *
- * @param {string} prefix - identifier prefix
- * @returns {string}
+ * @param prefix - identifier prefix
+ * @returns
  */
 export declare function generateId(prefix?: string): string;
 /**
  * Common method for printing a warning about the usage of deprecated property or method.
- *
  * @param condition - condition for deprecation.
  * @param oldProperty - deprecated property.
  * @param newProperty - the property that should be used instead.
@@ -290,7 +259,6 @@ export declare function generateId(prefix?: string): string;
 export declare function deprecationAssert(condition: boolean, oldProperty: string, newProperty: string): void;
 /**
  * Decorator which provides ability to cache method or accessor result
- *
  * @param target - target instance or constructor function
  * @param propertyKey - method or accessor name
  * @param descriptor - property descriptor
@@ -310,9 +278,8 @@ export declare function isMobileScreen(): boolean;
 export declare const isIosDevice: boolean;
 /**
  * Compares two values with unknown type
- *
  * @param var1 - value to compare
  * @param var2 - value to compare with
- * @returns {boolean} true if they are equal
+ * @returns true if they are equal
  */
 export declare function equals(var1: unknown, var2: unknown): boolean;
