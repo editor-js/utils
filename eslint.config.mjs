@@ -4,8 +4,8 @@ import CodeX from 'eslint-config-codex';
  * @todo connect architecture config
  */
 export default [
-  ...CodeX,
-  {
+  // ...CodeX,
+  ...{
     name: 'ts-editorjs/utils',
 
     /**

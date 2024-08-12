@@ -1,5 +1,8 @@
 {
   "name": "utils",
+  "workspaces": [
+    "packages/*"
+  ],
   "version": "1.0.0",
   "description": "Utils that are used by Editor.js and it's tools",
   "main": "build/index.js",
@@ -7,7 +10,10 @@
   "author": "CodeX Team <all@codex.so>",
   "license": "MIT",
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
+    "build": "yarn build:caret && yarn build:dom && yarn build:keyboard",
+    "build:caret": "cd packages/caret && yarn build",
+    "build:dom": "cd packages/dom && yarn build",
+    "build:keyboard": "cd packages/keyboard && yarn build",
     "lint": "eslint",
     "lint:fix": "yarn lint --fix"
   },
@@ -17,6 +23,7 @@
     "eslint-config-codex": "^2.0.0",
     "typescript-eslint": "^7.9.0",
     "ts-node": "^9.1.1",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "nanoid": "^4.0.2"
   }
 }
