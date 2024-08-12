@@ -3,3 +3,6 @@ dist/
 
 # module files
 node_modules/
+
+#
+*.tsbuildinfo
