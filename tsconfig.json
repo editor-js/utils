@@ -19,9 +19,13 @@
     "composite": true
   },
   "include": ["packages/**/*"],
+  "exclude": [
+    "node_modules",
+    "packages/**/dist*"
+  ],
   "references": [
-    { "path": "packages/caret" },
     { "path": "packages/dom" },
+    { "path": "packages/caret" },
     { "path": "packages/keyboard" }
   ]
 }

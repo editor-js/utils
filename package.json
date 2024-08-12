@@ -11,9 +11,9 @@
   "author": "CodeX Team <all@codex.so>",
   "license": "MIT",
   "scripts": {
-    "build": "yarn build:caret && yarn build:dom && yarn build:keyboard",
-    "build:caret": "cd packages/caret && yarn build",
+    "build": "yarn build:dom && yarn build:caret && yarn build:keyboard",
     "build:dom": "cd packages/dom && yarn build",
+    "build:caret": "cd packages/caret && yarn build",
     "build:keyboard": "cd packages/keyboard && yarn build",
     "lint": "eslint",
     "lint:fix": "yarn lint --fix"
