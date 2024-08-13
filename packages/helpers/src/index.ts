@@ -1,8 +1,4 @@
-/**
- * Class Util
- */
-
-import { nanoid } from 'nanoid';
+import { isObject } from './typeof';
 
 /**
  * Returns basic key codes as constants
@@ -38,114 +34,6 @@ export const mouseButtons = {
 };
 
 /**
- * Return string representation of the object type
- * @param object - object to get type
- * @returns string type name of the passed object
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function typeOf(object: any): string {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call,  @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
-  return Object.prototype.toString.call(object).match(/\s([a-zA-Z]+)/)[1].toLowerCase();
-}
-
-/**
- * Check if passed variable is a function
- * @param fn - function to check
- * @returns true, if passed v is of type funciton, false otherwise
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function isFunction(fn: any): fn is (...args: any[]) => any {
-  return typeOf(fn) === 'function' || typeOf(fn) === 'asyncfunction';
-}
-
-/**
- * Checks if passed argument is an object
- * @param v - object to check
- * @returns true, if passed v is of type object, false otherwise
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function isObject(v: any): v is object {
-  return typeOf(v) === 'object';
-}
-
-/**
- * Checks if passed argument is a string
- * @param v - variable to check
- * @returns true, if passed v is ot type string, false otherwise
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function isString(v: any): v is string {
-  return typeOf(v) === 'string';
-}
-
-/**
- * Checks if passed argument is boolean
- * @param v - variable to check
- * @returns true, if passed v is of type boolean, false otherwise
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function isBoolean(v: any): v is boolean {
-  return typeOf(v) === 'boolean';
-}
-
-/**
- * Checks if passed argument is number
- * @param v - variable to check
- * @returns true, if passed v is of type number, false otherwise
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function isNumber(v: any): v is number {
-  return typeOf(v) === 'number';
-}
-
-/**
- * Checks if passed argument is undefined
- * @param v - variable to check
- * @returns true, if passed v is of type undefined, false otherwise
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function isUndefined(v: any): v is undefined {
-  return typeOf(v) === 'undefined';
-}
-
-/**
- * Check if passed function is a class
- * @param fn - function to check
- * @returns true, if passed fn is a class, false otherwise
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function isClass(fn: any): boolean {
-  return isFunction(fn) && /^\s*class\s+/.test(fn.toString());
-}
-
-/**
- * True if passed variable is not null/undefined/''/{}
- * @param v value to check
- */
-export function notEmpty<T>(v: T | undefined | null | object): v is T {
-  return v !== undefined && v !== null && v !== '' && (typeof v !== 'object' || Object.keys(v).length > 0);
-}
-
-/**
- * True if passed variable is null/undefined/''/{}
- * @param v value to check
- */
-export function isEmpty(v: unknown): v is null | undefined | '' | Record<string, never> {
-  return !notEmpty(v);
-}
-
-/**
- * Check if passed object is a Promise
- * @param  object - object to check
- * @returns true, if passed object is a promise, false otherwise
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function isPromise(object: any): object is Promise<any> {
-  return Promise.resolve(object) === object;
-}
-
-/* eslint-disable @typescript-eslint/no-magic-numbers */
-/**
  * Returns true if passed key code is printable (a-Z, 0-9, etc) character.
  * @param keyCode - code of some key
  * @returns true, if passed keyCode is printable, false otherwise
@@ -158,52 +46,6 @@ export function isPrintableKey(keyCode: number): boolean {
     || (keyCode > 95 && keyCode < 112) // Numpad keys
     || (keyCode > 185 && keyCode < 193) // ;=,-./` (in order)
     || (keyCode > 218 && keyCode < 223); // [\]' (in order)
-}
-/* eslint-enable @typescript-eslint/no-magic-numbers */
-
-/**
- * Make array from array-like collection
- * @param collection - collection to convert to array
- * @returns
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function array(collection: ArrayLike<any>): any[] {
-  return Array.prototype.slice.call(collection);
-}
-
-/**
- * Delays method execution
- * @param method - method to execute
- * @param timeout - timeout in ms
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function delay(method: (...args: any[]) => any, timeout: number) {
-  return function (): void {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const context = this;
-
-    const args = arguments;
-
-    window.setTimeout(() => method.apply(context, args), timeout);
-  };
-}
-
-/**
- * Get file extension
- * @param file - file
- * @returns
- */
-export function getFileExtension(file: File): string {
-  return file.name.split('.').pop();
-}
-
-/**
- * Check if string is MIME type
- * @param type - string to check
- * @returns
- */
-export function isValidMimeType(type: string): boolean {
-  return /^[-\w]+\/([-+\w]+|\*)$/.test(type);
 }
 
 /**
@@ -242,67 +84,6 @@ export function debounce(func: (...args: unknown[]) => void, wait?: number, imme
 }
 
 /**
- * Returns a function, that, when invoked, will only be triggered at most once during a given window of time.
- * @param func - function to throttle
- * @param wait - function will be called only once for that period
- * @param options - Normally, the throttled function will run as much as it can
- *                  without ever going more than once per `wait` duration;
- *                  but if you'd like to disable the execution on the leading edge, pass
- *                  `{leading: false}`. To disable execution on the trailing edge, ditto.
- */
-export function throttle(func, wait, options: { leading?: boolean; trailing?: boolean } = undefined): () => void {
-  let context; let args; let result;
-  let timeout = null;
-  let previous = 0;
-
-  if (!options) {
-    options = {};
-  }
-
-  const later = function (): void {
-    previous = options.leading === false ? 0 : Date.now();
-    timeout = null;
-    result = func.apply(context, args);
-
-    if (!timeout) {
-      context = args = null;
-    }
-  };
-
-  return function (): unknown {
-    const now = Date.now();
-
-    if (!previous && options.leading === false) {
-      previous = now;
-    }
-
-    const remaining = wait - (now - previous);
-
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    context = this;
-
-    args = arguments;
-
-    if (remaining <= 0 || remaining > wait) {
-      if (timeout) {
-        clearTimeout(timeout);
-        timeout = null;
-      }
-      previous = now;
-      result = func.apply(context, args);
-
-      if (!timeout) {
-        context = args = null;
-      }
-    } else if (!timeout && options.trailing !== false) {
-      timeout = setTimeout(later, remaining);
-    }
-
-    return result;
-  };
-}
-
-/**
  * Copies passed text to the clipboard
  * @param text - text to copy
  */
@@ -321,7 +102,11 @@ export function copyTextToClipboard(text): void {
 
   range.selectNode(el);
 
-  window.getSelection().removeAllRanges();
+  if (selection === null) {
+    throw new Error('Cannot copy text to clipboard');
+  }
+
+  selection.removeAllRanges();
   selection.addRange(range);
 
   document.execCommand('copy');
@@ -450,34 +235,6 @@ export function getValidUrl(url: string): string {
 }
 
 /**
- * Create a block id
- * @returns
- */
-export function generateBlockId(): string {
-  const idLen = 10;
-
-  return nanoid(idLen);
-}
-
-/**
- * Opens new Tab with passed URL
- * @param url - URL address to redirect
- */
-export function openTab(url: string): void {
-  window.open(url, '_blank');
-}
-
-/**
- * Returns random generated identifier
- * @param prefix - identifier prefix
- * @returns
- */
-export function generateId(prefix = ''): string {
-  // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-  return `${prefix}${(Math.floor(Math.random() * 1e8)).toString(16)}`;
-}
-
-/**
  * Common method for printing a warning about the usage of deprecated property or method.
  * @param condition - condition for deprecation.
  * @param oldProperty - deprecated property.
@@ -487,7 +244,7 @@ export function deprecationAssert(condition: boolean, oldProperty: string, newPr
   const message = `«${oldProperty}» is deprecated and will be removed in the next major release. Please use the «${newProperty}» instead.`;
 
   if (condition) {
-    logLabeled(message, 'warn');
+    console.warn(message);
   }
 }
 
@@ -536,18 +293,6 @@ export function cacheable<Target, Value, Arguments extends unknown[] = unknown[]
   }
 
   return descriptor;
-}
-
-/**
- * All screens below this width will be treated as mobile;
- */
-export const mobileScreenBreakpoint = 650;
-
-/**
- * True if screen has mobile size
- */
-export function isMobileScreen(): boolean {
-  return window.matchMedia(`(max-width: ${mobileScreenBreakpoint}px)`).matches;
 }
 
 /**

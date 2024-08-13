@@ -26,7 +26,6 @@
     "typescript-eslint": "^7.9.0",
     "eslint": "^9.0.0",
     "eslint-config-codex": "^2.0.0",
-    "typescript": "^5.4.5",
-    "nanoid": "^4.0.2"
+    "typescript": "^5.4.5"
   }
 }
