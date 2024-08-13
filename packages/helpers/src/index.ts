@@ -45,6 +45,7 @@ export const mouseButtons = {
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function typeOf(object: any): string {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call,  @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
   return Object.prototype.toString.call(object).match(/\s([a-zA-Z]+)/)[1].toLowerCase();
 }
 
@@ -119,16 +120,19 @@ export function isClass(fn: any): boolean {
 }
 
 /**
- * Checks if object is empty
- * @param object - object to check
- * @returns true, if passed object is not empty, false otherwise
+ * True if passed variable is not null/undefined/''/{}
+ * @param v value to check
  */
-export function isEmpty(object: object): boolean {
-  if (object === undefined || object === null || (Object.keys(object).length === 0)) {
-    return true;
-  }
+export function notEmpty<T>(v: T | undefined | null | object): v is T {
+  return v !== undefined && v !== null && v !== '' && (typeof v !== 'object' || Object.keys(v).length > 0);
+}
 
-  return Object.keys(object).length === 0 && object.constructor === Object;
+/**
+ * True if passed variable is null/undefined/''/{}
+ * @param v value to check
+ */
+export function isEmpty(v: unknown): v is null | undefined | '' | Record<string, never> {
+  return !notEmpty(v);
 }
 
 /**
@@ -157,55 +161,6 @@ export function isPrintableKey(keyCode: number): boolean {
     || (keyCode > 218 && keyCode < 223); // [\]' (in order)
 }
 /* eslint-enable @typescript-eslint/no-magic-numbers */
-
-/**
- * Fires a promise sequence asynchronously
- * @param chains - list or ChainData's
- * @param success - success callback
- * @param fallback - callback that fires in case of errors
- * @returns
- * @deprecated use PromiseQueue.ts instead
- */
-export async function sequence(
-  chains: ChainData[],
-
-  success: (data: object) => void = (): void => {},
-
-  fallback: (data: object) => void = (): void => {}
-): Promise<void> {
-  /**
-   * Decorator
-   * @param chainData - Chain data
-   * @param successCallback - success callback
-   * @param fallbackCallback - fail callback
-   * @returns
-   */
-  async function waitNextBlock(
-    chainData: ChainData,
-    successCallback: (data: object) => void,
-    fallbackCallback: (data: object) => void
-  ): Promise<void> {
-    try {
-      await chainData.function(chainData.data);
-      await successCallback(!isUndefined(chainData.data) ? chainData.data : {});
-    } catch (e) {
-      fallbackCallback(!isUndefined(chainData.data) ? chainData.data : {});
-    }
-  }
-
-  /**
-   * pluck each element from queue
-   * First, send resolved Promise as previous value
-   * Each plugins "prepare" method returns a Promise, that's why
-   * reduce current element will not be able to continue while can't get
-   * a resolved Promise
-   */
-  return chains.reduce(async (previousValue, currentValue) => {
-    await previousValue;
-
-    return waitNextBlock(currentValue, success, fallback);
-  }, Promise.resolve());
-}
 
 /**
  * Make array from array-like collection
