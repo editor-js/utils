@@ -71,15 +71,6 @@ export default class Dom {
   }
 
   /**
-   * Creates Text Node with the passed content
-   * @param content - text content
-   * @returns
-   */
-  public static text(content: string): Text {
-    return document.createTextNode(content);
-  }
-
-  /**
    * Append one or several elements to the parent
    * @param parent - where to append
    * @param elements - element or elements list
@@ -130,39 +121,6 @@ export default class Dom {
 
     // remove temporary marker node
     parent.removeChild(temp);
-  }
-
-  /**
-   * Selector Decorator
-   *
-   * Returns first match
-   * @param el - element we searching inside. Default - DOM Document
-   * @param selector - searching string
-   * @returns
-   */
-  public static find(el: Element | Document = document, selector: string): Element | null {
-    return el.querySelector(selector);
-  }
-
-  /**
-   * Get Element by Id
-   * @param id - id to find
-   * @returns
-   */
-  public static get(id: string): HTMLElement | null {
-    return document.getElementById(id);
-  }
-
-  /**
-   * Selector Decorator.
-   *
-   * Returns all matches
-   * @param el - element we searching inside. Default - DOM Document
-   * @param selector - searching string
-   * @returns
-   */
-  public static findAll(el: Element | Document = document, selector: string): NodeList {
-    return el.querySelectorAll(selector);
   }
 
   /**
@@ -520,28 +478,6 @@ export default class Dom {
   }
 
   /**
-   * Helper for get holder from {string} or return HTMLElement
-   * @param element - holder's id or holder's HTML Element
-   * @returns
-   */
-  public static getHolder(element: string | HTMLElement): HTMLElement {
-    if (_.isString(element)) {
-      return document.getElementById(element);
-    }
-
-    return element;
-  }
-
-  /**
-   * Returns true if element is anchor (is A tag)
-   * @param element - element to check
-   * @returns
-   */
-  public static isAnchor(element: Element): element is HTMLAnchorElement {
-    return element.tagName.toLowerCase() === 'a';
-  }
-
-  /**
    * Return element's offset related to the document
    * @todo handle case when editor initialized in scrollable popup
    * @param el - element to compute offset
@@ -628,13 +564,4 @@ export function calculateBaseline(element: Element): number {
   const baselineY = marginTop + borderTopWidth + paddingTop + extraLineHeight + baselineOffset;
 
   return baselineY;
-}
-
-/**
- * Toggles the [data-empty] attribute on element depending on its emptiness
- * Used to mark empty inputs with a special attribute for placeholders feature
- * @param element - The element to toggle the [data-empty] attribute on
- */
-export function toggleEmptyMark(element: HTMLElement): void {
-  element.dataset.empty = Dom.isEmpty(element) ? 'true' : 'false';
 }
