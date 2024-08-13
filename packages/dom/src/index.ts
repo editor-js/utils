@@ -39,14 +39,14 @@ function allInputsSelector(): string {
  * Find all contenteditable, textarea and editable input elements passed holder contains
  * @param holder - element where to find inputs
  */
-function findAllInputs(holder: Element): HTMLElement[] {
+function findAllInputs(holder: HTMLElement): HTMLElement[] {
   return Array.from(holder.querySelectorAll(allInputsSelector()))
     /**
      * If contenteditable element contains block elements, treat them as inputs.
      */
     .reduce((result, input) => {
       if (isNativeInput(input) || containsOnlyInlineElements(input)) {
-        return [...result, input];
+        return [...result, input as HTMLElement];
       }
 
       return [...result, ...getDeepestBlockElements(input)];
@@ -373,7 +373,7 @@ function containsOnlyInlineElements(data: string | Element): boolean {
  * @param parent - root element
  * @returns
  */
-function getDeepestBlockElements(parent: HTMLElement): HTMLElement[] {
+function getDeepestBlockElements(parent: Element): Element[] {
   if (containsOnlyInlineElements(parent)) {
     return [parent];
   }

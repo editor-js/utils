@@ -6,7 +6,7 @@ import { isObject } from './typeOf';
  * @param sources - sources to be merged
  * @returns sourced merged with sources
  */
-export function deepMerge<T extends object>(target: T, ...sources: T[]): T {
+export function deepMerge<T>(target: T, ...sources: T[]): T {
   if (!sources.length) {
     return target;
   }
