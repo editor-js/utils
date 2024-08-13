@@ -30,7 +30,7 @@ export default [
       }],
       '@typescript-eslint/naming-convention': ['error', {
         selector: 'property',
-        format: ['UPPER_CASE'],
+        format: ['UPPER_CASE' | 'camelCase'],
       }],
     },
   },
