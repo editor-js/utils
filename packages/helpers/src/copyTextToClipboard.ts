@@ -1,8 +1,8 @@
 /**
  * Copies passed text to the clipboard
- * @param text - text to copy
+ * @param text - text to be copied to clipboard
  */
-export function copyTextToClipboard(text): void {
+export function copyTextToClipboard(text: string): void {
   const el = document.createElement('div');
 
   el.style.position = 'absolute';

@@ -1,4 +1,4 @@
-
+/* eslint-disable @typescript-eslint/no-magic-numbers */
 /**
  * Returns true if passed key code is printable (a-Z, 0-9, etc) character.
  * @param keyCode - code of some key
@@ -13,3 +13,4 @@ export function isPrintableKey(keyCode: number): boolean {
     || (keyCode > 185 && keyCode < 193) // ;=,-./` (in order)
     || (keyCode > 218 && keyCode < 223); // [\]' (in order)
 }
+/* eslint-enable @typescript-eslint/no-magic-numbers */

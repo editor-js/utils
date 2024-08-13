@@ -1,4 +1,4 @@
-import { getUserOS } from "./userOS";
+import { getUserOS } from './userOS';
 
 /**
  * Make shortcut command more human-readable

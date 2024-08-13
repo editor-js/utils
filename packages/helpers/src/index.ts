@@ -1,18 +1,17 @@
-import { cacheable } from "./cacheable";
-import { beautifyShortcut } from "./beautifyShortcut";
-import { capitalize } from "./capitalize";
-import { copyTextToClipboard } from "./copyTextToClipboard";
-import { debounce } from "./debounce";
-import { deepMerge } from "./deepMerge";
-import { deprecationAssert } from "./deprecationAssert";
-import { isEmpty, notEmpty } from "./empty";
-import { getValidUrl } from "./getValidUrl";
-import { isPrintableKey } from "./isPrintableKey";
-import { keyCodes, mouseButtons } from "./keyCodes";
-import { PromiseQueue } from "./PromiseQueue";
-import { throttle } from "./throttle";
-import {
-  typeOf,
+import { cacheable } from './cacheable';
+import { beautifyShortcut } from './beautifyShortcut';
+import { capitalize } from './capitalize';
+import { copyTextToClipboard } from './copyTextToClipboard';
+import { debounce } from './debounce';
+import { deepMerge } from './deepMerge';
+import { deprecationAssert } from './deprecationAssert';
+import { isEmpty, notEmpty } from './empty';
+import { getValidUrl } from './getValidUrl';
+import { isPrintableKey } from './isPrintableKey';
+import { keyCodes, mouseButtons } from './keyCodes';
+import { PromiseQueue } from './PromiseQueue';
+import { throttle } from './throttle';
+import { typeOf,
   isBoolean,
   isClass,
   isFunction,
@@ -20,8 +19,8 @@ import {
   isObject,
   isPromise,
   isString,
-  isUndefined } from "./typeOf";
-import { getUserOS, isIosDevice } from "./userOS";
+  isUndefined } from './typeOf';
+import { getUserOS, isIosDevice } from './userOS';
 
 export default { cacheable,
   beautifyShortcut,
@@ -48,5 +47,4 @@ export default { cacheable,
   isString,
   isUndefined,
   getUserOS,
-  isIosDevice,
-}
+  isIosDevice };

@@ -13,7 +13,7 @@ export function getUserOS(): { [key: string]: boolean } {
 
   const userOS = Object.keys(OS).find((os: string) => window.navigator.appVersion.toLowerCase().indexOf(os) !== -1);
 
-  if (userOS) {
+  if (userOS !== undefined) {
     OS[userOS] = true;
 
     return OS;
@@ -27,7 +27,7 @@ export function getUserOS(): { [key: string]: boolean } {
  */
 export const isIosDevice
   = typeof window !== 'undefined'
-  && window.navigator
+  && window.navigator !== null
   && window.navigator.platform
   && (/iP(ad|hone|od)/.test(window.navigator.platform)
   || (window.navigator.platform === 'MacIntel' && window.navigator.maxTouchPoints > 1));

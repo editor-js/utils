@@ -3,5 +3,6 @@
   "include": [
     "packages/**/*.ts",
     "eslint.config.mjs",
+    "src/**/*.ts"
   ],
 }

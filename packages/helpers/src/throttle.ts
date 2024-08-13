@@ -1,4 +1,3 @@
-
 /**
  * Returns a function, that, when invoked, will only be triggered at most once during a given window of time.
  * @param func - function to throttle
@@ -8,8 +7,20 @@
  *                  but if you'd like to disable the execution on the leading edge, pass
  *                  `{leading: false}`. To disable execution on the trailing edge, ditto.
  */
-export function throttle(func, wait, options: { leading?: boolean; trailing?: boolean } | undefined = undefined): () => void {
-  let context; let args; let result;
+export function throttle(func, wait, options: {
+  /**
+   * Optional leading argument
+   */
+  leading?: boolean;
+
+  /**
+   * Optional trailing argument
+   */
+  trailing?: boolean;
+} | undefined = undefined): () => void {
+  let context;
+  let args;
+  let result;
   let timeout: null | ReturnType<typeof setTimeout> = null;
   let previous = 0;
 
@@ -20,9 +31,10 @@ export function throttle(func, wait, options: { leading?: boolean; trailing?: bo
   const later = function (): void {
     previous = options.leading === false ? 0 : Date.now();
     timeout = null;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     result = func.apply(context, args);
 
-    if (!timeout) {
+    if (timeout === null) {
       context = args = null;
     }
   };
@@ -36,7 +48,7 @@ export function throttle(func, wait, options: { leading?: boolean; trailing?: bo
 
     const remaining = wait - (now - previous);
 
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    // eslint-disable-next-line @typescript-eslint/no-this-alias, @typescript-eslint/no-unsafe-assignment
     context = this;
 
     args = arguments;
@@ -47,9 +59,10 @@ export function throttle(func, wait, options: { leading?: boolean; trailing?: bo
         timeout = null;
       }
       previous = now;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       result = func.apply(context, args);
 
-      if (!timeout) {
+      if (timeout === null) {
         context = args = null;
       }
     } else if (!timeout && options.trailing !== false) {

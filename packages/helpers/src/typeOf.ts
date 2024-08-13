@@ -1,4 +1,3 @@
-
 /**
  * Return string representation of the object type
  * @param object - object to get type

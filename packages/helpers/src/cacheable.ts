@@ -9,7 +9,8 @@ export function cacheable<Target, Value, Arguments extends unknown[] = unknown[]
   propertyKey: string,
   descriptor: PropertyDescriptor
 ): PropertyDescriptor {
-  const propertyToOverride = descriptor.value ? 'value' : 'get';
+  const propertyToOverride = (Boolean(descriptor.value)) ? 'value' : 'get';
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const originalMethod = descriptor[propertyToOverride];
   const cacheKey = `#${propertyKey}Cache`;
 
@@ -21,10 +22,13 @@ export function cacheable<Target, Value, Arguments extends unknown[] = unknown[]
     /**
      * If there is no cache, create it
      */
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if (this[cacheKey] === undefined) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
       this[cacheKey] = originalMethod.apply(this, ...args);
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
     return this[cacheKey];
   };
 
@@ -33,6 +37,7 @@ export function cacheable<Target, Value, Arguments extends unknown[] = unknown[]
    * @param value - value to set
    */
   if (propertyToOverride === 'get' && descriptor.set) {
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     const originalSet = descriptor.set;
 
     descriptor.set = function (value: unknown): void {

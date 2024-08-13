@@ -6,24 +6,24 @@
  * @param func - function that we're throttling
  * @param wait - time in milliseconds
  * @param immediate - call now
- * @returns
+ * @returns void
  */
 export function debounce(func: (...args: unknown[]) => void, wait?: number, immediate?: boolean): () => void {
-  let timeout;
+  let timeout: number | undefined = undefined;
 
   return (...args: unknown[]): void => {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    // eslint-disable-next-line @typescript-eslint/no-this-alias, @typescript-eslint/no-unsafe-assignment
     const context = this;
 
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     const later = () => {
-      timeout = null;
-      if (!immediate) {
+      timeout = undefined;
+      if (immediate !== true) {
         func.apply(context, args);
       }
     };
 
-    const callNow = immediate && !timeout;
+    const callNow = immediate === true && timeout !== undefined;
 
     window.clearTimeout(timeout);
     timeout = window.setTimeout(later, wait);

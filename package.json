@@ -1,17 +1,17 @@
 {
-  "name": "utils",
+  "name": "@editorjs/utils",
   "private": true,
   "workspaces": [
     "packages/*"
   ],
   "version": "1.0.0",
-  "description": "Utils that are used by Editor.js and it's tools",
-  "main": "build/index.js",
+  "description": "Useful utils for working with Editor.js",
+  "main": "dist/index.js",
   "repository": "https://github.com/editor-js/utils",
   "author": "CodeX Team <all@codex.so>",
   "license": "MIT",
   "scripts": {
-    "build": "yarn build:helpers &&  yarn build:dom && yarn build:caret && yarn build:keyboard",
+    "build": "tsc && yarn build:helpers &&  yarn build:dom && yarn build:caret && yarn build:keyboard",
     "build:helpers": "cd packages/helpers && yarn build",
     "build:dom": "cd packages/dom && yarn build",
     "build:caret": "cd packages/caret && yarn build",
@@ -20,11 +20,9 @@
     "lint:fix": "yarn lint --fix"
   },
   "devDependencies": {
-    "tslint": "^6.1.1",
     "@types/node": "^20.10.7",
-    "@eslint/eslintrc": "^3.1.0",
-    "typescript-eslint": "^7.9.0",
     "eslint": "^9.0.0",
+    "typescript-eslint": "^7.9.0",
     "eslint-config-codex": "^2.0.0",
     "typescript": "^5.4.5"
   }
