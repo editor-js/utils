@@ -3,7 +3,7 @@
  * @param parent - where to append
  * @param elements - element or elements list
  */
-function prepend(parent: Element, elements: Element | Element[]): void {
+export function prepend(parent: Element, elements: Element | Element[]): void {
   if (Array.isArray(elements)) {
     elements = elements.reverse();
     elements.forEach(el => parent.prepend(el));

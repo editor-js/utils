@@ -22,7 +22,7 @@ import { typeOf,
   isUndefined } from './typeOf';
 import { getUserOS, isIosDevice } from './userOS';
 
-export default { cacheable,
+export { cacheable,
   beautifyShortcut,
   capitalize,
   copyTextToClipboard,
