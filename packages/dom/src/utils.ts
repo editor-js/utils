@@ -9,9 +9,24 @@ import Dom from './index';
  * Possible log levels
  */
 export enum LogLevels {
+  /**
+   * Level of the logging that represents maximum information about all events
+   */
   VERBOSE = 'VERBOSE',
+
+  /**
+   * Level of the logging that represents information about events
+   */
   INFO = 'INFO',
+
+  /**
+   * Level of the logging that represents information only about warning and error events
+   */
   WARN = 'WARN',
+
+  /**
+   * Level of the logging that represents information only about error events
+   */
   ERROR = 'ERROR'
 }
 
@@ -153,7 +168,7 @@ _log.logLevel = LogLevels.VERBOSE;
 
 /**
  * Set current log level
- * @param logLevel - log level to set
+ * @param logLevel - log level that represents amount of the information to be logged
  */
 export function setLogLevel(logLevel: LogLevels): void {
   _log.logLevel = logLevel;
@@ -182,7 +197,7 @@ export function typeOf(object: any): string {
 /**
  * Check if passed variable is a function
  * @param fn - function to check
- * @returns
+ * @returns true, if passed v is of type funciton, false otherwise
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isFunction(fn: any): fn is (...args: any[]) => any {
@@ -192,7 +207,7 @@ export function isFunction(fn: any): fn is (...args: any[]) => any {
 /**
  * Checks if passed argument is an object
  * @param v - object to check
- * @returns
+ * @returns true, if passed v is of type object, false otherwise
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isObject(v: any): v is object {
@@ -202,7 +217,7 @@ export function isObject(v: any): v is object {
 /**
  * Checks if passed argument is a string
  * @param v - variable to check
- * @returns
+ * @returns true, if passed v is ot type string, false otherwise
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isString(v: any): v is string {
@@ -212,7 +227,7 @@ export function isString(v: any): v is string {
 /**
  * Checks if passed argument is boolean
  * @param v - variable to check
- * @returns
+ * @returns true, if passed v is of type boolean, false otherwise
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isBoolean(v: any): v is boolean {
@@ -222,7 +237,7 @@ export function isBoolean(v: any): v is boolean {
 /**
  * Checks if passed argument is number
  * @param v - variable to check
- * @returns
+ * @returns true, if passed v is of type number, false otherwise
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isNumber(v: any): v is number {
@@ -232,7 +247,7 @@ export function isNumber(v: any): v is number {
 /**
  * Checks if passed argument is undefined
  * @param v - variable to check
- * @returns
+ * @returns true, if passed v is of type undefined, false otherwise
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isUndefined(v: any): v is undefined {
@@ -242,7 +257,7 @@ export function isUndefined(v: any): v is undefined {
 /**
  * Check if passed function is a class
  * @param fn - function to check
- * @returns
+ * @returns true, if passed fn is a class, false otherwise
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isClass(fn: any): boolean {
@@ -252,10 +267,10 @@ export function isClass(fn: any): boolean {
 /**
  * Checks if object is empty
  * @param object - object to check
- * @returns
+ * @returns true, if passed object is not empty, false otherwise
  */
 export function isEmpty(object: object): boolean {
-  if (!object) {
+  if (object === undefined || object === null || (Object.keys(object).length === 0)) {
     return true;
   }
 
@@ -265,7 +280,7 @@ export function isEmpty(object: object): boolean {
 /**
  * Check if passed object is a Promise
  * @param  object - object to check
- * @returns
+ * @returns true, if passed object is a promise, false otherwise
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isPromise(object: any): object is Promise<any> {
@@ -275,8 +290,8 @@ export function isPromise(object: any): object is Promise<any> {
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 /**
  * Returns true if passed key code is printable (a-Z, 0-9, etc) character.
- * @param keyCode - key code
- * @returns
+ * @param keyCode - code of some key
+ * @returns true, if passed keyCode is printable, false otherwise
  */
 export function isPrintableKey(keyCode: number): boolean {
   return (keyCode > 47 && keyCode < 58) // number keys

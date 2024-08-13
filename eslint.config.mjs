@@ -19,7 +19,19 @@ export default [
     },
 
     rules: {
+      'n/no-missing-import': ['off'],
+      'n/no-extraneous-import': ['error', {
+        allowModules: ['nanoid'],
+      }],
       'n/no-unpublished-import': ['off'],
+      'n/no-unsupported-features/node-builtins': ['error', {
+        version: '>=22.1.0',
+        allowExperimental: true,
+      }],
+      '@typescript-eslint/naming-convention': ['error', {
+        selector: 'property',
+        format: ['UPPER_CASE'],
+      }],
     },
   },
 ];

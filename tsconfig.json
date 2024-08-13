@@ -13,6 +13,7 @@
     // allows to omit export default in .json files
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
+    "strictNullChecks": true,
     "paths": {
       "@utils/*": ["packages/*/src"]
     },
