@@ -7,7 +7,7 @@ import { plugin as TsPlugin, parser as TsParser } from 'typescript-eslint';
 export default [
   ...CodeX,
   {
-    name: 'ts-editorls/utils',
+    name: 'ts-editorjs/utils',
     ignores: ['eslint.config.mjs'],
     /**
      * This are the options for typescript files
