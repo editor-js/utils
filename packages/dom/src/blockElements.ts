@@ -1,6 +1,6 @@
 /**
  * Return array of names of block html elements
- * @returns
+ * @returns array of block element names
  */
 export function blockElements(): string[] {
   return [

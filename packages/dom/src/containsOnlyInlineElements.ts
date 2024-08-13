@@ -4,7 +4,7 @@ import { blockElements } from './blockElements';
 /**
  * Check if passed content includes only inline elements
  * @param data - element or html string
- * @returns
+ * @returns true if data contains only inline elements, false otherwise
  */
 export function containsOnlyInlineElements(data: string | HTMLElement): boolean {
   let wrapper: HTMLElement;
