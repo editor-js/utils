@@ -1,6 +1,6 @@
-import * as Caret from '@utils/caret/src';
-import * as Keyboard from '@utils/keyboard/src';
-import * as Helpers from '@utils/helpers/src';
-import * as Dom from '@utils/dom/src';
+import * as Caret from '@utils/caret';
+import * as Keyboard from '@utils/keyboard';
+import * as Helpers from '@utils/helpers';
+import * as Dom from '@utils/dom';
 
 export { Caret, Keyboard, Helpers, Dom };

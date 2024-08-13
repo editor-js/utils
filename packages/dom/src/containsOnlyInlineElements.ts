@@ -1,4 +1,4 @@
-import { isString } from '@utils/helpers/src';
+import { isString } from '@editorjs/helpers';
 import { blockElements } from './blockElements';
 
 /**

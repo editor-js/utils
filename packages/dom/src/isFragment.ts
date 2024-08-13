@@ -1,4 +1,4 @@
-import { isNumber } from '@utils/helpers/src';
+import { isNumber } from '@editorjs/helpers';
 
 /**
  * Check if object is DocumentFragment node

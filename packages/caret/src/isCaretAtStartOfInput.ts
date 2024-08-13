@@ -1,4 +1,4 @@
-import { getDeepestNode, isEmpty, isNativeInput, checkContenteditableSliceForEmptiness } from '@utils/dom/src';
+import { getDeepestNode, isEmpty, isNativeInput, checkContenteditableSliceForEmptiness } from '@editorjs/dom';
 import { getCaretNodeAndOffset } from './getCaretNodeAndOffset';
 
 /**
