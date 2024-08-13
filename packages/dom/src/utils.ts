@@ -6,50 +6,6 @@ import { nanoid } from 'nanoid';
 import Dom from './index';
 
 /**
- * Possible log levels
- */
-export enum LogLevels {
-  /**
-   * Level of the logging that represents maximum information about all events
-   */
-  VERBOSE = 'VERBOSE',
-
-  /**
-   * Level of the logging that represents information about events
-   */
-  INFO = 'INFO',
-
-  /**
-   * Level of the logging that represents information only about warning and error events
-   */
-  WARN = 'WARN',
-
-  /**
-   * Level of the logging that represents information only about error events
-   */
-  ERROR = 'ERROR'
-}
-
-/**
- * Allow to use global VERSION, that will be overwritten by Webpack
- */
-declare const VERSION: string;
-
-/**
- * data - data that will be passed to the success or fallback
- * function - function's that must be called asynchronously
- */
-export interface ChainData {
-  data?: object;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  function: (...args: any[]) => any;
-}
-
-/**
- * Editor.js utils
- */
-
-/**
  * Returns basic key codes as constants
  * @returns {{}}
  */
@@ -83,111 +39,9 @@ export const mouseButtons = {
 };
 
 /**
- * Custom logger
- * @param labeled — if true, Editor.js label is shown
- * @param msg  - message
- * @param type - logging type 'log'|'warn'|'error'|'info'
- * @param [args]      - argument to log with a message
- * @param style  - additional styling to message
- */
-function _log(
-  labeled: boolean,
-  msg: string,
-  type = 'log',
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  args?: any,
-  style = 'color: inherit'
-): void {
-  if (!('console' in window) || !window.console[type]) {
-    return;
-  }
-
-  const isSimpleType = ['info', 'log', 'warn', 'error'].includes(type);
-  const argsToPass = [];
-
-  switch (_log.logLevel) {
-    case LogLevels.ERROR:
-      if (type !== 'error') {
-        return;
-      }
-      break;
-
-    case LogLevels.WARN:
-      if (!['error', 'warn'].includes(type)) {
-        return;
-      }
-      break;
-
-    case LogLevels.INFO:
-      if (!isSimpleType || labeled) {
-        return;
-      }
-      break;
-  }
-
-  if (args) {
-    argsToPass.push(args);
-  }
-
-  const editorLabelText = `Editor.js ${VERSION}`;
-  const editorLabelStyle = `line-height: 1em;
-            color: #006FEA;
-            display: inline-block;
-            font-size: 11px;
-            line-height: 1em;
-            background-color: #fff;
-            padding: 4px 9px;
-            border-radius: 30px;
-            border: 1px solid rgba(56, 138, 229, 0.16);
-            margin: 4px 5px 4px 0;`;
-
-  if (labeled) {
-    if (isSimpleType) {
-      argsToPass.unshift(editorLabelStyle, style);
-      msg = `%c${editorLabelText}%c ${msg}`;
-    } else {
-      msg = `( ${editorLabelText} )${msg}`;
-    }
-  }
-
-  try {
-    if (!isSimpleType) {
-      console[type](msg);
-    } else if (args) {
-      console[type](`${msg} %o`, ...argsToPass);
-    } else {
-      console[type](msg, ...argsToPass);
-    }
-  } catch (ignored) {}
-}
-
-/**
- * Current log level
- */
-_log.logLevel = LogLevels.VERBOSE;
-
-/**
- * Set current log level
- * @param logLevel - log level that represents amount of the information to be logged
- */
-export function setLogLevel(logLevel: LogLevels): void {
-  _log.logLevel = logLevel;
-}
-
-/**
- * _log method proxy without Editor.js label
- */
-export const log = _log.bind(window, false);
-
-/**
- * _log method proxy with Editor.js label
- */
-export const logLabeled = _log.bind(window, true);
-
-/**
  * Return string representation of the object type
  * @param object - object to get type
- * @returns
+ * @returns string type name of the passed object
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function typeOf(object: any): string {
