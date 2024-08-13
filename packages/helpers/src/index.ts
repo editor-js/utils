@@ -3,7 +3,6 @@
  */
 
 import { nanoid } from 'nanoid';
-import Dom from './index';
 
 /**
  * Returns basic key codes as constants
@@ -308,9 +307,12 @@ export function throttle(func, wait, options: { leading?: boolean; trailing?: bo
  * @param text - text to copy
  */
 export function copyTextToClipboard(text): void {
-  const el = Dom.make('div', 'codex-editor-clipboard', {
-    innerHTML: text,
-  });
+  const el = document.createElement('div');
+
+  el.style.position = 'absolute';
+  el.style.left = '-999px';
+  el.style.bottom = '-999px';
+  el.innerHTML = text;
 
   document.body.appendChild(el);
 
