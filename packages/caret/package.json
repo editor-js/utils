@@ -1,5 +1,5 @@
 {
-  "name": "@utils/caret",
+  "name": "@editorjs/caret",
   "version": "1.0.0",
   "main": "dist/index.js",
   "license": "MIT",
@@ -7,5 +7,7 @@
     "build": "tsc"
   },
   "dependencies": {},
-  "devDependencies": {}
+  "devDependencies": {
+    "@editorjs/dom": "1.0.0"
+  }
 }
