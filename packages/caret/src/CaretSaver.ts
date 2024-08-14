@@ -3,7 +3,7 @@ import { make } from '@editorjs/dom';
 /**
  * Helper for saving and restoring caret position
  */
-export default class Caret {
+export class CaretSaver {
   /**
    * Returns the first range
    * @returns range of the caret if it exists, null otherwise
@@ -15,26 +15,14 @@ export default class Caret {
   }
 
   /**
-   * The <span> for caret saving/restoring
-   */
-  private savedFakeCaret: HTMLElement | undefined;
-
-  /**
-   * Store internal properties
-   */
-  constructor() {
-    /**
-     * The hidden <span> for caret saving/restoring
-     */
-    this.savedFakeCaret = undefined;
-  }
-
-  /**
    * Saves caret position using hidden <span>
+   * @returns function for resoring the caret
    */
-  public save(): void {
-    const range = Caret.range;
+  public save(): () => void {
+    const range = CaretSaver.range;
     const cursor = make('span');
+
+    cursor.id = 'cursor';
 
     cursor.hidden = true;
 
@@ -43,14 +31,16 @@ export default class Caret {
     }
     range.insertNode(cursor);
 
-    this.savedFakeCaret = cursor;
+    return () => this.restore();
   }
 
   /**
    * Restores the caret position saved by the save() method
    */
-  public restore(): void {
-    if (!this.savedFakeCaret) {
+  private restore(): void {
+    const caretAnchor = document.getElementById('caret');
+
+    if (caretAnchor === null) {
       return;
     }
 
@@ -62,8 +52,8 @@ export default class Caret {
 
     const range = new Range();
 
-    range.setStartAfter(this.savedFakeCaret);
-    range.setEndAfter(this.savedFakeCaret);
+    range.setStartAfter(caretAnchor);
+    range.setEndAfter(caretAnchor);
 
     sel.removeAllRanges();
     sel.addRange(range);
@@ -72,7 +62,7 @@ export default class Caret {
      * A little timeout uses to allow browser to set caret after element before we remove it.
      */
     setTimeout(() => {
-      this.savedFakeCaret?.remove();
+      caretAnchor.remove();
     // eslint-disable-next-line @typescript-eslint/no-magic-numbers
     }, 150);
   }
