@@ -13,7 +13,6 @@ on:
 
 env:
   NOTIFY_WEBHOOK_LINK: ${{ secrets.CODEX_BOT_NOTIFY_EDITORJS_PUBLIC_CHAT }}
-  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
 jobs:
   publish:
@@ -28,6 +27,9 @@ jobs:
           node-version: 22.1.0
           registry-url: 'https://registry.npmjs.org/'
 
+      - name: Add npmrc file
+        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+
       - name: Install dependencies
         run: yarn install
 
@@ -36,6 +38,8 @@ jobs:
 
       - name: Publish all packages
         run: yarn workspaces foreach --all --no-private npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   notify:
     needs: publish
