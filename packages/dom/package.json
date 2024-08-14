@@ -6,8 +6,8 @@
   "scripts": {
     "build": "tsc"
   },
-  "dependencies": {},
-  "devDependencies": {
+  "dependencies": {
     "@editorjs/helpers": "1.0.0"
-  }
+  },
+  "devDependencies": {}
 }

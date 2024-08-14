@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    name: Build notes.web
+    name: Build editorjs/utils
     runs-on: ubuntu-latest
 
     steps:
