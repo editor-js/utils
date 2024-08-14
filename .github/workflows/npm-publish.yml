@@ -35,7 +35,7 @@ jobs:
         run: yarn build
 
       - name: Publish all packages
-        run: yarn workspaces foreach --all --no-private yarn publish --access=public
+        run: yarn workspaces foreach --all --no-private npm publish --access public
 
   notify:
     needs: publish
