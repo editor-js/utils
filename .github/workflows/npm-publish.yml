@@ -4,6 +4,12 @@ on:
   push:
     branches:
       - main
+  workflow-call:
+    secrets:
+      NPM_TOKEN:
+        required: true
+      CODEX_BOT_NOTIFY_EDITORJS_PUBLIC_CHAT:
+        required: true
 
 env:
   NOTIFY_WEBHOOK_LINK: ${{ secrets.CODEX_BOT_NOTIFY_EDITORJS_PUBLIC_CHAT }}
