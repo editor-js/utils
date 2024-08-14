@@ -1,8 +1,5 @@
-# typescript-lib-template
-Monorepository with several packages usefull for Editor.js and it's tools development 
-
-[![NPM version](https://img.shields.io/npm/v/@codexteam/typescript-lib-template?style=flat-square)](https://www.npmjs.com/package/@codexteam/typescript-lib-template)
-[![License](https://img.shields.io/npm/l/@codexteam/typescript-lib-template?style=flat-square)](https://www.npmjs.com/package/@codexteam/typescript-lib-template)
+# Editor.js utils
+Utils usefull for Editor.js tools development
 
 ## Packages
 - Caret
@@ -14,27 +11,23 @@ You can use them via installing from npm:
 
 ```
 npm install @editorjs/caret
+```
+```
 npm install @editorjs/helpers
+```
+```
 npm install @editorjs/dom
+```
+```
 npm install @editorjs/keyboard
 ```
 
-Or add them to your project as dependencie
-```
-dependencies: {
-    "@editorjs/caret": "^0.0.1",
-    "@editorjs/helpers": "^0.0.1",
-    "@editorjs/dom": "^0.0.1",
-    "@editorjs/keyboard": "^0.0.1"
-}
-```
+# About CodeX
 
-## About team
+<img align="right" width="120" height="120" src="https://codex.so/public/app/img/codex-logo.svg" hspace="50">
 
-We are CodeX and we build products for developers and makers.
+CodeX is a team of digital specialists around the world interested in building high-quality open source products on a global market. We are [open](https://codex.so/join) for young people who want to constantly improve their skills and grow professionally with experiments in cutting-edge technologies.
 
-Follow us on Twitter: [twitter.com/codex_team](https://twitter.com/codex_team)
-
-Feel free to contact: <a href="mailto:team@codex.so?subject=Editor.js feedback">team@codex.so</a>
-
-[codex.so](https://codex.so)
+| 🌐 | Join  👋  | Twitter | Instagram |
+| -- | -- | -- | -- |
+| [codex.so](https://codex.so) | [codex.so/join](https://codex.so/join) |[@codex_team](http://twitter.com/codex_team) | [@codex_team](http://instagram.com/codex_team/) |
