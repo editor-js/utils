@@ -13,6 +13,7 @@ on:
 
 env:
   NOTIFY_WEBHOOK_LINK: ${{ secrets.CODEX_BOT_NOTIFY_EDITORJS_PUBLIC_CHAT }}
+  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
 jobs:
   publish:
@@ -23,6 +24,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
+          always-auth: true
           node-version: 22.1.0
           registry-url: 'https://registry.npmjs.org/'
 
@@ -33,9 +35,7 @@ jobs:
         run: yarn build
 
       - name: Publish all packages
-        run: yarn workspaces foreach --all --no-private npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: yarn workspaces foreach --all --no-private yarn publish --access=public
 
   notify:
     needs: publish
