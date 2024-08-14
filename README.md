@@ -1,5 +1,5 @@
 # Editor.js utils
-Utils usefull for Editor.js tools development
+Utils useful for Editor.js tools development
 
 ## Packages
 - Caret
