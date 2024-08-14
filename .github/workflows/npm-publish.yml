@@ -27,7 +27,7 @@ jobs:
         run: yarn build
 
       - name: Publish all packages
-        run: yarn workspaces foreach --all npm publish --access public
+        run: yarn workspaces foreach --no-private npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
