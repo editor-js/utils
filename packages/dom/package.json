@@ -7,7 +7,7 @@
     "build": "tsc"
   },
   "dependencies": {
-    "@editorjs/helpers": "1.0.0"
+    "@editorjs/helpers": "workspace:*"
   },
   "devDependencies": {}
 }
