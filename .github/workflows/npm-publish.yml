@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    pull_request:
+      types: [opened, synchronize, reopened]
 
 env:
   NOTIFY_WEBHOOK_LINK: ${{ secrets.CODEX_BOT_NOTIFY_EDITORJS_PUBLIC_CHAT }}
@@ -27,7 +29,7 @@ jobs:
         run: yarn build
 
       - name: Publish all packages
-        run: yarn workspaces foreach --no-private npm publish --access public
+        run: yarn workspaces foreach --all --no-private npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
