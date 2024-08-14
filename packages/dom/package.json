@@ -1,0 +1,12 @@
+{
+  "name": "@editorjs/dom",
+  "version": "0.0.1",
+  "main": "dist/index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@editorjs/helpers": "workspace:*"
+  }
+}

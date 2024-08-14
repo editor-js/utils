@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    name: Build notes.web
+    name: Build editorjs/utils
     runs-on: ubuntu-latest
 
     steps:
@@ -19,7 +19,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: 20
+          node-version: 22.1.0
 
       - name: Install dependencies
         run: yarn install
