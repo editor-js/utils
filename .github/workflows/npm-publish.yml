@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-    pull_request:
-      types: [opened, synchronize, reopened]
 
 env:
   NOTIFY_WEBHOOK_LINK: ${{ secrets.CODEX_BOT_NOTIFY_EDITORJS_PUBLIC_CHAT }}
