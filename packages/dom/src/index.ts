@@ -2,8 +2,8 @@ import { append } from './append';
 import { blockElements } from './blockElements';
 import { calculateBaseline } from './calculateBaseline';
 import { canSetCaret } from './canSetCaret';
-import { checkContenteditableSliceForEmptiness } from './checkContenteditableSliceForEmptiness';
 import { containsOnlyInlineElements } from './containsOnlyInlineElements';
+import { fragmentToString } from './fragmentToString';
 import { getContentLength } from './getContentLength';
 import { getDeepestBlockElements } from './getDeepestBlockElements';
 import { getDeepestNode } from './getDeepestNode';
@@ -25,8 +25,8 @@ export { append,
   blockElements,
   calculateBaseline,
   canSetCaret,
-  checkContenteditableSliceForEmptiness,
   containsOnlyInlineElements,
+  fragmentToString,
   getContentLength,
   getDeepestBlockElements,
   getDeepestNode,
