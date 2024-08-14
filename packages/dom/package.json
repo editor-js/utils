@@ -8,6 +8,5 @@
   },
   "dependencies": {
     "@editorjs/helpers": "workspace:*"
-  },
-  "devDependencies": {}
+  }
 }
