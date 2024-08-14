@@ -1,22 +1,33 @@
 # typescript-lib-template
-A quick start template for a new TypeScript library
+Monorepository with several packages usefull for Editor.js and it's tools development 
 
 [![NPM version](https://img.shields.io/npm/v/@codexteam/typescript-lib-template?style=flat-square)](https://www.npmjs.com/package/@codexteam/typescript-lib-template)
 [![License](https://img.shields.io/npm/l/@codexteam/typescript-lib-template?style=flat-square)](https://www.npmjs.com/package/@codexteam/typescript-lib-template)
 
-## How to use
-1. Click [here](https://github.com/codex-team/typescript-lib-template/generate) and fill setting for new repository
-2. Change package name in `package.json` and other fields if necessary
-3. Change NPM package scope from [workflow file](./.github/workflows/main.yml) or remove it
-4. Fill `NPM_TOKEN` and `CODEX_BOT_WEBHOOK` secrets in your repository or organization settings
-5. Start writing your new library!
+## Packages
+- Caret
+- Dom
+- Helpers
+- Keyboard
 
-## Features
+You can use them via installing from npm:
 
-- TypeScript support
-- ESlint support with [eslint-config-codex](http://github.com/codex-team/eslint-config/)
-- Unit testing with [Jest](http://jestjs.io)
-- GitHub Actions configuration for test/lint/build/publish purposes
+```
+npm install @editorjs/caret
+npm install @editorjs/helpers
+npm install @editorjs/dom
+npm install @editorjs/keyboard
+```
+
+Or add them to your project as dependencie
+```
+dependencies: {
+    "@editorjs/caret": "^0.0.1",
+    "@editorjs/helpers": "^0.0.1",
+    "@editorjs/dom": "^0.0.1",
+    "@editorjs/keyboard": "^0.0.1"
+}
+```
 
 ## About team
 
