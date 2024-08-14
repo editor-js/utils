@@ -6,6 +6,3 @@ node_modules/
 
 # build info lock
 *.tsbuildinfo
-
-# yarn install stage logs
-*.gz
