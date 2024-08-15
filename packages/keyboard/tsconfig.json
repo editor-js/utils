@@ -2,6 +2,7 @@
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "src",
+    "composite": true,
   },
   "include": ["**/*"],
   "exclude": ["dist"]
