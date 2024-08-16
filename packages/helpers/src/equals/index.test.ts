@@ -50,12 +50,16 @@ describe('equals', () => {
         expected: true,
       },
       {
+        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
         var1: [1, 2, 3],
+        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
         var2: [1, 2, 3],
         expected: true,
       },
       {
+        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
         var1: [1, 2, 3],
+        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
         var2: [1, 2, 4],
         expected: false,
       },
@@ -71,15 +75,19 @@ describe('equals', () => {
       },
       {
         var1: { a: 1,
+          // eslint-disable-next-line @typescript-eslint/no-magic-numbers
           b: [1, 2, 3] },
         var2: { a: 1,
+          // eslint-disable-next-line @typescript-eslint/no-magic-numbers
           b: [1, 2, 3] },
         expected: true,
       },
       {
         var1: { a: 1,
+          // eslint-disable-next-line @typescript-eslint/no-magic-numbers
           b: [1, 2, 3] },
         var2: { a: 1,
+          // eslint-disable-next-line @typescript-eslint/no-magic-numbers
           b: [1, 2, 4] },
         expected: false,
       },
@@ -119,7 +127,6 @@ describe('equals', () => {
         expected: false,
       },
     ]
-
   )(
     'should return $expected when comparing $var1 and $var2',
     ({ var1, var2, expected }) => {
