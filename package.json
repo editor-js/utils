@@ -39,6 +39,6 @@
   },
   "packageManager": "yarn@4.4.0",
   "dependencies": {
-    "vitest": "^2.0.5"
+    "vitest": "1.4.0"
   }
 }
