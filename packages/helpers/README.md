@@ -1,5 +1,9 @@
 # @editorjs/helpers
-
+Utils useful for Editor.js tools development
+### Installation 
+ ```
+   npm install @editorjs/helpers
+```
 - [beautifyShortcut](https://github.com/editor-js/utils/blob/main/packages/helpers/src/beautifyShortcut.ts) - Make shortcut command more human-readable
 - [cacheable](https://github.com/editor-js/utils/blob/main/packages/helpers/src/cacheable.ts) - Decorator which provides ability to cache method or accessor result
 - [capitalize](https://github.com/editor-js/utils/blob/main/packages/helpers/src/capitalize.ts) - Capitalizes first letter of the string
@@ -23,3 +27,11 @@
 - [isPromise](https://github.com/editor-js/utils/blob/main/packages/helpers/src/typeOf.ts) - Check if passed object is a Promise
 - [getUserOS](https://github.com/editor-js/utils/blob/main/packages/helpers/src/userOS.ts) - Returns object with os name as key and boolean as value. Shows current user OS
 - [equals](https://github.com/editor-js/utils/blob/main/packages/helpers/src/userOS.ts) - Compares two values with unknown type
+# About CodeX
+   <img align="right" width="120" height="120" src="https://codex.so/public/app/img/codex-logo.svg" hspace="50">
+
+   CodeX is a team of digital specialists around the world interested in building high-quality open source products on a global market. We are [open](https://codex.so/join) for young people who want to constantly improve their skills and grow professionally with experiments in cutting-edge technologies.
+
+  | 🌐 | Join  👋  | Twitter | Instagram |
+   | -- | -- | -- | -- | 
+   | [codex.so](https://codex.so) | [codex.so/join](https://codex.so/join) |[@codex_team](http://twitter.com/codex_team) | [@codex_team](http://instagram.com/codex_team/) |

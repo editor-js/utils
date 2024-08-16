@@ -1,5 +1,6 @@
 {
   "name": "@editorjs/helpers",
+  "description": "Utils useful for Editor.js tools development",
   "version": "0.0.2",
   "main": "dist/index.js",
   "license": "MIT",

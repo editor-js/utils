@@ -1,5 +1,9 @@
 # @editorjs/dom
-
+Utils useful for work with dom for Editor.js tools development
+### Installation 
+ ```
+   npm install @editorjs/dom
+```
 - [allInputsSelector](https://github.com/editor-js/utils/blob/main/packages/dom/src/allInputsSelector.ts) - Returns CSS selector for all text inputs
 - [append](https://github.com/editor-js/utils/blob/main/packages/dom/src/append.ts) - Append one or several elements to the parent
 - [blockElements](https://github.com/editor-js/utils/blob/main/packages/dom/src/blockElements.ts) - Return array of names of block html elements
@@ -25,3 +29,11 @@
 - [make](https://github.com/editor-js/utils/blob/main/packages/dom/src/make.ts) - Helper for making Elements with class name and attributes
 - [offset](https://github.com/editor-js/utils/blob/main/packages/dom/src/offset.ts) - Return element's offset related to the document
 - [prepend](https://github.com/editor-js/utils/blob/main/packages/dom/src/prepend.ts) - Append element or a couple to the beginning of the parent elements
+# About CodeX
+   <img align="right" width="120" height="120" src="https://codex.so/public/app/img/codex-logo.svg" hspace="50">
+
+   CodeX is a team of digital specialists around the world interested in building high-quality open source products on a global market. We are [open](https://codex.so/join) for young people who want to constantly improve their skills and grow professionally with experiments in cutting-edge technologies.
+
+  | 🌐 | Join  👋  | Twitter | Instagram |
+   | -- | -- | -- | -- | 
+   | [codex.so](https://codex.so) | [codex.so/join](https://codex.so/join) |[@codex_team](http://twitter.com/codex_team) | [@codex_team](http://instagram.com/codex_team/) |

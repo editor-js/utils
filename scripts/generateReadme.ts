@@ -63,6 +63,35 @@ function extractMethodDescriptions(filePath: string): string[] {
 }
 
 /**
+ * Extract the description from package.json
+ * @param packageDir - Directory path where package.json is located
+ * @returns The description from package.json, or a default message if not found
+ */
+function extractPackageDescription(packageDir: string): string {
+  const packageJsonPath = path.join(packageDir, 'package.json');
+
+  // Check if package.json exists
+  if (!fs.existsSync(packageJsonPath)) {
+    console.error(`package.json not found in ${packageDir}`);
+
+    return 'Description not available';
+  }
+
+  try {
+    // Read and parse package.json
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const packageJson = fs.readJSONSync(packageJsonPath);
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return
+    return (Boolean(packageJson.description)) ? packageJson.description : 'Description not available';
+  } catch (error) {
+    console.error(`Failed to read or parse ${packageJsonPath}:`, error);
+
+    return 'Description not available';
+  }
+}
+
+/**
  * Generate README.md documentation by parsing TypeScript files
  * @param dirPath - Directory path
  */
@@ -71,7 +100,21 @@ function generateDocs(dirPath: string): void {
   const srcPath = path.join(dirPath, 'src');
   const files = fs.readdirSync(srcPath).filter(file => file.endsWith('.ts') && file !== 'index.ts');
   const readmePath = path.join(dirPath, 'README.md');
-  const docContent: string[] = [`# @editorjs/${packageName}`, ''];
+  const docContent: string[] = [`# @editorjs/${packageName}`];
+  const docFooter: string = '# About CodeX\n \
+  <img align="right" width="120" height="120" src="https://codex.so/public/app/img/codex-logo.svg" hspace="50">\n\n \
+  CodeX is a team of digital specialists around the world interested in building high-quality open source products on a global market. We are [open](https://codex.so/join) for young people who want to constantly improve their skills and grow professionally with experiments in cutting-edge technologies.\n\n\
+  | 🌐 | Join  👋  | Twitter | Instagram |\n \
+  | -- | -- | -- | -- | \n \
+  | [codex.so](https://codex.so) | [codex.so/join](https://codex.so/join) |[@codex_team](http://twitter.com/codex_team) | [@codex_team](http://instagram.com/codex_team/) |';
+  const description = extractPackageDescription(dirPath);
+  const packageInstall: string = `### Installation \n \
+\`\`\`\n \
+  npm install @editorjs/${packageName}\n\
+\`\`\``;
+
+  docContent.push(description);
+  docContent.push(packageInstall);
 
   files.forEach((file) => {
     const filePath = path.join(srcPath, file);
@@ -82,7 +125,13 @@ function generateDocs(dirPath: string): void {
     }
   });
 
-  if (docContent.length > 1) { // Сначала заголовок, поэтому минимум 2 строки
+  docContent.push(docFooter);
+
+  /**
+   * Check that we have contents besides header and footer and installation and description of the package
+   */
+  // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+  if (docContent.length > 4) {
     fs.writeFileSync(readmePath, docContent.join('\n'), 'utf8');
     console.log(`Documentation generated in ${readmePath}`);
   } else {
