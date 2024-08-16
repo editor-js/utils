@@ -9,7 +9,7 @@ export function cacheable<Target, Value, Arguments extends unknown[] = unknown[]
   propertyKey: string,
   descriptor: PropertyDescriptor
 ): PropertyDescriptor {
-  const propertyToOverride = (Boolean(descriptor.value)) ? 'value' : 'get';
+  const propertyToOverride = (descriptor.value !== undefined) ? 'value' : 'get';
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const originalMethod = descriptor[propertyToOverride];
   const cacheKey = `#${propertyKey}Cache`;
@@ -25,8 +25,10 @@ export function cacheable<Target, Value, Arguments extends unknown[] = unknown[]
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if (this[cacheKey] === undefined) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-      this[cacheKey] = originalMethod.apply(this, ...args);
+      this[cacheKey] = originalMethod.apply(this, args);
     }
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    console.log(this[cacheKey], cacheKey, this, 'hahshasdfh');
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
     return this[cacheKey];

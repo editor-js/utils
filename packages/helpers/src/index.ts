@@ -1,4 +1,4 @@
-import { cacheable } from './cacheable/cacheable';
+import { cacheable } from './cacheable';
 import { beautifyShortcut } from './beautifyShortcut';
 import { capitalize } from './capitalize';
 import { copyTextToClipboard } from './copyTextToClipboard';
