@@ -4,6 +4,7 @@ Utils useful for work with dom for Editor.js tools development
  ```
    npm install @editorjs/dom
 ```
+### Function list
 - [allInputsSelector](https://github.com/editor-js/utils/blob/main/packages/dom/src/allInputsSelector.ts) - Returns CSS selector for all text inputs
 - [append](https://github.com/editor-js/utils/blob/main/packages/dom/src/append.ts) - Append one or several elements to the parent
 - [blockElements](https://github.com/editor-js/utils/blob/main/packages/dom/src/blockElements.ts) - Return array of names of block html elements

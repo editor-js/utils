@@ -1,5 +1,5 @@
 import { isCollapsedWhitespaces } from '@editorjs/dom';
-import { extractContenteditableSlice } from './extractContenteditableSlice';
+import { getContenteditableSlice } from './getContenteditableSlice';
 
 /**
  * Checks content at left or right of the passed node for emptiness.
@@ -11,9 +11,9 @@ import { extractContenteditableSlice } from './extractContenteditableSlice';
  */
 export function checkContenteditableSliceForEmptiness(contenteditable: HTMLElement, fromNode: Node, offsetInsideNode: number, direction: 'left' | 'right'): boolean {
   /**
-   * Extract content editable slice
+   * Get content editable slice
    */
-  const textContent = extractContenteditableSlice(contenteditable, fromNode, offsetInsideNode, direction);
+  const textContent = getContenteditableSlice(contenteditable, fromNode, offsetInsideNode, direction);
 
   /**
    * Check extracted slice for emptiness

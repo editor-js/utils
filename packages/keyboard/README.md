@@ -4,6 +4,7 @@ Utils useful for work with keyboard for Editor.js tools development
  ```
    npm install @editorjs/keyboard
 ```
+### Function list
 - [getKeyboardKeyForCode](https://github.com/editor-js/utils/blob/main/packages/keyboard/src/getKeyboardKeyForCode.ts) - Returns real layout-related keyboard key for a given key code.
 # About CodeX
    <img align="right" width="120" height="120" src="https://codex.so/public/app/img/codex-logo.svg" hspace="50">

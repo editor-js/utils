@@ -4,6 +4,7 @@ Utils useful for Editor.js tools development
  ```
    npm install @editorjs/helpers
 ```
+### Function list
 - [beautifyShortcut](https://github.com/editor-js/utils/blob/main/packages/helpers/src/beautifyShortcut.ts) - Make shortcut command more human-readable
 - [cacheable](https://github.com/editor-js/utils/blob/main/packages/helpers/src/cacheable.ts) - Decorator which provides ability to cache method or accessor result
 - [capitalize](https://github.com/editor-js/utils/blob/main/packages/helpers/src/capitalize.ts) - Capitalizes first letter of the string

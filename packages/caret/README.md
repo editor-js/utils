@@ -4,6 +4,7 @@ Utils useful for work with caret for Editor.js tools development
  ```
    npm install @editorjs/caret
 ```
+### Function list
 - [checkContenteditableSliceForEmptiness](https://github.com/editor-js/utils/blob/main/packages/caret/src/checkContenteditableSliceForEmptiness.ts) - Checks content at left or right of the passed node for emptiness.
 - [extractContenteditableSlice](https://github.com/editor-js/utils/blob/main/packages/caret/src/extractContenteditableSlice.ts) - Returns slice of the contenteditable html element from caret position to the start or end (depending on direction)
 - [focus](https://github.com/editor-js/utils/blob/main/packages/caret/src/focus.ts) - Set focus to contenteditable or native input element

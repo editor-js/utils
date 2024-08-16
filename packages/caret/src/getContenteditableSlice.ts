@@ -1,12 +1,15 @@
+import { fragmentToString } from '@editorjs/dom';
+
 /**
  * Returns slice of the contenteditable html element from caret position to the start or end (depending on direction)
  * @param contenteditable - The contenteditable element containing the nodes.
  * @param fromNode - The starting node to check from.
  * @param offsetInsideNode - The offset inside the starting node.
  * @param direction - The direction to check ('left' or 'right').
+ * @param extract - should we remove from element extracted part
  * @returns true if adjacent content is empty, false otherwise.
  */
-export function extractContenteditableSlice(contenteditable: HTMLElement, fromNode: Node, offsetInsideNode: number, direction: 'left' | 'right'): string {
+export function getContenteditableSlice(contenteditable: HTMLElement, fromNode: Node, offsetInsideNode: number, direction: 'left' | 'right', extract: boolean = false): string {
   const range = document.createRange();
 
   /**
@@ -24,6 +27,15 @@ export function extractContenteditableSlice(contenteditable: HTMLElement, fromNo
   } else {
     range.setStart(fromNode, offsetInsideNode);
     range.setEnd(contenteditable, contenteditable.childNodes.length);
+  }
+
+  /**
+   * Check if we should extract content from the range
+   */
+  if (extract === true) {
+    const textContent = range.extractContents();
+
+    return fragmentToString(textContent);
   }
 
   /**

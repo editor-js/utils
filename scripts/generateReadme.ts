@@ -115,6 +115,7 @@ function generateDocs(dirPath: string): void {
 
   docContent.push(description);
   docContent.push(packageInstall);
+  docContent.push('### Function list');
 
   files.forEach((file) => {
     const filePath = path.join(srcPath, file);
@@ -131,7 +132,7 @@ function generateDocs(dirPath: string): void {
    * Check that we have contents besides header and footer and installation and description of the package
    */
   // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-  if (docContent.length > 4) {
+  if (docContent.length > 5) {
     fs.writeFileSync(readmePath, docContent.join('\n'), 'utf8');
     console.log(`Documentation generated in ${readmePath}`);
   } else {
