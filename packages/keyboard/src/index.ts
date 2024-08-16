@@ -83,12 +83,19 @@ declare global {
 export async function getKeyboardKeyForCode(code: string, fallback: string): Promise<string> {
   const keyboard = navigator.keyboard;
 
-  if (!keyboard) {
+  if (keyboard === null) {
     return fallback;
   }
 
-  const map = await keyboard.getLayoutMap();
-  const key = map.get(code);
+  try {
+    const map = await keyboard.getLayoutMap();
 
-  return (key ?? '') || fallback;
+    const key = map.get(code);
+
+    return key ?? fallback;
+  } catch (e) {
+    console.error(e);
+
+    return fallback;
+  }
 }
