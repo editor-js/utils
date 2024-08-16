@@ -1,4 +1,4 @@
-# helpers
+# @editorjs/helpers
 
 - [beautifyShortcut](https://github.com/editor-js/utils/blob/main/packages/helpers/src/beautifyShortcut.ts) - Make shortcut command more human-readable
 - [cacheable](https://github.com/editor-js/utils/blob/main/packages/helpers/src/cacheable.ts) - Decorator which provides ability to cache method or accessor result

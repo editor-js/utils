@@ -71,7 +71,7 @@ function generateDocs(dirPath: string): void {
   const srcPath = path.join(dirPath, 'src');
   const files = fs.readdirSync(srcPath).filter(file => file.endsWith('.ts') && file !== 'index.ts');
   const readmePath = path.join(dirPath, 'README.md');
-  const docContent: string[] = [`# ${packageName}`, ''];
+  const docContent: string[] = [`# @editorjs/${packageName}`, ''];
 
   files.forEach((file) => {
     const filePath = path.join(srcPath, file);
