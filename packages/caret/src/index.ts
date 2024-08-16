@@ -1,5 +1,5 @@
 import { checkContenteditableSliceForEmptiness } from './checkContenteditableSliceForEmptiness';
-import { extractContenteditableSlice } from './getContenteditableSlice';
+import { getContenteditableSlice } from './getContenteditableSlice';
 import { focus } from './focus';
 import { getCaretNodeAndOffset } from './getCaretNodeAndOffset';
 import { getRange } from './getRange';
@@ -8,7 +8,7 @@ import { isCaretAtStartOfInput } from './isCaretAtStartOfInput';
 import { save } from './save';
 
 export { checkContenteditableSliceForEmptiness,
-  extractContenteditableSlice,
+  getContenteditableSlice,
   focus,
   getCaretNodeAndOffset,
   getRange,
