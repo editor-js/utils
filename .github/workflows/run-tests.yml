@@ -19,16 +19,10 @@ jobs:
     strategy:
       # If set to true, Github will cancel all other jobs if one of the jobs fails
       fail-fast: false
-      matrix:
-        branch:
-          - ${{ github.head_ref }}
-          - "main"
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-        with:
-          ref: ${{ matrix.branch }}
 
       - name: Setup node
         uses: actions/setup-node@v3
@@ -40,6 +34,3 @@ jobs:
 
       - name: Run tests
         run: yarn test
-
-      - name: Get an appropriate name for an artifact
-        run: echo "ARTIFACT_NAME=coverage-${{ matrix.branch }}" | tr -d ':<>|*?\r\n\/\\' >> $GITHUB_ENV
