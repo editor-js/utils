@@ -27,7 +27,7 @@ export default [
     rules: {
       'n/no-missing-import': ['off'],
       'n/no-extraneous-import': ['error', {
-        allowModules: ['nanoid', '@editorjs/caret', '@editorjs/dom', '@editorjs/helpers', '@editorjs/keyboard'],
+        allowModules: ['nanoid', '@editorjs/caret', '@editorjs/dom', '@editorjs/helpers', '@editorjs/keyboard', 'vitest'],
       }],
       'n/no-unpublished-import': ['off'],
       'n/no-unsupported-features/node-builtins': ['error', {

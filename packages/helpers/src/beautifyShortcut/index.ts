@@ -1,4 +1,4 @@
-import { getUserOS } from './userOS';
+import { getUserOS } from '../userOS';
 
 /**
  * Make shortcut command more human-readable
@@ -18,7 +18,7 @@ export function beautifyShortcut(shortcut: string): string {
     .replace(/escape/gi, '⎋')
     .replace(/insert/gi, 'Ins')
     .replace(/delete/gi, '␡')
-    .replace(/\+/gi, ' + ');
+    .replace(/\+/gi, '+');
 
   if (OS.mac) {
     shortcut = shortcut.replace(/ctrl|cmd/gi, '⌘').replace(/alt/gi, '⌥');

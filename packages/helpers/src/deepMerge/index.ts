@@ -1,4 +1,4 @@
-import { isObject } from './typeOf';
+import { isObject } from '../typeOf';
 
 /**
  * Merge two objects recursively
@@ -6,7 +6,7 @@ import { isObject } from './typeOf';
  * @param sources - sources to be merged
  * @returns sourced merged with sources
  */
-export function deepMerge<T>(target: T, ...sources: T[]): T {
+export function deepMerge(target: object, ...sources: object[]): object {
   if (!sources.length) {
     return target;
   }
@@ -18,9 +18,9 @@ export function deepMerge<T>(target: T, ...sources: T[]): T {
         if (target[key] === null) {
           Object.assign(target, { [key]: {} });
         }
-        deepMerge(target[key], source[key]);
+        deepMerge(target[key] as object, source[key]);
       } else {
-        Object.assign(target, { [key]: source[key] });
+        Object.assign(target, { [key]: source[key] as object });
       }
     }
   }

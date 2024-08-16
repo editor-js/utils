@@ -1,4 +1,4 @@
-import { isObject } from './typeOf';
+import { isObject } from '../typeOf';
 
 /**
  * Returns object with os name as key and boolean as value. Shows current user OS
