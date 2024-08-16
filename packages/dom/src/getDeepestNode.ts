@@ -1,5 +1,6 @@
-import { isNativeInput } from './findAllInputs';
-import { isLineBreakTag, isSingleTag } from './isLineBreakTag';
+import { isNativeInput } from './isNativeInput';
+import { isLineBreakTag } from './isLineBreakTag';
+import { isSingleTag } from './isSingleTag';
 
 /**
  * Search for deepest node which is Leaf.

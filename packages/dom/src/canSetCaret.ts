@@ -1,4 +1,4 @@
-import { isNativeInput } from './findAllInputs';
+import { isNativeInput } from './isNativeInput';
 import { isContentEditable } from './isContentEditable';
 
 /**

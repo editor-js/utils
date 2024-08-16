@@ -21,10 +21,11 @@
     },
     "composite": true
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "scripts"],
   "exclude": [
     "node_modules",
-    "packages/**/dist*"
+    "packages/**/dist*",
+    "scripts/**/*"
   ],
   "references": [
     { "path": "packages/dom" },
