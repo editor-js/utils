@@ -1,5 +1,5 @@
 import { test, describe, expect } from 'vitest';
-import { deepMerge } from '@editorjs/helpers';
+import { deepMerge } from '.';
 
 describe('Test deep merge function', () => {
   test.each(
