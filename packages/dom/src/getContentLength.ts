@@ -1,4 +1,4 @@
-import { isNativeInput } from './inputs';
+import { isNativeInput } from './isNativeInput';
 
 /**
  * Return length of node`s text content

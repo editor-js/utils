@@ -1,6 +1,7 @@
 {
   "name": "@editorjs/caret",
-  "version": "0.0.1",
+  "description": "Utils useful for work with caret for Editor.js tools development",
+  "version": "0.0.2",
   "main": "dist/index.js",
   "license": "MIT",
   "scripts": {

@@ -24,12 +24,12 @@
   "include": ["src/**/*"],
   "exclude": [
     "node_modules",
-    "packages/**/dist*"
+    "packages/**/dist*",
   ],
   "references": [
     { "path": "packages/dom" },
     { "path": "packages/caret" },
-    { "path": "packages/keyboard" },
-    { "path": "packages/helpers" }
+    { "path": "packages/helpers" },
+    { "path": "packages/keyboard" }
   ]
 }

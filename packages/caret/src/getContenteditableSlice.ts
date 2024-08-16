@@ -1,14 +1,15 @@
-import { isCollapsedWhitespaces } from './isCollapsedWhitespaces';
+import { fragmentToString } from '@editorjs/dom';
 
 /**
- * Checks content at left or right of the passed node for emptiness.
+ * Returns slice of the contenteditable html element from caret position to the start or end (depending on direction)
  * @param contenteditable - The contenteditable element containing the nodes.
  * @param fromNode - The starting node to check from.
  * @param offsetInsideNode - The offset inside the starting node.
  * @param direction - The direction to check ('left' or 'right').
+ * @param extract - should we remove from element extracted part
  * @returns true if adjacent content is empty, false otherwise.
  */
-export function checkContenteditableSliceForEmptiness(contenteditable: HTMLElement, fromNode: Node, offsetInsideNode: number, direction: 'left' | 'right'): boolean {
+export function getContenteditableSlice(contenteditable: HTMLElement, fromNode: Node, offsetInsideNode: number, direction: 'left' | 'right', extract: boolean = false): string {
   const range = document.createRange();
 
   /**
@@ -29,6 +30,15 @@ export function checkContenteditableSliceForEmptiness(contenteditable: HTMLEleme
   }
 
   /**
+   * Check if we should extract content from the range
+   */
+  if (extract === true) {
+    const textContent = range.extractContents();
+
+    return fragmentToString(textContent);
+  }
+
+  /**
    * Clone the range's content and check its text content
    */
   const clonedContent = range.cloneContents();
@@ -45,5 +55,5 @@ export function checkContenteditableSliceForEmptiness(contenteditable: HTMLEleme
    *
    * If text contains only invisible whitespaces, it is considered to be empty
    */
-  return isCollapsedWhitespaces(textContent);
+  return textContent;
 }
