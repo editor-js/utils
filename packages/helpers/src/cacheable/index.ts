@@ -27,8 +27,6 @@ export function cacheable<Target, Value, Arguments extends unknown[] = unknown[]
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
       this[cacheKey] = originalMethod.apply(this, args);
     }
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    console.log(this[cacheKey], cacheKey, this, 'hahshasdfh');
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
     return this[cacheKey];
