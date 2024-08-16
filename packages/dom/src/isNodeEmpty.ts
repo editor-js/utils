@@ -1,6 +1,6 @@
-import { isSingleTag, isLineBreakTag } from './isTag';
+import { isSingleTag, isLineBreakTag } from './isLineBreakTag';
 import { isElement } from './isElement';
-import { isNativeInput } from './inputs';
+import { isNativeInput } from './findAllInputs';
 
 /**
  * Checks node if it is empty
