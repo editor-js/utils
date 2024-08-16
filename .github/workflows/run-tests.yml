@@ -1,4 +1,4 @@
-name: API tests
+name: Utils tests
 
 on:
   push:

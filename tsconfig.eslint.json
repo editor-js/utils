@@ -6,6 +6,6 @@
     "src/**/*.ts",
     "tests/**/*",
     "scripts/**/*.ts",
-    "vitest.config.js"
+    "vitest.config.mjs"
   ],
 }
