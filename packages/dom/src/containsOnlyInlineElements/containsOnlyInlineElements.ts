@@ -1,5 +1,5 @@
 import { isString } from '@editorjs/helpers';
-import { blockElements } from './blockElements';
+import { blockElements } from '../blockElements';
 
 /**
  * Check if passed content includes only inline elements

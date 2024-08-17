@@ -1,4 +1,4 @@
-import { make } from './make';
+import { make } from '../make';
 
 /**
  * Returns the HTML content of passed Document Fragment

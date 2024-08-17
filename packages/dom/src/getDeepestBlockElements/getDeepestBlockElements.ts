@@ -1,4 +1,4 @@
-import { containsOnlyInlineElements } from './containsOnlyInlineElements';
+import { containsOnlyInlineElements } from '../containsOnlyInlineElements';
 
 /**
  * Find and return all block elements in the passed parent (including subtree)

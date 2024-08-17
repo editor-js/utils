@@ -1,7 +1,7 @@
-import { containsOnlyInlineElements } from './containsOnlyInlineElements';
-import { getDeepestBlockElements } from './getDeepestBlockElements';
-import { allInputsSelector } from './allInputsSelector';
-import { isNativeInput } from './isNativeInput';
+import { containsOnlyInlineElements } from '../containsOnlyInlineElements';
+import { getDeepestBlockElements } from '../getDeepestBlockElements';
+import { allInputsSelector } from '../allInputsSelector';
+import { isNativeInput } from '../isNativeInput';
 
 /**
  * Find all contenteditable, textarea and editable input elements passed holder contains

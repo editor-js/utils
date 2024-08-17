@@ -1,5 +1,5 @@
-import { isLeaf } from './isLeaf';
-import { isNodeEmpty } from './isNodeEmpty';
+import { isLeaf } from '../isLeaf';
+import { isNodeEmpty } from '../isNodeEmpty';
 
 /**
  * breadth-first search (BFS)

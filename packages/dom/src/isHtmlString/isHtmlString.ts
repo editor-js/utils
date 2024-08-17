@@ -1,4 +1,4 @@
-import { make } from './make';
+import { make } from '../make';
 
 /**
  * Check if string contains html elements

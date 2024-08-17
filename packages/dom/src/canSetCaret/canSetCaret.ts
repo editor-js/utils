@@ -1,5 +1,5 @@
-import { isNativeInput } from './isNativeInput';
-import { isContentEditable } from './isContentEditable';
+import { isNativeInput } from '../isNativeInput';
+import { isContentEditable } from '../isContentEditable';
 
 /**
  * Checks if we can set caret
