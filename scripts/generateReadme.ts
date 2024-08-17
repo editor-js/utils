@@ -92,13 +92,51 @@ function extractPackageDescription(packageDir: string): string {
 }
 
 /**
+ * Returns array of paths to the files in srcPath directory (except index.ts files)
+ * @param srcPath - path to the src directory
+ * @returns array of the paths to the files
+ */
+function getFilePaths(srcPath: string): string[] {
+  let filePaths: string[] = [];
+
+  /**
+   * Function for recursive check of the directory
+   * @param directory - directory for recursive file searching
+   */
+  function exploreDirectory(directory: string): void {
+    /**
+     * Get all elements in current directory
+     */
+    const items = fs.readdirSync(directory);
+
+    items.forEach((item) => {
+      const itemPath = path.join(directory, item);
+      const stats = fs.statSync(itemPath);
+
+      if (stats.isDirectory()) {
+        exploreDirectory(itemPath);
+      } else if (stats.isFile() && item.endsWith('.ts') && !item.endsWith('.test.ts') && item !== 'index.ts') {
+        /**
+         * If this file is .ts and not .test.ts, then we add it to the paths
+         */
+        filePaths.push(itemPath);
+      }
+    });
+  }
+
+  exploreDirectory(srcPath);
+
+  return filePaths;
+}
+
+/**
  * Generate README.md documentation by parsing TypeScript files
  * @param dirPath - Directory path
  */
 function generateDocs(dirPath: string): void {
   const packageName = path.basename(dirPath);
   const srcPath = path.join(dirPath, 'src');
-  const files = fs.readdirSync(srcPath).filter(file => file.endsWith('.ts') && file !== 'index.ts');
+  const files = getFilePaths(srcPath);
   const readmePath = path.join(dirPath, 'README.md');
   const docContent: string[] = [`# @editorjs/${packageName}`];
   const docFooter: string = '# About CodeX\n \
@@ -118,8 +156,7 @@ function generateDocs(dirPath: string): void {
   docContent.push('### Function list');
 
   files.forEach((file) => {
-    const filePath = path.join(srcPath, file);
-    const descriptions = extractMethodDescriptions(filePath);
+    const descriptions = extractMethodDescriptions(file);
 
     if (descriptions.length > 0) {
       docContent.push(...descriptions);
