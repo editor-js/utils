@@ -1,7 +1,7 @@
 {
   "name": "@editorjs/keyboard",
   "description": "Utils useful for work with keyboard for Editor.js tools development",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "main": "dist/index.js",
   "license": "MIT",
   "scripts": {
