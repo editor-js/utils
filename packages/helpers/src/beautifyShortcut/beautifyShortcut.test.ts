@@ -81,9 +81,6 @@ describe('Test beautifyShortcut function', () => {
       });
 
       expect(beautifyShortcut('cmd + c')).toBe('⌘ + c');
-
-      // Resetting stub
-      vi.restoreAllMocks();
     });
 
     test('should replace cmd with Ctrl on Windows', () => {
@@ -94,9 +91,6 @@ describe('Test beautifyShortcut function', () => {
       });
 
       expect(beautifyShortcut('cmd + c')).toBe('Ctrl + c');
-
-      // Resetting stub
-      vi.restoreAllMocks();
     });
 
     test('should replace cmd with Ctrl on Linux', () => {
@@ -107,9 +101,6 @@ describe('Test beautifyShortcut function', () => {
       });
 
       expect(beautifyShortcut('cmd + c')).toBe('Ctrl + c');
-
-      // Resetting stub
-      vi.restoreAllMocks();
     });
   });
 });
