@@ -1,5 +1,5 @@
 import { isCollapsedWhitespaces } from '@editorjs/dom';
-import { getContenteditableSlice } from './getContenteditableSlice';
+import { getContenteditableSlice } from '../getContenteditableSlice/getContenteditableSlice';
 
 /**
  * Checks content at left or right of the passed node for emptiness.

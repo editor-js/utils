@@ -1,6 +1,6 @@
 import { getDeepestNode, isEmpty, isNativeInput } from '@editorjs/dom';
-import { getCaretNodeAndOffset } from './getCaretNodeAndOffset';
-import { checkContenteditableSliceForEmptiness } from './checkContenteditableSliceForEmptiness';
+import { getCaretNodeAndOffset } from '../getCaretNodeAndOffset/getCaretNodeAndOffset';
+import { checkContenteditableSliceForEmptiness } from '../checkContenteditableSliceForEmptiness/checkContenteditableSliceForEmptiness';
 
 /**
  * Checks if caret is at the start of the passed input

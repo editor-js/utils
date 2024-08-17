@@ -1,5 +1,5 @@
 import { make } from '@editorjs/dom';
-import { getRange } from './getRange';
+import { getRange } from '../getRange/getRange';
 
 /**
  * Saves caret position using hidden <span>
