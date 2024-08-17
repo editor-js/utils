@@ -9,7 +9,7 @@ import { isEmpty, notEmpty } from './empty';
 import { getValidUrl } from './getValidUrl';
 import { isPrintableKey } from './isPrintableKey';
 import { keyCodes, mouseButtons } from './keyCodes';
-import { PromiseQueue } from './PromiseQueue';
+import { PromiseQueue } from './promiseQueue';
 import { throttle } from './throttle';
 import { typeOf,
   isBoolean,

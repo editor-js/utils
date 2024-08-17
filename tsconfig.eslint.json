@@ -4,6 +4,8 @@
     "packages/**/*.ts",
     "eslint.config.mjs",
     "src/**/*.ts",
-    "scripts/**/*.ts"
+    "tests/**/*.ts",
+    "scripts/**/*.ts",
+    "vitest.config.mjs"
   ],
 }

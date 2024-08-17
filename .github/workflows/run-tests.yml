@@ -1,0 +1,39 @@
+name: Utils tests
+
+on:
+  push:
+    branches:
+      - 'main'
+    tags:
+      - 'v*'
+
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  tests:
+    runs-on: ubuntu-22.04
+    permissions:
+      # Required to checkout the code
+      contents: read
+    strategy:
+      # If set to true, Github will cancel all other jobs if one of the jobs fails
+      fail-fast: false
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 22.1.0
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Build utils
+        run: yarn build
+
+      - name: Run tests
+        run: yarn test
