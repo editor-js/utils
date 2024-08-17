@@ -1,5 +1,5 @@
 import { describe, test, expect, vi } from 'vitest';
-import { deprecationAssert } from '.';
+import { deprecationAssert } from './deprecationAssert';
 
 describe('Test deprecationAssert function', () => {
   test.each([

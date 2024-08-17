@@ -1,5 +1,5 @@
 import { test, describe, expect, vi } from 'vitest';
-import { cacheable } from '.';
+import { cacheable } from './cacheable';
 
 /**
  * Class for cachable decorator testing

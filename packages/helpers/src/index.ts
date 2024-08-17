@@ -1,10 +1,10 @@
-import { cacheable } from './cacheable';
-import { beautifyShortcut } from './beautifyShortcut';
-import { capitalize } from './capitalize';
-import { copyTextToClipboard } from './copyTextToClipboard';
-import { debounce } from './debounce';
-import { deepMerge } from './deepMerge';
-import { deprecationAssert } from './deprecationAssert';
+import { cacheable } from './cacheable/cacheable';
+import { beautifyShortcut } from './beautifyShortcut/beautifyShortcut';
+import { capitalize } from './capitalize/capitalize';
+import { copyTextToClipboard } from './copyTextToClipboard/copyTextToClipboard';
+import { debounce } from './debounce/debounce';
+import { deepMerge } from './deepMerge/deepMerge';
+import { deprecationAssert } from './deprecationAssert/deprecationAssert';
 import { isEmpty, notEmpty } from './empty';
 import { getValidUrl } from './getValidUrl';
 import { isPrintableKey } from './isPrintableKey';

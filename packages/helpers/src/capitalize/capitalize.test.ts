@@ -1,5 +1,5 @@
 import { test, describe, expect } from 'vitest';
-import { capitalize } from '.';
+import { capitalize } from './capitalize';
 
 describe('Test capitalize function', () => {
   test.each(

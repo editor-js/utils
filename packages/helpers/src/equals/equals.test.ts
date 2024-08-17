@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest';
-import { equals } from '.';
+import { equals } from './equals';
 
 describe('equals', () => {
   test.each(

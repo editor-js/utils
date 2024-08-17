@@ -1,5 +1,5 @@
 import { test, describe, expect, vi } from 'vitest';
-import { beautifyShortcut } from '.';
+import { beautifyShortcut } from './beautifyShortcut';
 
 describe('Test beautifyShortcut function', () => {
   test.each([

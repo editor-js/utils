@@ -1,5 +1,5 @@
 import { test, describe, expect } from 'vitest';
-import { deepMerge } from '.';
+import { deepMerge } from './deepMerge';
 
 describe('Test deep merge function', () => {
   test.each(
@@ -20,6 +20,42 @@ describe('Test deep merge function', () => {
           firstValue: 1,
           secondValue: 2,
           thirdValue: 3,
+        },
+      },
+      {
+        sources: [
+          {
+            firstObject: {
+              firstValue: 1,
+            },
+            secondObject: {
+              secondValue: 2,
+            },
+          },
+          {
+            thirdValue: 1,
+          },
+          {
+            deepObject: {
+              deeperObject: {
+                value: 0,
+              },
+            },
+          },
+        ],
+        merged: {
+          firstObject: {
+            firstValue: 1,
+          },
+          secondObject: {
+            secondValue: 2,
+          },
+          thirdValue: 1,
+          deepObject: {
+            deeperObject: {
+              value: 0,
+            },
+          },
         },
       },
       {
