@@ -22,6 +22,24 @@ describe('Test getUserOs function', () => {
       },
     },
     {
+      OSName: 'X11; Linux x86_64',
+      expectedResponse: {
+        win: false,
+        mac: false,
+        x11: true,
+        linux: false,
+      },
+    },
+    {
+      OSName: 'Linux',
+      expectedResponse: {
+        win: false,
+        mac: false,
+        x11: false,
+        linux: true,
+      },
+    },
+    {
       OSName: 'Random OS',
       expectedResponse: {
         win: false,
