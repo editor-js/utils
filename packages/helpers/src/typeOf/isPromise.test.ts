@@ -9,6 +9,11 @@ describe('Test isPromise function', () => {
         expectedResponse: true,
       },
       {
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
+        target: async function myAsyncFunction() {},
+        expectedResponse: false,
+      },
+      {
         target: new Promise(() => {}),
         expectedResponse: true,
       },
