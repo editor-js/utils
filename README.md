@@ -2,10 +2,10 @@
 Utils useful for Editor.js tools development
 
 ## Packages
-- Caret
-- Dom
-- Helpers
-- Keyboard
+- [Caret](https://github.com/editor-js/utils/tree/main/packages/caret)
+- [Dom](https://github.com/editor-js/utils/tree/main/packages/dom)
+- [Helpers](https://github.com/editor-js/utils/tree/main/packages/helpers)
+- [Keyboard](https://github.com/editor-js/utils/tree/main/packages/keyboard)
 
 You can use them via installing from npm:
 
