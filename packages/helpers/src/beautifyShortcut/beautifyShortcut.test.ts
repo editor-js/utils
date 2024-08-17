@@ -1,7 +1,10 @@
-import { test, describe, expect, vi } from 'vitest';
+import { test, describe, expect, vi, afterEach } from 'vitest';
 import { beautifyShortcut } from './beautifyShortcut';
 
 describe('Test beautifyShortcut function', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
   test.each([
     {
       shortcut: 'shift',

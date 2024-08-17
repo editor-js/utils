@@ -6,7 +6,7 @@ import { cacheable } from './cacheable';
  */
 class testClass {
   /**
-   * Test function with cachable decorator
+   * Test method with cachable decorator
    * @param a - test constant paramenter
    */
   @cacheable
@@ -22,9 +22,51 @@ class testClass {
   }
 
   /**
-   * Anchore function to spy on
+   * Test method with cachable decorator and several arguments
+   * @param a - test constant parameter
+   * @param b - test constant parameter
+   */
+  @cacheable
+  public addadd(a: number, b: number): number {
+    /**
+     * This is workaround for spy on double function
+     * vitest's toBeCalledTimes counts call even if we call just a decorator
+     * so it should count visiting of the function only when we pass cachable decorator
+     */
+    this.addCalled();
+
+    return a + b;
+  }
+
+  /**
+   * Test getter method with cachable decorator
+   */
+  @cacheable
+  public get getter(): number {
+    /**
+     * This is workaround for spy on double function
+     * vitest's toBeCalledTimes counts call even if we call just a decorator
+     * so it should count visiting of the function only when we pass cachable decorator
+     */
+    this.getterCalled();
+
+    return 0;
+  }
+
+  /**
+   * Anchore function to spy on double method visiting
    */
   public doubleCalled(): void {};
+
+  /**
+   * Anchore function to spy on add method visiting
+   */
+  public addCalled(): void {};
+
+  /**
+   * Anchore function to spy on add method visiting
+   */
+  public getterCalled(): void {};
 }
 
 describe('Test cacheable decorator', () => {
@@ -32,20 +74,25 @@ describe('Test cacheable decorator', () => {
     const classInstance = new testClass();
 
     /** Spy on the method to count how many times it's called */
-    const spy = vi.spyOn(classInstance, 'doubleCalled');
+    const oneArgMethodSpy = vi.spyOn(classInstance, 'doubleCalled');
+    const severalArgMethodSpy = vi.spyOn(classInstance, 'addCalled');
+    const getterMethodSpy = vi.spyOn(classInstance, 'getterCalled');
 
     // eslint-disable-next-line @typescript-eslint/no-magic-numbers
     for (let i = 0; i < 5; i++) {
-      // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-      classInstance.double(5);
+      classInstance.double(1);
+      classInstance.addadd(1, 1);
+      classInstance.getter;
     }
 
     /**
      * We expect, that we get inside of the double function only one time,
      * Other times we call cachable decorator and it returns value without visiting actual double function
      */
-    expect(spy).toBeCalledTimes(1);
+    expect(severalArgMethodSpy).toBeCalledTimes(1);
+    expect(getterMethodSpy).toBeCalledTimes(1);
+    expect(oneArgMethodSpy).toBeCalledTimes(1);
 
-    spy.mockRestore();
+    vi.restoreAllMocks();
   });
 });
