@@ -18,19 +18,19 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@editorjs/caret@workspace:packages/caret"
   dependencies:
-    "@editorjs/dom": "workspace:*"
+    "@editorjs/dom": "workspace:^"
   languageName: unknown
   linkType: soft
 
-"@editorjs/dom@workspace:*, @editorjs/dom@workspace:packages/dom":
+"@editorjs/dom@workspace:^, @editorjs/dom@workspace:packages/dom":
   version: 0.0.0-use.local
   resolution: "@editorjs/dom@workspace:packages/dom"
   dependencies:
-    "@editorjs/helpers": "workspace:*"
+    "@editorjs/helpers": "workspace:^"
   languageName: unknown
   linkType: soft
 
-"@editorjs/helpers@workspace:*, @editorjs/helpers@workspace:packages/helpers":
+"@editorjs/helpers@workspace:^, @editorjs/helpers@workspace:packages/helpers":
   version: 0.0.0-use.local
   resolution: "@editorjs/helpers@workspace:packages/helpers"
   languageName: unknown
