@@ -7,6 +7,9 @@
   "scripts": {
     "build": "tsc"
   },
+  "workspaces": [
+    "packages/*"
+  ],
   "dependencies": {
     "@editorjs/helpers": "workspace:^"
   }
