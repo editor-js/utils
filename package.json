@@ -25,7 +25,8 @@
     "test": "vitest run",
     "lint": "eslint",
     "lint:fix": "yarn lint --fix",
-    "generate-docs": "ts-node scripts/generateReadme.ts"
+    "generate-docs": "ts-node scripts/generateReadme.ts",
+    "publish:ci": "ts-node scripts/publish.ts"
   },
   "devDependencies": {
     "@types/fs-extra": "^11",
