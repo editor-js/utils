@@ -31,7 +31,7 @@ jobs:
         run: yarn install
 
       - name: Create .npmrc and publish packages
-         run: |
+        run: |
           # Create .npmrc file in each package directory
           for dir in packages/*; do
             if [ -d "$dir" ]; then
