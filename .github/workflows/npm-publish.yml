@@ -27,14 +27,19 @@ jobs:
           node-version: 22.1.0
           registry-url: 'https://registry.npmjs.org/'
 
-      - name: Create .npmrc
-        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
-
       - name: Install dependencies
         run: yarn install
 
-      - name: Publish all packages
-        run: yarn publish:ci
+      - name: Create .npmrc and publish packages
+         run: |
+          # Create .npmrc file in each package directory
+          for dir in packages/*; do
+            if [ -d "$dir" ]; then
+              echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > "$dir/.npmrc"
+            fi
+          done
+          # Run the publish script
+          yarn publish:ci
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
