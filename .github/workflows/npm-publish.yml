@@ -37,19 +37,6 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-    #   - name: Create .npmrc and publish packages
-    #     run: |
-    #       # Create .npmrc file in each package directory
-    #       for dir in packages/*; do
-    #         if [ -d "$dir" ]; then
-    #           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > "$dir/.npmrc"
-    #         fi
-    #       done
-    #       # Run the publish script
-    #       yarn publish:ci
-    #     env:
-    #       NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
   notify:
     needs: publish
     runs-on: ubuntu-latest
