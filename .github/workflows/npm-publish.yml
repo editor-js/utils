@@ -32,12 +32,7 @@ jobs:
 
       - name: Create .npmrc and publish packages
         run: |
-          cat <<EOF > ~/.npmrc
-            //registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}
-            registry=https://registry.npmjs.org/
-            always-auth=true
-          EOF
-          cat ~/.npmrc
+          echo "npmAuthToken: ${{ secrets.NPM_TOKEN }}" >> .yarnrc.yml
           yarn publish:ci
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
