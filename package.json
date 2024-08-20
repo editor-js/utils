@@ -25,8 +25,8 @@
     "test": "vitest run",
     "lint": "eslint",
     "lint:fix": "yarn lint --fix",
-    "generate-docs": "ts-node scripts/generateReadme.ts",
-    "publish:ci": "ts-node scripts/publish.ts"
+    "publish:ci": "ts-node scripts/publish.ts",
+    "generate-docs": "ts-node scripts/generateReadme.ts"
   },
   "devDependencies": {
     "@types/fs-extra": "^11",
@@ -38,6 +38,5 @@
     "typescript": "^5.4.5",
     "typescript-eslint": "^7.9.0",
     "vitest": "1.4.0"
-  },
-  "packageManager": "yarn@4.4.0"
+  }
 }

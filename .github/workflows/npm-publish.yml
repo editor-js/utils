@@ -1,54 +1,34 @@
-name: Publish all packages to NPM
+name: Publish Packages
 
 on:
   push:
     branches:
-      - main
-  workflow_call:
-    secrets:
-      NPM_TOKEN:
-        required: true
-      CODEX_BOT_NOTIFY_EDITORJS_PUBLIC_CHAT:
-        required: true
-
-env:
-  NOTIFY_WEBHOOK_LINK: ${{ secrets.CODEX_BOT_NOTIFY_EDITORJS_PUBLIC_CHAT }}
+      - 'main'
 
 jobs:
-  publish:
+  publish-npm:
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          always-auth: true
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Use Node.js v18
+        uses: actions/setup-node@v4
+        with:
           node-version: 22.1.0
-          registry-url: 'https://registry.npmjs.org/'
+          registry-url: https://registry.npmjs.org/
+          cache: pnpm
 
-      - name: Install dependencies
-        run: yarn install
+      - run: pnpm install
 
-      - name: Publish all packages
-        run: yarn publish:ci
+      - run: npm run build
+
+      - run: pnpm run publish:ci
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-  notify:
-    needs: publish
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Get package info
-        id: package
-        uses: codex-team/action-nodejs-package-info@v1
-
-      - name: Send a message
-        uses: codex-team/action-codexbot-notify@v1
-        with:
-          webhook: ${{ env.NOTIFY_WEBHOOK_LINK }}
-          message: '📦 [${{ steps.package.outputs.name }}](${{ steps.package.outputs.npmjs-link }}) ${{ steps.package.outputs.version }} was published'
-          parse_mode: 'markdown'
-          disable_web_page_preview: true
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+          NPM_CONFIG_PROVENANCE: true
