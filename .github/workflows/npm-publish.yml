@@ -27,17 +27,11 @@ jobs:
           node-version: 22.1.0
           registry-url: 'https://registry.npmjs.org/'
 
-      - name: Add npmrc file
-        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
-
       - name: Install dependencies
         run: yarn install
 
-      - name: Build all packages
-        run: yarn build
-
       - name: Publish all packages
-        run: yarn workspaces foreach --all --no-private npm publish --access public
+        run: yarn publish:ci
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
