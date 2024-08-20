@@ -32,3 +32,17 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
           NPM_CONFIG_PROVENANCE: true
+
+  notify:
+    needs: publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Get package info
+        id: package
+        uses: codex-team/action-nodejs-package-info@v1
+      - name: Send a message
+        uses: codex-team/action-codexbot-notify@v1
+        with:
+          webhook: ${{ env.NOTIFY_WEBHOOK_LINK }}
+          message: '📦 [${{ steps.package.outputs.name }}](${{ steps.package.outputs.npmjs-link }}) ${{ steps.package.outputs.version }} was published'

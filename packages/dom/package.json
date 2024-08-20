@@ -4,6 +4,7 @@
   "version": "0.0.6",
   "main": "dist/index.js",
   "license": "MIT",
+  "repository": "https://github.com/editor-js/utils/tree/main/packages/dom",
   "scripts": {
     "build": "tsc"
   },

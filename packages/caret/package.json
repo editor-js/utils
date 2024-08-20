@@ -4,6 +4,7 @@
   "version": "0.0.5",
   "main": "dist/index.js",
   "license": "MIT",
+  "repository": "https://github.com/editor-js/utils/tree/main/packages/caret",
   "scripts": {
     "build": "tsc"
   },
