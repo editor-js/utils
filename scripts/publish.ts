@@ -26,7 +26,7 @@ function getPackages(): string[] {
 
 execSync('npm run build', { stdio: 'inherit' });
 
-let command = 'yarn npm publish --access public';
+let command = 'yarn npm publish --access public --tolerate-republish';
 
 const packages = getPackages();
 
