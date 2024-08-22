@@ -30,27 +30,9 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
-      - name: Create .npmrc and publish packages
+      - name: Create .yarnrc.yml and publish packages
         run: |
           echo "npmAuthToken: ${{ secrets.NPM_TOKEN }}" >> .yarnrc.yml
           yarn publish:ci
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-  notify:
-    needs: publish
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Get package info
-        id: package
-        uses: codex-team/action-nodejs-package-info@v1
-
-      - name: Send a message
-        uses: codex-team/action-codexbot-notify@v1
-        with:
-          webhook: ${{ env.NOTIFY_WEBHOOK_LINK }}
-          message: '📦 [${{ steps.package.outputs.name }}](${{ steps.package.outputs.npmjs-link }}) ${{ steps.package.outputs.version }} was published'
-          parse_mode: 'markdown'
-          disable_web_page_preview: true
