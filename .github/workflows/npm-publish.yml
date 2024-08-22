@@ -36,28 +36,4 @@ jobs:
           yarn publish:ci
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-
-  notify:
-    needs: publish
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Get package info
-        id: package
-        uses: codex-team/action-nodejs-package-info@v1
-
-      - name: Send a message
-        uses: codex-team/action-codexbot-notify@v1
-        with:
-          webhook: ${{ env.NOTIFY_WEBHOOK_LINK }}
-          message: '📦 [${{ steps.package.outputs.name }}](${{ steps.package.outputs.npmjs-link }}) ${{ steps.package.outputs.version }} was published'
-          parse_mode: 'markdown'
-          disable_web_page_preview: true
-=======
           NOTIFY_WEBHOOK: ${{ secrets.CODEX_BOT_NOTIFY_EDITORJS_PUBLIC_CHAT }}
->>>>>>> Stashed changes
-=======
->>>>>>> 55a8924eb663ee76836f0c6661758fd4cb72f1b5
