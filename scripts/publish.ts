@@ -76,7 +76,7 @@ for (const { name, version, link } of packages) {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: new URLSearchParams({
-        message: `📦 (${name})[${link}] ${version} was published`,
+        message: `📦 [${name}](${link}) ${version} was published`,
       }),
     })
       .catch(error => console.error('Error:', error));
