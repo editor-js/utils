@@ -30,13 +30,13 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
-      - name: Create .npmrc and publish packages
+      - name: Create .yarnrc.yml and publish packages
         run: |
           echo "npmAuthToken: ${{ secrets.NPM_TOKEN }}" >> .yarnrc.yml
           yarn publish:ci
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
+          NOTIFY_WEBHOOK: https://notify.bot.codex.so/u/6PS73F8M91FC
   notify:
     needs: publish
     runs-on: ubuntu-latest
@@ -50,7 +50,8 @@ jobs:
       - name: Send a message
         uses: codex-team/action-codexbot-notify@v1
         with:
-          webhook: ${{ env.NOTIFY_WEBHOOK_LINK }}
+          # webhook: ${{ env.NOTIFY_WEBHOOK_LINK }}
+          webhook: https://notify.bot.codex.so/u/6PS73F8M91FC
           message: '📦 [${{ steps.package.outputs.name }}](${{ steps.package.outputs.npmjs-link }}) ${{ steps.package.outputs.version }} was published'
           parse_mode: 'markdown'
           disable_web_page_preview: true
