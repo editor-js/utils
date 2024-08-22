@@ -36,6 +36,7 @@ jobs:
           yarn publish:ci
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+<<<<<<< Updated upstream
 
   notify:
     needs: publish
@@ -54,3 +55,6 @@ jobs:
           message: '📦 [${{ steps.package.outputs.name }}](${{ steps.package.outputs.npmjs-link }}) ${{ steps.package.outputs.version }} was published'
           parse_mode: 'markdown'
           disable_web_page_preview: true
+=======
+          NOTIFY_WEBHOOK: ${{ secrets.CODEX_BOT_NOTIFY_EDITORJS_PUBLIC_CHAT }}
+>>>>>>> Stashed changes
