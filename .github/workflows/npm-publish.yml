@@ -30,12 +30,13 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
-      - name: Create .npmrc and publish packages
+      - name: Create .yarnrc.yml and publish packages
         run: |
           echo "npmAuthToken: ${{ secrets.NPM_TOKEN }}" >> .yarnrc.yml
           yarn publish:ci
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+<<<<<<< HEAD
 <<<<<<< Updated upstream
 
   notify:
@@ -58,3 +59,5 @@ jobs:
 =======
           NOTIFY_WEBHOOK: ${{ secrets.CODEX_BOT_NOTIFY_EDITORJS_PUBLIC_CHAT }}
 >>>>>>> Stashed changes
+=======
+>>>>>>> 55a8924eb663ee76836f0c6661758fd4cb72f1b5
