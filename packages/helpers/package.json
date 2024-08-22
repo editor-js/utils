@@ -2,7 +2,7 @@
   "name": "@editorjs/helpers",
   "description": "Utils useful for Editor.js tools development",
   "repository": "https://github.com/editor-js/utils/tree/main/packages/helpers",
-  "link": "https://www.npmjs.com/package/@editorjs/helpers",
+  "link": "https://github.com/editor-js/utils/tree/main/packages/helpers",
   "version": "0.0.8",
   "main": "dist/index.js",
   "license": "MIT",
