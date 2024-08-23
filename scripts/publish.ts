@@ -1,6 +1,7 @@
 import { execSync } from 'child_process';
 import * as process from 'process';
 import * as path from 'path';
+import querystring from 'querystring';
 import { pathExistsSync, statSync, readdirSync, readJsonSync } from 'fs-extra';
 
 const packagesDir = path.join(__dirname, '..', 'packages');
@@ -75,12 +76,12 @@ for (const { name, version, link } of packages) {
       // eslint-disable-next-line @typescript-eslint/naming-convention
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: new URLSearchParams({
+      body: querystring.stringify({
         message: `📦 [${name}](${link}) ${version} was published`,
         // eslint-disable-next-line @typescript-eslint/naming-convention
         parse_mode: 'Markdown',
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        disable_web_page_preview: 'false',
+        disable_web_page_preview: false,
       }),
     })
       .catch(error => console.error('Error:', error));
