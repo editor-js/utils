@@ -36,5 +36,4 @@ jobs:
           yarn publish:ci
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          # NOTIFY_WEBHOOK: ${{ secrets.CODEX_BOT_NOTIFY_EDITORJS_PUBLIC_CHAT }}
-          NOTIFY_WEBHOOK: https://notify.bot.codex.so/u/6PS73F8M91FC
+          NOTIFY_WEBHOOK: ${{ secrets.CODEX_BOT_NOTIFY_EDITORJS_PUBLIC_CHAT }}
