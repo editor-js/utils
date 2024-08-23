@@ -81,7 +81,7 @@ for (const { name, version, link } of packages) {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         parse_mode: 'Markdown',
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        disable_web_page_preview: false,
+        disable_web_page_preview: true,
       }),
     })
       .catch(error => console.error('Error:', error));
