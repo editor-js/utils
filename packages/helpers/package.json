@@ -3,7 +3,7 @@
   "description": "Utils useful for Editor.js tools development",
   "repository": "https://github.com/editor-js/utils/tree/main/packages/helpers",
   "link": "https://github.com/editor-js/utils/tree/main/packages/helpers",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "main": "dist/index.js",
   "license": "MIT",
   "scripts": {

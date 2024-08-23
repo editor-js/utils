@@ -77,6 +77,8 @@ for (const { name, version, link } of packages) {
       },
       body: new URLSearchParams({
         message: `📦 [${name}](${link}) ${version} was published`,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        parse_mode: 'Markdown',
       }),
     })
       .catch(error => console.error('Error:', error));
