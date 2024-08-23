@@ -3,7 +3,7 @@
   "description": "Utils useful for work with dom for Editor.js tools development",
   "repository": "https://github.com/editor-js/utils/tree/main/packages/dom",
   "link": "https://github.com/editor-js/utils/tree/main/packages/dom",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "main": "dist/index.js",
   "license": "MIT",
   "scripts": {
