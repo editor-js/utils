@@ -23,7 +23,7 @@ export function focus(element: HTMLElement, atStart: boolean = true): void {
     /**
      * Helper function to create a new text node and set the caret
      * @param parent - parent element to append the text node
-     * @param prepend
+     * @param prepend - should the text node be prepended or appended
      */
     const createAndFocusTextNode = (parent: HTMLElement | ChildNode, prepend = false): void => {
       const textNode = document.createTextNode('');
