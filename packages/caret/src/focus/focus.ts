@@ -23,11 +23,16 @@ export function focus(element: HTMLElement, atStart: boolean = true): void {
     /**
      * Helper function to create a new text node and set the caret
      * @param parent - parent element to append the text node
+     * @param prepend
      */
-    const createAndFocusTextNode = (parent: HTMLElement): void => {
+    const createAndFocusTextNode = (parent: HTMLElement | ChildNode, prepend = false): void => {
       const textNode = document.createTextNode('');
 
-      parent.appendChild(textNode);
+      if (prepend) {
+        parent.insertBefore(textNode, parent.firstChild);
+      } else {
+        parent.appendChild(textNode);
+      }
       range.setStart(textNode, 0);
       range.setEnd(textNode, 0);
     };
@@ -67,7 +72,7 @@ export function focus(element: HTMLElement, atStart: boolean = true): void {
         /**
          * If no text node is found, create one and set focus
          */
-        createAndFocusTextNode(element);
+        createAndFocusTextNode(element, atStart);
       }
     } else {
       /**
