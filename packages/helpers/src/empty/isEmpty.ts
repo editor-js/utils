@@ -1,4 +1,4 @@
-import { notEmpty } from '.';
+import { notEmpty } from './notEmpty';
 
 /**
  * True if passed variable is null/undefined/''/{}
