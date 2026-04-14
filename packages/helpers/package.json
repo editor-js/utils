@@ -3,8 +3,9 @@
   "description": "Utils useful for Editor.js tools development",
   "repository": "https://github.com/editor-js/utils/tree/main/packages/helpers",
   "link": "https://github.com/editor-js/utils/tree/main/packages/helpers",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "main": "dist/index.js",
+  "type": "module",
   "license": "MIT",
   "scripts": {
     "build": "tsc --project tsconfig.build.json"
