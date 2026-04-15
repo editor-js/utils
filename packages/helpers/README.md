@@ -28,6 +28,13 @@ Utils useful for Editor.js tools development
 - [isUndefined](https://github.com/editor-js/utils/blob/main/packages/helpers/src/typeOf/isUndefined.ts) - Checks if passed argument is undefined
 - [typeOf](https://github.com/editor-js/utils/blob/main/packages/helpers/src/typeOf/typeOf.ts) - Return string representation of the object type
 - [getUserOS](https://github.com/editor-js/utils/blob/main/packages/helpers/src/userOS/getUserOS.ts) - Returns object with os name as key and boolean as value. Shows current user OS
+- [EventsDispatcher](./src/EventsDispatcher/EventsDispatcher.ts) - Class for working with events. Provides methods for subscribing, unsubscribing and emitting events
+- [Listeners](./src/Listeners/Listeners.ts) - Class for working with listeners. Provides methods for subscribing and unsubscribing listeners on HTML elements
+- [bem](./src/bem/bem.ts) - Helper for working with BEM class names
+- [delay](./src/delay/delay.ts) - Returns a Promise that resolves after a specified number of milliseconds
+- [generateId](./src/generateId/generateId.ts) - Generates random string id
+- [tooltip](./src/tooltip/tooltip.ts) - Wrapper around codex-tooltip library for showing tooltips
+
 # About CodeX
    <img align="right" width="120" height="120" src="https://codex.so/public/app/img/codex-logo.svg" hspace="50">
 

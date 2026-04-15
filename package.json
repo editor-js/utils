@@ -2,10 +2,7 @@
   "name": "@editorjs/utils",
   "private": true,
   "workspaces": [
-    "packages/caret",
-    "packages/dom",
-    "packages/helpers",
-    "packages/keyboard"
+    "packages/*"
   ],
   "version": "1.0.0",
   "description": "Useful utils for working with Editor.js",
@@ -22,6 +19,7 @@
     "build:dom": "cd packages/dom && yarn build",
     "build:caret": "cd packages/caret && yarn build",
     "build:keyboard": "cd packages/keyboard && yarn build",
+    "build:ui-kit": "cd packages/ui-kit && yarn build",
     "test": "vitest run",
     "lint": "eslint",
     "lint:fix": "yarn lint --fix",

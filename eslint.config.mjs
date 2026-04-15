@@ -8,7 +8,7 @@ export default [
   ...CodeX,
   {
     name: 'ts-editorjs/utils',
-    ignores: ['eslint.config.mjs'],
+    ignores: ['eslint.config.mjs', '**/vite.config.js'],
     /**
      * This are the options for typescript files
      */

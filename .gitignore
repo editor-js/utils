@@ -6,3 +6,6 @@ node_modules/
 
 # build info lock
 *.tsbuildinfo
+
+# IDE files
+.idea/

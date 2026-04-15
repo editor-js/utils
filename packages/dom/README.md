@@ -29,7 +29,11 @@ Utils useful for work with dom for Editor.js tools development
 - [isSingleTag](https://github.com/editor-js/utils/blob/main/packages/dom/src/isSingleTag/isSingleTag.ts) - Check if passed tag has no closed tag
 - [make](https://github.com/editor-js/utils/blob/main/packages/dom/src/make/make.ts) - Helper for making Elements with class name and attributes
 - [offset](https://github.com/editor-js/utils/blob/main/packages/dom/src/offset/offset.ts) - Return element's offset related to the document
-- [prepend](https://github.com/editor-js/utils/blob/main/packages/dom/src/prepend/prepend.ts) - Append element or a couple to the beginning of the parent elements
+- [prepend](https://github.com/editor-js/utils/blob/main/packages/dom/src/prepend/prepend.ts) - Append element or a couple to the beginning of the parent elements 
+- [DomIterator](./src/DomIterator/DomIterator.ts) - Class for iterating over DOM nodes. Provides methods for iterating over child nodes, siblings, etc
+- [Flipper](./src/Flipper/Flipper.ts) - Utility to iterate over UI elements by Tab or arrow keys
+- [isMobileScreen](./src/isMobileScreen/isMobileScreen.ts) - Checks if screen width is less than mobile breakpoint (768px)
+
 # About CodeX
    <img align="right" width="120" height="120" src="https://codex.so/public/app/img/codex-logo.svg" hspace="50">
 
