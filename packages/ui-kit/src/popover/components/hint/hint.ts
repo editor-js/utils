@@ -1,0 +1,56 @@
+import { make } from '@editorjs/dom';
+import { css } from './hint.const';
+import type { HintParams } from '../../types';
+
+import './hint.css';
+
+/**
+ * Represents the hint content component
+ */
+export class Hint {
+  /**
+   * Html element used to display hint content on screen
+   */
+  private nodes: {
+    /**
+     * Hint root element
+     */
+    root: HTMLElement;
+
+    /**
+     * Hint title element
+     */
+    title: HTMLElement;
+
+    /**
+     * Hint description element
+     */
+    description?: HTMLElement;
+  };
+
+  /**
+   * Constructs the hint content instance
+   * @param params - hint content parameters
+   */
+  constructor(params: HintParams) {
+    this.nodes = {
+      root: make('div', [css.root, params.alignment === 'center' ? css.alignedCenter : css.alignedStart]),
+      title: make('div', css.title, { textContent: params.title }),
+    };
+
+    this.nodes.root.appendChild(this.nodes.title);
+
+    if (params.description !== undefined) {
+      this.nodes.description = make('div', css.description, { textContent: params.description });
+
+      this.nodes.root.appendChild(this.nodes.description);
+    }
+  }
+
+  /**
+   * Returns the root element of the hint content
+   */
+  public getElement(): HTMLElement {
+    return this.nodes.root;
+  }
+}
