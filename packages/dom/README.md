@@ -11,7 +11,9 @@ Utils useful for work with dom for Editor.js tools development
 - [calculateBaseline](https://github.com/editor-js/utils/blob/main/packages/dom/src/calculateBaseline/calculateBaseline.ts) - Calculates the Y coordinate of the text baseline from the top of the element's margin box,
 - [canSetCaret](https://github.com/editor-js/utils/blob/main/packages/dom/src/canSetCaret/canSetCaret.ts) - Checks if we can set caret
 - [containsOnlyInlineElements](https://github.com/editor-js/utils/blob/main/packages/dom/src/containsOnlyInlineElements/containsOnlyInlineElements.ts) - Check if passed content includes only inline elements
+- [DomIterator](https://github.com/editor-js/utils/blob/main/packages/dom/src/domIterator/domIterator.ts) - Iterator over passed Elements list.
 - [findAllInputs](https://github.com/editor-js/utils/blob/main/packages/dom/src/findAllInputs/findAllInputs.ts) - Find all contenteditable, textarea and editable input elements passed holder contains
+- [Flipper](https://github.com/editor-js/utils/blob/main/packages/dom/src/flipper/flipper.ts) - Flipper is a component that iterates passed items array by TAB or Arrows and clicks it by ENTER
 - [fragmentToString](https://github.com/editor-js/utils/blob/main/packages/dom/src/fragmentToString/fragmentToString.ts) - Returns the HTML content of passed Document Fragment
 - [getContentLength](https://github.com/editor-js/utils/blob/main/packages/dom/src/getContentLength/getContentLength.ts) - Return length of node`s text content
 - [getDeepestBlockElements](https://github.com/editor-js/utils/blob/main/packages/dom/src/getDeepestBlockElements/getDeepestBlockElements.ts) - Find and return all block elements in the passed parent (including subtree)
@@ -24,6 +26,7 @@ Utils useful for work with dom for Editor.js tools development
 - [isHTMLString](https://github.com/editor-js/utils/blob/main/packages/dom/src/isHtmlString/isHtmlString.ts) - Check if string contains html elements
 - [isLeaf](https://github.com/editor-js/utils/blob/main/packages/dom/src/isLeaf/isLeaf.ts) - checks node if it is doesn't have any child nodes
 - [isLineBreakTag](https://github.com/editor-js/utils/blob/main/packages/dom/src/isLineBreakTag/isLineBreakTag.ts) - Check if element is BR or WBR
+- [isMobileScreen](https://github.com/editor-js/utils/blob/main/packages/dom/src/isMobileScreen/isMobileScreen.ts) - True if screen has mobile size
 - [isNativeInput](https://github.com/editor-js/utils/blob/main/packages/dom/src/isNativeInput/isNativeInput.ts) - Checks target if it is native input
 - [isNodeEmpty](https://github.com/editor-js/utils/blob/main/packages/dom/src/isNodeEmpty/isNodeEmpty.ts) - Checks node if it is empty
 - [isSingleTag](https://github.com/editor-js/utils/blob/main/packages/dom/src/isSingleTag/isSingleTag.ts) - Check if passed tag has no closed tag

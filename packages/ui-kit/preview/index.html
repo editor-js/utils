@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>UI Kit Preview</title>
+  <script type="module">
+    import { PopoverDesktop } from '/src/index.ts';
+    const triggerElement = document.getElementById('trigger');
+
+    const popover = new PopoverDesktop(
+      {
+        items: [{ title: 'Item 1' }],
+        scopeElement: document.body,
+        searchable: true,
+      }
+    )
+
+    window.popover = popover;
+
+    trigger.append(popover.getElement());
+
+    triggerElement.addEventListener('click', e => {
+      if (popover.isActivated) {
+        popover.hide();
+      } else {
+        popover.show();
+      }
+    })
+  </script>
+</head>
+<body>
+<div style="width: 500px; height: 100vh; border: 1px solid black;">
+  <div id="trigger" style="position: relative;">Popover</div>
+</div>
+</body>
+</html>

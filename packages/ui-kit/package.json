@@ -1,0 +1,33 @@
+{
+  "name": "@editorjs/popover",
+  "description": "UI Components for Editor.js",
+  "packageManager": "yarn@4.4.0",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite",
+    "lint": "eslint",
+    "lint:styles": "stylelint './src/**/*.css'",
+    "lint:styles:fix": "yarn lint:styles --fix"
+  },
+  "devDependencies": {
+    "postcss": "^8.5.9",
+    "postcss-apply": "^0.12.0",
+    "postcss-nested": "^7.0.2",
+    "postcss-preset-env": "^11.2.1",
+    "stylelint": "^17.7.0",
+    "vite": "^8.0.8",
+    "vite-plugin-css-injected-by-js": "^5.0.0",
+    "vite-plugin-dts": "^4.5.4",
+    "yaml": "^2.8.3"
+  },
+  "dependencies": {
+    "@codexteam/icons": "^0.3.3",
+    "@editorjs/caret": "workspace:^",
+    "@editorjs/dom": "workspace:^",
+    "@editorjs/helpers": "workspace:^"
+  }
+}

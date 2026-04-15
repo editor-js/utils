@@ -21,8 +21,17 @@ import { typeOf,
   isString,
   isUndefined } from './typeOf';
 import { getUserOS, isIosDevice } from './userOS';
+import { delay } from './delay';
+import { generateId } from './generateId';
+import type { ListenerData } from './Listeners';
+import { Listeners } from './Listeners';
+import { tooltip } from './tooltip';
+import { bem } from './bem';
+import { EventsDispatcher } from './EventsDispatcher';
 
-export { cacheable,
+export type { ListenerData };
+export {
+  cacheable,
   beautifyShortcut,
   capitalize,
   copyTextToClipboard,
@@ -47,4 +56,11 @@ export { cacheable,
   isString,
   isUndefined,
   getUserOS,
-  isIosDevice };
+  isIosDevice,
+  delay,
+  generateId,
+  Listeners,
+  tooltip,
+  EventsDispatcher,
+  bem
+};

@@ -4,7 +4,8 @@
     "rootDir": "src",
     "composite": true,
     "declaration": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "module": "preserve"
   },
   "include": ["**/*"],
   "exclude": ["dist"]

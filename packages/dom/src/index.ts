@@ -23,8 +23,14 @@ import { isSingleTag } from './isSingleTag';
 import { make } from './make';
 import { offset } from './offset';
 import { prepend } from './prepend';
+import { DomIterator } from './domIterator';
+import type { FlipperOptions } from './flipper';
+import { Flipper } from './flipper';
+import { isMobileScreen, mobileScreenBreakpoint } from './isMobileScreen';
 
-export { append,
+export type { FlipperOptions };
+export {
+  append,
   blockElements,
   calculateBaseline,
   canSetCaret,
@@ -48,4 +54,9 @@ export { append,
   isLineBreakTag,
   make,
   offset,
-  prepend };
+  prepend,
+  DomIterator,
+  Flipper,
+  isMobileScreen,
+  mobileScreenBreakpoint
+};
