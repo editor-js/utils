@@ -1,11 +1,5 @@
-import { canSetCaret } from '../canSetCaret';
-import { delay } from '@editorjs/helpers';
-import { focus } from '@editorjs/caret';
-
-const FOCUS_DELAY = 50;
-
 /**
- * Iterator above passed Elements list.
+ * Iterator over passed Elements list.
  * Each next or previous action adds provides CSS-class and sets cursor to this item
  */
 export class DomIterator {
@@ -156,13 +150,6 @@ export class DomIterator {
        * Before counting module we need to add length before because of "The JavaScript Modulo Bug"
        */
       focusedButtonIndex = (this.items.length + focusedButtonIndex - 1) % this.items.length;
-    }
-
-    if (canSetCaret(this.items[focusedButtonIndex])) {
-      /**
-       * Focus input with micro-delay to ensure DOM is updated
-       */
-      delay(() => focus(this.items[focusedButtonIndex]), FOCUS_DELAY);
     }
 
     /**

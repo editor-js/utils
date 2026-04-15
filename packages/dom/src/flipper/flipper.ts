@@ -1,5 +1,6 @@
 import { DomIterator } from '../domIterator';
 import { keyCodes, isFunction } from '@editorjs/helpers';
+import { canSetCaret } from '../canSetCaret';
 
 /**
  * Flipper construction options
@@ -32,6 +33,11 @@ export interface FlipperOptions {
    * If not specified all keys are enabled
    */
   allowedKeys?: number[];
+
+  /**
+   * Callback to set caret to the current element if possible. If not provided, caret is not set
+   */
+  setCaret?: (item: HTMLElement) => void;
 }
 
 /**
@@ -71,12 +77,18 @@ export class Flipper {
   private flipCallbacks: Array<() => void> = [];
 
   /**
+   * Sets caret to provided item. Should be implemented by the end user
+   */
+  private setCaret?: (item: HTMLElement) => void;
+
+  /**
    * @param options - different constructing settings
    */
   constructor(options: FlipperOptions) {
     this.iterator = new DomIterator(options.items, options.focusedItemClass);
     this.activateCallback = options.activateCallback;
     this.allowedKeys = options.allowedKeys || Flipper.usedKeys;
+    this.setCaret = options.setCaret;
   }
 
   /**
@@ -290,10 +302,25 @@ export class Flipper {
    * Fired after flipping in any direction
    */
   private flipCallback(): void {
+    this.setCaretToCurrentItem();
+
     if (this.iterator.currentItem) {
       this.iterator.currentItem.scrollIntoViewIfNeeded();
     }
 
     this.flipCallbacks.forEach(cb => cb());
+  }
+
+  /**
+   * Sets caret to the current item if setCaret callback is provided
+   */
+  private setCaretToCurrentItem(): void {
+    const currentItem = this.iterator.currentItem;
+
+    if (currentItem === null || this.setCaret === undefined || !canSetCaret(currentItem)) {
+      return;
+    }
+
+    this.setCaret(currentItem);
   }
 }

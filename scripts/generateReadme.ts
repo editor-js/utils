@@ -44,7 +44,7 @@ function extractMethodDescriptions(filePath: string): string[] {
    * @param node - The current TypeScript AST node
    */
   function visit(node: ts.Node): void {
-    if (ts.isFunctionDeclaration(node) && node.name) {
+    if ((ts.isFunctionDeclaration(node) || ts.isClassDeclaration(node)) && node.name) {
       const functionName = node.name.text;
       const description = parseJSDocDescription(node);
 

@@ -14,7 +14,7 @@
   "author": "CodeX Team <all@codex.so>",
   "license": "MIT",
   "scripts": {
-    "build": "yarn build:helpers &&  yarn build:dom && yarn build:caret && yarn build:keyboard && tsc",
+    "build": "yarn build:helpers &&  yarn build:dom && yarn build:caret && yarn build:keyboard && yarn build:ui-kit && tsc",
     "build:helpers": "cd packages/helpers && yarn build",
     "build:dom": "cd packages/dom && yarn build",
     "build:caret": "cd packages/caret && yarn build",

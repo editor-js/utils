@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "@codexteam/icons": "^0.3.3",
+    "@editorjs/caret": "workspace:^",
     "@editorjs/dom": "workspace:^",
     "@editorjs/helpers": "workspace:^"
   }

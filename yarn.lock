@@ -730,7 +730,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@editorjs/dom@workspace:packages/dom"
   dependencies:
-    "@editorjs/caret": "workspace:^"
     "@editorjs/helpers": "workspace:^"
   languageName: unknown
   linkType: soft
@@ -754,6 +753,7 @@ __metadata:
   resolution: "@editorjs/popover@workspace:packages/ui-kit"
   dependencies:
     "@codexteam/icons": "npm:^0.3.3"
+    "@editorjs/caret": "workspace:^"
     "@editorjs/dom": "workspace:^"
     "@editorjs/helpers": "workspace:^"
     postcss: "npm:^8.5.9"

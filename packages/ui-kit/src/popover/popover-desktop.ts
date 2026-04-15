@@ -8,9 +8,15 @@ import { PopoverEvent } from './types';
 import { CSSVariables, css } from './popover.const';
 import type { SearchableItem } from './components/search-input';
 import { SearchInput, SearchInputEvent } from './components/search-input';
-import { cacheable, keyCodes } from '@editorjs/helpers';
+import { cacheable, delay, keyCodes } from '@editorjs/helpers';
 import { PopoverItemDefault } from './components/popover-item';
 import { PopoverItemHtml } from './components/popover-item/popover-item-html/popover-item-html';
+import { focus } from '@editorjs/caret';
+
+/**
+ * Delay before care focus after flipping to the next item to allow DOM update
+ */
+const FOCUS_DELAY = 50;
 
 /**
  * Desktop popover.
@@ -91,6 +97,7 @@ export class PopoverDesktop extends PopoverAbstract {
           keyCodes.DOWN,
           keyCodes.ENTER,
         ],
+        setCaret: this.setCaretToItem,
       });
 
       this.flipper.onFlip(this.onFlip);
@@ -437,5 +444,16 @@ export class PopoverDesktop extends PopoverAbstract {
    */
   private toggleNothingFoundMessage(isDisplayed: boolean): void {
     this.nodes.nothingFoundMessage.classList.toggle(css.nothingFoundMessageDisplayed, isDisplayed);
+  }
+
+  /**
+   * Set's caret to the item provided by Flipper
+   * @param item - HTML element to set the caret to
+   */
+  private setCaretToItem(this: void, item: HTMLElement): void {
+    /**
+     * Focus input with micro-delay to ensure DOM is updated
+     */
+    delay(() => focus(item), FOCUS_DELAY);
   }
 }

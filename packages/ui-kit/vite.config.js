@@ -44,10 +44,9 @@ export default {
     copyPublicDir: false,
     lib: {
       entry: path.resolve(__dirname, 'src', 'index.ts'),
-      name: 'UiKit',
+      name: 'UIKit',
       fileName: 'ui-kit',
-    },
-    sourcemap: true,
+    }
   },
 
   define: {
