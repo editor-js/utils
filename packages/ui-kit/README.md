@@ -1,5 +1,5 @@
 # @editorjs/ui-kit
-Description not available
+UI Components for Editor.js
 ### Installation 
  ```
    npm install @editorjs/ui-kit
