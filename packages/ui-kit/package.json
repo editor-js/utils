@@ -1,5 +1,5 @@
 {
-  "name": "@editorjs/popover",
+  "name": "@editorjs/ui-kit",
   "description": "UI Components for Editor.js",
   "packageManager": "yarn@4.4.0",
   "version": "1.0.0",
