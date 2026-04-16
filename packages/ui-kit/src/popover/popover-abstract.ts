@@ -121,6 +121,34 @@ export abstract class PopoverAbstract<Nodes extends PopoverNodes = PopoverNodes>
   }
 
   /**
+   * Adds a single item to the popover
+   * @param params - item parameters
+   */
+  public addItem(params: PopoverItemParams): void {
+    const [item] = this.buildItems([params]);
+
+    this.items.push(item);
+    this.nodes.items.appendChild(item.getElement());
+  }
+
+  /**
+   * Removes an item from the popover by its name
+   * @param name - name of the item to be removed
+   */
+  public removeItemByName(name: string): void {
+    const foundItemIndex = this.items.findIndex(item => item.name === name);
+
+    if (foundItemIndex === -1) {
+      return;
+    }
+
+    const [removedItem] = this.items.splice(foundItemIndex, 1);
+
+    removedItem.destroy();
+    removedItem.getElement().remove();
+  }
+
+  /**
    * Open popover
    */
   public show(): void {

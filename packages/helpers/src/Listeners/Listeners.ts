@@ -72,7 +72,7 @@ export class Listeners {
 
     const alreadyExist = this.findOne(element, eventType, handler);
 
-    if (alreadyExist !== undefined) {
+    if (alreadyExist !== null) {
       return;
     }
 

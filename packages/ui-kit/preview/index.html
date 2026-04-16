@@ -9,7 +9,7 @@
 
     const popover = new PopoverDesktop(
       {
-        items: [{ title: 'Item 1' }],
+        items: [{ title: 'Item 1', onActivate: console.log }],
         scopeElement: document.body,
         searchable: true,
       }

@@ -11,3 +11,5 @@ import { PopoverMobile } from './popover-mobile';
 export type Popover = PopoverDesktop | PopoverMobile | PopoverInline;
 
 export { PopoverDesktop, PopoverMobile, PopoverInline };
+
+export * from './types';
