@@ -131,6 +131,6 @@ export class SearchInput extends EventsDispatcher<SearchInputEventMap> {
     const text = item.title === undefined ? '' : item.title.toLowerCase();
     const query = this.searchQuery?.toLowerCase();
 
-    return query !== undefined ? text.includes(query) : false;
+    return query !== undefined && query !== '' ? text.includes(query) : false;
   }
 }
