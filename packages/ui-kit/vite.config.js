@@ -45,7 +45,7 @@ export default {
     lib: {
       entry: path.resolve(__dirname, 'src', 'index.ts'),
       name: 'UIKit',
-      fileName: 'ui-kit',
+      fileName: 'index',
     }
   },
 
