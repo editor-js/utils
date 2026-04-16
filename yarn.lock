@@ -748,9 +748,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@editorjs/popover@workspace:packages/ui-kit":
+"@editorjs/ui-kit@workspace:packages/ui-kit":
   version: 0.0.0-use.local
-  resolution: "@editorjs/popover@workspace:packages/ui-kit"
+  resolution: "@editorjs/ui-kit@workspace:packages/ui-kit"
   dependencies:
     "@codexteam/icons": "npm:^0.3.3"
     "@editorjs/caret": "workspace:^"
