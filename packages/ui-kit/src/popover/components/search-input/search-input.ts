@@ -83,6 +83,14 @@ export class SearchInput extends EventsDispatcher<SearchInputEventMap> {
   }
 
   /**
+   * Update search items in case they have been changed
+   * @param items - new items to set
+   */
+  public updateItems(items: SearchableItem[]): void {
+    this.items = items;
+  }
+
+  /**
    * Returns search field element
    */
   public getElement(): HTMLElement {
@@ -131,6 +139,6 @@ export class SearchInput extends EventsDispatcher<SearchInputEventMap> {
     const text = item.title === undefined ? '' : item.title.toLowerCase();
     const query = this.searchQuery?.toLowerCase();
 
-    return query !== undefined && query === '' ? text.includes(query) : false;
+    return query !== undefined ? text.includes(query) : false;
   }
 }

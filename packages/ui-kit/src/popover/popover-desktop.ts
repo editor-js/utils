@@ -1,6 +1,6 @@
 import { Flipper } from '@editorjs/dom';
 import { PopoverAbstract } from './popover-abstract';
-import type { PopoverItemRenderParamsMap } from './types';
+import type { PopoverItemParams, PopoverItemRenderParamsMap } from './types';
 import type { PopoverItem } from './components/popover-item';
 import { PopoverItemSeparator, css as popoverItemCls } from './components/popover-item';
 import type { PopoverParams } from './types';
@@ -167,6 +167,30 @@ export class PopoverDesktop extends PopoverAbstract {
 
     this.previouslyHoveredItem = null;
   };
+
+  /**
+   * Override for addItem method to update search items
+   * @param params - parameters of an item to add
+   */
+  public addItem(params: PopoverItemParams): void {
+    super.addItem(params);
+
+    if (this.search !== undefined) {
+      this.search.updateItems(this.itemsDefault);
+    }
+  }
+
+  /**
+   * Override for addItem method to update search items
+   * @param name - name of the item to be removed
+   */
+  public removeItemByName(name: string): void {
+    super.removeItemByName(name);
+
+    if (this.search !== undefined) {
+      this.search.updateItems(this.itemsDefault);
+    }
+  }
 
   /**
    * Clears memory
