@@ -41,6 +41,12 @@ export interface PopoverParams {
    * Popover nesting level. 0 value means that it is a root popover
    */
   nestingLevel?: number;
+
+  /**
+   * True if popover should close when user clicks outside of it. True by default.
+   * Set to false to disable closing on outside click.
+   */
+  closeOnOutsideClick?: boolean;
 }
 
 /**

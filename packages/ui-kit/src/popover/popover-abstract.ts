@@ -157,6 +157,21 @@ export abstract class PopoverAbstract<Nodes extends PopoverNodes = PopoverNodes>
     if (this.search !== undefined) {
       this.search.focus();
     }
+
+    if (this.params.closeOnOutsideClick !== false) {
+      /**
+       * Need capture phase here to avoid triggering on the same event show() was called
+       */
+      this.listeners.on(
+        document,
+        'click',
+        this.outsideClickHandler,
+        {
+          capture: true,
+          passive: true,
+        }
+      );
+    }
   }
 
   /**
@@ -171,6 +186,8 @@ export abstract class PopoverAbstract<Nodes extends PopoverNodes = PopoverNodes>
     if (this.search !== undefined) {
       this.search.clear();
     }
+
+    this.listeners.off(document, 'pointerdown', this.outsideClickHandler);
 
     this.emit(PopoverEvent.Closed);
   }
@@ -264,6 +281,20 @@ export abstract class PopoverAbstract<Nodes extends PopoverNodes = PopoverNodes>
       this.emit(PopoverEvent.ClosedOnActivate);
     }
   }
+
+  /**
+   * Handler to close popover when click happens outside of it.
+   * @param event - click mouse event
+   */
+  private outsideClickHandler = (event: MouseEvent): void => {
+    const path = event.composedPath();
+
+    if (path.includes(this.nodes.popover)) {
+      return;
+    }
+
+    this.hide();
+  };
 
   /**
    * Handles clicks inside popover
