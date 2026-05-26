@@ -738,7 +738,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@editorjs/helpers@workspace:packages/helpers"
   dependencies:
-    codex-tooltip: "npm:^1.0.5"
+    codex-tooltip: "npm:^1.0.6"
   languageName: unknown
   linkType: soft
 
@@ -2631,10 +2631,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"codex-tooltip@npm:^1.0.5":
-  version: 1.0.5
-  resolution: "codex-tooltip@npm:1.0.5"
-  checksum: 10c0/1834fb829044ea64b95fe7fb4eb4bfa9e8a667c2e51830a1bb11819921553e4978c4a3ee18643efc1f85f8e9766a43ab941d77d445420908c3d52bae5f3f0276
+"codex-tooltip@npm:^1.0.6":
+  version: 1.0.6
+  resolution: "codex-tooltip@npm:1.0.6"
+  checksum: 10c0/ec7488795aafbb004382899b51170190fc13ec2723004355a44e0bc50402325585108b9ef9825a7e6a6dff30e4e9edab8c93a3fe95cb2583e15f89630528676f
   languageName: node
   linkType: hard
 
