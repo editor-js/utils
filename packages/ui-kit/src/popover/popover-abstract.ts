@@ -162,7 +162,7 @@ export abstract class PopoverAbstract<Nodes extends PopoverNodes = PopoverNodes>
       /**
        * Need capture phase here to avoid triggering on the same event show() was called
        */
-      this.listeners.on(document, 'click', this.outsideClickHandler, { capture: true });
+      this.listeners.on(document, 'click', this.outsideClickHandler, { capture: true, passive: true });
     }
   }
 
