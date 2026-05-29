@@ -113,6 +113,18 @@ export class PopoverMobile extends PopoverAbstract<PopoverMobileNodes> {
     /** Show nested items */
     this.updateItemsAndHeader(item.children, item.title);
 
+    const close = (parent?: boolean): void => {
+      if (parent === true) {
+        this.hide();
+      } else {
+        this.history.pop();
+
+        this.updateItemsAndHeader(this.history.currentItems, this.history.currentTitle);
+      }
+    };
+
+    item.onChildrenOpen(close);
+
     this.history.push({
       title: item.title,
       items: item.children,

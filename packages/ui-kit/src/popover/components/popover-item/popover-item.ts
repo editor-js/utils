@@ -33,14 +33,16 @@ export abstract class PopoverItem {
 
   /**
    * Called when children popover is opened (if exists)
+   * @param close - callback that can be called to close the children popover. If called with true it should
+   * also close the parent popover.
    */
-  public onChildrenOpen(): void {
+  public onChildrenOpen(close: (parent?: boolean) => void): void {
     if (this.params === undefined) {
       return;
     }
 
     if ('children' in this.params && typeof this.params.children?.onOpen === 'function') {
-      this.params.children.onOpen();
+      this.params.children.onOpen(close);
     }
   }
 

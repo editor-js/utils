@@ -33,7 +33,7 @@ export interface PopoverItemChildren {
   /**
    * Called once children popover is opened
    */
-  onOpen?: () => void;
+  onOpen?: (close: (parent?: boolean) => void) => void;
 
   /**
    * Called once children popover is closed
