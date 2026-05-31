@@ -286,7 +286,17 @@ export class PopoverDesktop extends PopoverAbstract {
       messages: this.messages,
     });
 
-    item.onChildrenOpen();
+    const close = (parent?: boolean): void => {
+      if (parent === true) {
+        /** Close parent popover as well */
+        this.hide();
+      } else {
+        /** Close only nested popover */
+        this.destroyNestedPopoverIfExists();
+      }
+    };
+
+    item.onChildrenOpen(close);
 
     /**
      * Close nested popover when item with 'closeOnActivate' property set was clicked

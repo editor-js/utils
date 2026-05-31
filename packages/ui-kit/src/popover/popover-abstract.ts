@@ -187,7 +187,7 @@ export abstract class PopoverAbstract<Nodes extends PopoverNodes = PopoverNodes>
       this.search.clear();
     }
 
-    this.listeners.off(document, 'pointerdown', this.outsideClickHandler);
+    this.listeners.off(document, 'click', this.outsideClickHandler);
 
     this.emit(PopoverEvent.Closed);
   }

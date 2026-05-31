@@ -4,33 +4,61 @@
   <meta charset="UTF-8">
   <title>UI Kit Preview</title>
   <script type="module">
-    import { PopoverDesktop } from '/src/index.ts';
+    import { PopoverDesktop, PopoverItemType } from '/src/index.ts';
+
     const triggerElement = document.getElementById('trigger');
+
+    const input = document.createElement('input');
 
     const popover = new PopoverDesktop(
       {
-        items: [{ title: 'Item 1', onActivate: console.log, closeOnActivate: true }],
         scopeElement: document.body,
         searchable: true,
+        items: [
+          { title: 'Simple Item', onActivate: () => { console.log('Simple item activated'); }, closeOnActivate: true },
+          {
+            title: 'Has children',
+            children: {
+              searchable: false,
+              onOpen: (close) => {
+                console.log('children popover opened');
+
+                input.addEventListener('keydown', e => {
+                  if (e.key === 'Enter') {
+                    close(true);
+                  }
+                });
+
+                input.focus();
+              },
+              items: [
+                { title: 'Child A', name: 'child-a', onActivate: () => { console.log('Child A activated'); } },
+                { title: 'Child B', name: 'child-b', onActivate: () => { console.log('Child B activated'); } },
+                { type: PopoverItemType.Html, element: input, name: 'input-item', onActivate: undefined }
+              ],
+            },
+          },
+        ],
       }
-    )
+    );
 
     window.popover = popover;
 
-    trigger.append(popover.getElement());
+    const trigger = document.getElementById('trigger');
 
-    triggerElement.addEventListener('click', e => {
-      if (popover.isActivated) {
-        popover.hide();
-      } else {
+    trigger.insertAdjacentElement('afterend', popover.getElement())
+
+
+    triggerElement.addEventListener('click', () => {
         popover.show();
-      }
-    })
+    });
   </script>
 </head>
 <body>
-<div style="width: 500px; height: 100vh; border: 1px solid black;">
-  <div id="trigger" style="position: relative;">Popover</div>
+<div style="position: relative; width: 500px; height: 100vh; border: 1px solid black; display: flex; flex-direction: column; gap: 12px; padding: 12px;">
+  <div style="position: relative;">
+    <div id="trigger">Popover</div>
+  </div>
 </div>
 </body>
 </html>
