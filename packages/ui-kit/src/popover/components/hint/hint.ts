@@ -9,6 +9,11 @@ import './hint.css';
  */
 export class Hint {
   /**
+   * Counter used to generate unique ids for hint elements
+   */
+  private static instancesCount = 0;
+
+  /**
    * Html element used to display hint content on screen
    */
   private nodes: {
@@ -37,6 +42,12 @@ export class Hint {
       root: make('div', [css.root, params.alignment === 'center' ? css.alignedCenter : css.alignedStart]),
       title: make('div', css.title, { textContent: params.title }),
     };
+
+    Hint.instancesCount += 1;
+
+    /** Item refers to the hint via aria-describedby, so the hint needs an id and a role */
+    this.nodes.root.id = `${css.root}-${Hint.instancesCount.toString()}`;
+    this.nodes.root.setAttribute('role', 'tooltip');
 
     this.nodes.root.appendChild(this.nodes.title);
 

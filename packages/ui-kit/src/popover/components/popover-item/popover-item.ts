@@ -1,4 +1,4 @@
-import { tooltip } from '@editorjs/helpers';
+import { tooltip, Listeners } from '@editorjs/helpers';
 import { Hint } from '../hint';
 import type { PopoverItemParams, HintPosition, HintParams } from '../../types';
 
@@ -6,6 +6,11 @@ import type { PopoverItemParams, HintPosition, HintParams } from '../../types';
  * Popover item abstract class
  */
 export abstract class PopoverItem {
+  /**
+   * Listeners util instance
+   */
+  protected listeners = new Listeners();
+
   /**
    * Constructs the instance
    * @param params - instance parameters
@@ -29,6 +34,7 @@ export abstract class PopoverItem {
    */
   public destroy(): void {
     tooltip.hide();
+    this.listeners.removeAll();
   }
 
   /**
@@ -95,10 +101,26 @@ export abstract class PopoverItem {
   // eslint-disable-next-line jsdoc/require-jsdoc -- ESLint doesn't understand an object is a type there
   protected addHint(itemElement: HTMLElement, hintData: HintParams & { position: HintPosition }): void {
     const content = new Hint(hintData);
-
-    tooltip.onHover(itemElement, content.getElement(), {
+    const contentElement = content.getElement();
+    const options = {
       placement: hintData.position,
       hidingDelay: 100,
+    };
+
+    tooltip.onHover(itemElement, contentElement, options);
+
+    /**
+     * Hint holds the shortcut description, so it should be available to the keyboard users too,
+     * not only on hover
+     */
+    itemElement.setAttribute('aria-describedby', contentElement.id);
+
+    this.listeners.on(itemElement, 'focus', () => {
+      tooltip.show(itemElement, contentElement, options);
+    });
+
+    this.listeners.on(itemElement, 'blur', () => {
+      tooltip.hide(true);
     });
   }
 

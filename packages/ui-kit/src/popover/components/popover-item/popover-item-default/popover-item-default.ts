@@ -222,6 +222,8 @@ export class PopoverItemDefault extends PopoverItem {
    */
   public override toggleHidden(isHidden: boolean): void {
     this.nodes.root?.classList.toggle(css.hidden, isHidden);
+    /** Hiding is done via a class, the attribute keeps the intent explicit for assistive technologies */
+    this.nodes.root?.toggleAttribute('hidden', isHidden);
   }
 
   /**

@@ -9,6 +9,11 @@ import { css } from './popover.const';
 import { make } from '@editorjs/dom';
 
 /**
+ * Elements that can hold the focus inside the popover
+ */
+const FOCUSABLE_SELECTOR = 'a[href], button:not([disabled]), input:not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])';
+
+/**
  * Mobile Popover.
  * On mobile devices Popover behaves like a fixed panel at the bottom of screen. Nested item appears like "pages" with the "back" button
  */
@@ -37,6 +42,12 @@ export class PopoverMobile extends PopoverAbstract<PopoverMobileNodes> {
   private isHidden = true;
 
   /**
+   * Element that was focused before the popover was opened.
+   * Focus returns to it once the popover closes
+   */
+  private previouslyFocusedElement: HTMLElement | null = null;
+
+  /**
    * Construct the instance
    * @param params - popover params object
    */
@@ -61,6 +72,14 @@ export class PopoverMobile extends PopoverAbstract<PopoverMobileNodes> {
       this.hide();
     });
 
+    /**
+     * Popover covers the screen and locks the scroll while it is opened,
+     * which is a modal dialog in everything but semantics
+     */
+    this.nodes.popoverContainer.setAttribute('role', 'dialog');
+    this.nodes.popoverContainer.setAttribute('aria-modal', 'true');
+    this.updateAccessibleName();
+
     /* Save state to history for proper navigation between nested and parent popovers */
     this.history.push({ items: params.items });
   }
@@ -71,9 +90,17 @@ export class PopoverMobile extends PopoverAbstract<PopoverMobileNodes> {
   public show(): void {
     this.nodes.overlay.classList.remove(css.overlayHidden);
 
+    /** Focus should return to whatever the popover was opened from */
+    this.previouslyFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+
     super.show();
 
     this.scrollLocker.lock();
+    this.toggleItemsTabbable(true);
+
+    this.listeners.on(document, 'keydown', this.handleKeyDown as (event: Event) => void, { capture: true });
+
+    this.focusFirstElement();
 
     this.isHidden = false;
   }
@@ -90,10 +117,16 @@ export class PopoverMobile extends PopoverAbstract<PopoverMobileNodes> {
     this.nodes.overlay.classList.add(css.overlayHidden);
 
     this.scrollLocker.unlock();
+    this.toggleItemsTabbable(false);
+
+    this.listeners.off(document, 'keydown', this.handleKeyDown as (event: Event) => void, { capture: true });
 
     this.history.reset();
 
     this.isHidden = true;
+
+    this.previouslyFocusedElement?.focus();
+    this.previouslyFocusedElement = null;
   }
 
   /**
@@ -128,6 +161,85 @@ export class PopoverMobile extends PopoverAbstract<PopoverMobileNodes> {
     this.history.push({
       title: item.title,
       items: item.children,
+    });
+  }
+
+  /**
+   * Elements inside the popover that can be focused, in the document order
+   */
+  private get focusableElements(): HTMLElement[] {
+    return Array.from(
+      this.nodes.popoverContainer.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)
+    ).filter(element => element.offsetParent !== null);
+  }
+
+  /**
+   * Handles the keys the dialog is responsible for: Escape closes it,
+   * Tab is looped so that the focus does not leave the dialog while it is opened
+   * @param event - keydown event to handle
+   */
+  private handleKeyDown = (event: KeyboardEvent): void => {
+    if (this.isHidden) {
+      return;
+    }
+
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      this.hide();
+
+      return;
+    }
+
+    if (event.key !== 'Tab') {
+      return;
+    }
+
+    const elements = this.focusableElements;
+
+    if (elements.length === 0) {
+      return;
+    }
+
+    const first = elements[0];
+    const last = elements[elements.length - 1];
+    const active = document.activeElement;
+
+    if (event.shiftKey && (active === first || !this.nodes.popoverContainer.contains(active))) {
+      event.preventDefault();
+      last.focus();
+
+      return;
+    }
+
+    if (!event.shiftKey && (active === last || !this.nodes.popoverContainer.contains(active))) {
+      event.preventDefault();
+      first.focus();
+    }
+  };
+
+  /**
+   * Moves focus inside the dialog once it is opened
+   */
+  private focusFirstElement(): void {
+    const [first] = this.focusableElements;
+
+    first?.focus();
+  }
+
+  /**
+   * Items are plain elements, so they need an explicit tabindex to take part in the focus trap.
+   * A closed popover stays in the DOM and hence should not be reachable by Tab
+   * @param isTabbable - true if the popover is opened
+   */
+  private toggleItemsTabbable(isTabbable: boolean): void {
+    this.items.forEach((item) => {
+      const element = item.getElement();
+
+      if (element === null) {
+        return;
+      }
+
+      element.tabIndex = isTabbable ? 0 : -1;
     });
   }
 
@@ -189,5 +301,11 @@ export class PopoverMobile extends PopoverAbstract<PopoverMobileNodes> {
     this.items = this.buildItems(items);
 
     this.renderItems(this.items);
+
+    if (!this.isHidden) {
+      /** Element that was focused has just been removed, so focus is moved into the new list */
+      this.toggleItemsTabbable(true);
+      this.focusFirstElement();
+    }
   }
 }

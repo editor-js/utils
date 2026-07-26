@@ -31,6 +31,7 @@ export class PopoverItemSeparator extends PopoverItem {
       line: make('div', css.line),
     };
 
+    this.nodes.root.setAttribute('role', 'separator');
     this.nodes.root.appendChild(this.nodes.line);
   }
 
@@ -47,5 +48,7 @@ export class PopoverItemSeparator extends PopoverItem {
    */
   public toggleHidden(isHidden: boolean): void {
     this.nodes.root?.classList.toggle(css.hidden, isHidden);
+    /** Hiding is done via a class, the attribute keeps the intent explicit for assistive technologies */
+    this.nodes.root?.toggleAttribute('hidden', isHidden);
   }
 }

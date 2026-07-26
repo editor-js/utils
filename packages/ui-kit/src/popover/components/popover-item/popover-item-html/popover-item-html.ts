@@ -30,6 +30,12 @@ export class PopoverItemHtml extends PopoverItem {
       root: make('div', css.root),
     };
 
+    /**
+     * Wrapper is a layout element. Inside a menu an unroled wrapper would break the expected
+     * parent/child structure, so its custom content participates in the menu directly
+     */
+    this.nodes.root.setAttribute('role', 'none');
+
     this.nodes.root.appendChild(params.element);
 
     if (params.name !== undefined) {
@@ -62,6 +68,8 @@ export class PopoverItemHtml extends PopoverItem {
    */
   public toggleHidden(isHidden: boolean): void {
     this.nodes.root?.classList.toggle(css.hidden, isHidden);
+    /** Hiding is done via a class, the attribute keeps the intent explicit for assistive technologies */
+    this.nodes.root?.toggleAttribute('hidden', isHidden);
   }
 
   /**
