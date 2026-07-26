@@ -85,6 +85,21 @@
   }
 
   /**
+   * Announcements for screen readers. Takes no space and is not displayed on screen
+   */
+  &__live-region {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    border: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    clip-path: inset(50%);
+  }
+
+  /**
    * Semantic wrapper for a group of radio-like items.
    * Generates no box, so items keep participating in the layout of the items container
    */

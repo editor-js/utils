@@ -47,6 +47,19 @@ export abstract class PopoverItem {
   }
 
   /**
+   * Reflects the state of the popover with children items opened from this item.
+   * Does nothing for the items that have no children
+   * @param isExpanded - true if the children popover is currently displayed
+   */
+  public toggleExpanded(isExpanded: boolean): void {
+    if (!this.hasChildren) {
+      return;
+    }
+
+    this.getElement()?.setAttribute('aria-expanded', String(isExpanded));
+  }
+
+  /**
    * Called when children popover is closed (if exists)
    */
   public onChildrenClose(): void {

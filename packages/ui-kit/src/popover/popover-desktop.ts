@@ -277,6 +277,9 @@ export class PopoverDesktop extends PopoverAbstract {
     this.nestedPopover = null;
     this.flipper?.activate(this.flippableElements);
 
+    /** Nested popover may have been opened either by click or by hover, so no single item is known here */
+    this.items.forEach(item => item.toggleExpanded(false));
+
     this.nestedPopoverTriggerItem?.onChildrenClose();
   }
 
@@ -329,6 +332,8 @@ export class PopoverDesktop extends PopoverAbstract {
 
     this.nestedPopover.show();
     this.flipper?.deactivate();
+
+    item.toggleExpanded(true);
 
     return this.nestedPopover;
   }
@@ -497,6 +502,7 @@ export class PopoverDesktop extends PopoverAbstract {
         item.toggleHidden(isHidden);
       });
     this.toggleNothingFoundMessage(isNothingFound);
+    this.announceSearchResults(data.query, data.items.length);
 
     /** List of elements available for keyboard navigation considering search query applied */
     const flippableElements = data.query === '' ? this.flippableElements : data.items.map(item => (item as PopoverItem).getElement());
@@ -507,6 +513,26 @@ export class PopoverDesktop extends PopoverAbstract {
       this.flipper.activate(flippableElements as HTMLElement[]);
     }
   };
+
+  /**
+   * Announces how many items are left after filtering, since the list changes silently otherwise
+   * @param query - search query the items were filtered by
+   * @param count - number of the items matching the query
+   */
+  private announceSearchResults(query: string, count: number): void {
+    /** Clearing the query is not a result of a user search, nothing to report */
+    if (query === '') {
+      return;
+    }
+
+    if (count === 0) {
+      this.announce(this.messages.nothingFound ?? '');
+
+      return;
+    }
+
+    this.announce((this.messages.results ?? '').replace('{count}', count.toString()));
+  }
 
   /**
    * Toggles nothing found message visibility

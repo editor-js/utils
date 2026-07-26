@@ -3,7 +3,7 @@ import { PopoverItemDefault, PopoverItemSeparator } from './components/popover-i
 import { make } from '@editorjs/dom';
 import type { SearchInput } from './components/search-input';
 import { EventsDispatcher } from '@editorjs/helpers';
-import { Listeners } from '@editorjs/helpers';
+import { Listeners, delay } from '@editorjs/helpers';
 import type {
   PopoverItemParams,
   PopoverItemRenderParamsMap,
@@ -18,6 +18,12 @@ import {
 import { PopoverEvent } from './types';
 import { css } from './popover.const';
 import { PopoverItemHtml } from './components/popover-item/popover-item-html/popover-item-html';
+
+/**
+ * Delay before filling the live region in, so that its content is treated as a change
+ * and hence announced even when the same message repeats
+ */
+const ANNOUNCEMENT_DELAY = 50;
 
 /**
  * Class responsible for rendering popover and handling its behaviour
@@ -64,6 +70,7 @@ export abstract class PopoverAbstract<Nodes extends PopoverNodes = PopoverNodes>
     nothingFound: 'Nothing found',
     search: 'Search',
     back: 'Back',
+    results: '{count} results',
   };
 
   /**
@@ -97,6 +104,12 @@ export abstract class PopoverAbstract<Nodes extends PopoverNodes = PopoverNodes>
     });
 
     this.nodes.popoverContainer.appendChild(this.nodes.nothingFoundMessage);
+
+    this.nodes.liveRegion = make('div', [css.liveRegion]);
+    this.nodes.liveRegion.setAttribute('role', 'status');
+    this.nodes.liveRegion.setAttribute('aria-live', 'polite');
+
+    this.nodes.popoverContainer.appendChild(this.nodes.liveRegion);
     this.nodes.items = make('div', [css.items]);
     this.nodes.items.setAttribute('role', this.itemsContainerRole);
 
@@ -290,6 +303,21 @@ export abstract class PopoverAbstract<Nodes extends PopoverNodes = PopoverNodes>
   }
 
   /**
+   * Announces the message to screen readers via the popover live region.
+   * The region is cleared first, otherwise repeating the same text is not announced
+   * @param message - text to announce
+   */
+  protected announce(message: string): void {
+    const region = this.nodes.liveRegion;
+
+    region.textContent = '';
+
+    delay(() => {
+      region.textContent = message;
+    }, ANNOUNCEMENT_DELAY)();
+  }
+
+  /**
    * Retrieves popover item that is the target of the specified event
    * @param event - event to retrieve popover item from
    */
@@ -333,6 +361,7 @@ export abstract class PopoverAbstract<Nodes extends PopoverNodes = PopoverNodes>
       item.handleClick();
     }
 
+    this.announceConfirmationStateIfNeeded(item);
     this.toggleItemActivenessIfNeeded(item);
 
     if (item.closeOnActivate === true) {
@@ -368,6 +397,23 @@ export abstract class PopoverAbstract<Nodes extends PopoverNodes = PopoverNodes>
     }
 
     this.handleItemClick(item);
+  }
+
+  /**
+   * Announces the confirmation request, since the item silently becomes a different control:
+   * same element, new icon, new title and new action
+   * @param clickedItem - popover item that was clicked
+   */
+  private announceConfirmationStateIfNeeded(clickedItem: PopoverItem): void {
+    if (!(clickedItem instanceof PopoverItemDefault) || !clickedItem.isConfirmationStateEnabled) {
+      return;
+    }
+
+    const name = clickedItem.accessibleName;
+
+    if (name !== undefined) {
+      this.announce(name);
+    }
   }
 
   /**

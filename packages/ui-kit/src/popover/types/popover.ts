@@ -66,6 +66,12 @@ export interface PopoverMessages {
   back?: string;
 
   /**
+   * Announced after the items get filtered by the search query.
+   * '{count}' is replaced with the number of found items
+   */
+  results?: string;
+
+  /**
    * Accessible name of the popover items container (menu or toolbar).
    * Not rendered visually, used by screen readers to announce what the popover is
    */
@@ -100,6 +106,9 @@ export interface PopoverNodes {
 
   /** Message displayed when no items found while searching */
   nothingFoundMessage: HTMLElement;
+
+  /** Visually hidden element used to announce dynamic changes to screen readers */
+  liveRegion: HTMLElement;
 
   /** Popover items wrapper */
   items: HTMLElement;

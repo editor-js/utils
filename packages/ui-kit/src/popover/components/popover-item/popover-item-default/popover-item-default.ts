@@ -82,6 +82,14 @@ export class PopoverItemDefault extends PopoverItem {
   }
 
   /**
+   * Accessible name the item currently exposes.
+   * Differs from the title while the item is in confirmation state
+   */
+  public get accessibleName(): string | undefined {
+    return PopoverItemDefault.getAccessibleName(this.confirmationState ?? this.params);
+  }
+
+  /**
    * True if item is focused in keyboard navigation process
    */
   public get isFocused(): boolean {
@@ -95,6 +103,12 @@ export class PopoverItemDefault extends PopoverItem {
 
     return this.nodes.root.classList.contains(css.focused);
   }
+
+  /**
+   * Attributes describing the item for assistive technologies.
+   * Kept in sync when the item's content is replaced, for example in confirmation mode
+   */
+  private static readonly ariaAttributes = ['role', 'aria-label', 'aria-disabled', 'aria-checked', 'aria-pressed'];
 
   /**
    * Item html elements
@@ -128,6 +142,27 @@ export class PopoverItemDefault extends PopoverItem {
     super(params);
 
     this.nodes.root = this.make(params, renderParams);
+  }
+
+  /**
+   * Copies semantics from the freshly constructed element to the element rendered on the page.
+   * The item root is reused across states, only its content is replaced, so the attributes
+   * have to be transferred separately
+   * @param source - element the attributes are read from
+   * @param target - element the attributes are applied to
+   */
+  private static copyAriaAttributes(source: HTMLElement, target: HTMLElement): void {
+    PopoverItemDefault.ariaAttributes.forEach((attribute) => {
+      const value = source.getAttribute(attribute);
+
+      if (value === null) {
+        target.removeAttribute(attribute);
+
+        return;
+      }
+
+      target.setAttribute(attribute, value);
+    });
   }
 
   /**
@@ -301,6 +336,12 @@ export class PopoverItemDefault extends PopoverItem {
     if (stateAttribute !== null) {
       el.setAttribute(stateAttribute, String(this.isActive));
     }
+
+    if (this.hasChildren) {
+      /** Items of the inline popover open panels rather than menus */
+      el.setAttribute('aria-haspopup', this.ariaRole === 'button' ? 'true' : 'menu');
+      el.setAttribute('aria-expanded', 'false');
+    }
   }
 
   /**
@@ -320,6 +361,8 @@ export class PopoverItemDefault extends PopoverItem {
     const confirmationEl = this.make(params);
 
     this.nodes.root.innerHTML = confirmationEl.innerHTML;
+    /** Item becomes a different control, so its name and state should follow */
+    PopoverItemDefault.copyAriaAttributes(confirmationEl, this.nodes.root);
     this.nodes.root.classList.add(css.confirmationState);
 
     this.confirmationState = newState;
@@ -337,6 +380,7 @@ export class PopoverItemDefault extends PopoverItem {
     const itemWithOriginalParams = this.make(this.params);
 
     this.nodes.root.innerHTML = itemWithOriginalParams.innerHTML;
+    PopoverItemDefault.copyAriaAttributes(itemWithOriginalParams, this.nodes.root);
     this.nodes.root.classList.remove(css.confirmationState);
 
     this.confirmationState = null;

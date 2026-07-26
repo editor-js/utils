@@ -36,6 +36,11 @@ export class PopoverItemHtml extends PopoverItem {
       this.nodes.root.dataset.itemName = params.name;
     }
 
+    if (this.hasChildren) {
+      this.nodes.root.setAttribute('aria-haspopup', 'menu');
+      this.nodes.root.setAttribute('aria-expanded', 'false');
+    }
+
     if (params.hint !== undefined && renderParams?.hint?.enabled !== false) {
       this.addHint(this.nodes.root, {
         ...params.hint,

@@ -16,6 +16,7 @@ export const css = {
   popoverOpened: className(null, 'opened'),
   search: className('search'),
   nothingFoundMessage: className('nothing-found-message'),
+  liveRegion: className('live-region'),
   nothingFoundMessageDisplayed: className('nothing-found-message', 'displayed'),
   items: className('items'),
   itemsGroup: className('items-group'),
