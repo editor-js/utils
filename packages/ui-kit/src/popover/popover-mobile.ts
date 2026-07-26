@@ -5,6 +5,7 @@ import { PopoverStatesHistory } from './utils/popover-states-history';
 import type { PopoverMobileNodes, PopoverParams, PopoverItemParams } from './types';
 import type { PopoverItemDefault } from './components/popover-item';
 import { PopoverItemSeparator } from './components/popover-item';
+import { PopoverItemHtml } from './components/popover-item/popover-item-html/popover-item-html';
 import { PopoverItemType } from './types';
 import { css } from './popover.const';
 import { make } from '@editorjs/dom';
@@ -232,11 +233,24 @@ export class PopoverMobile extends PopoverAbstract<PopoverMobileNodes> {
    * Items are plain elements, so they need an explicit tabindex to take part in the focus trap.
    * A closed popover stays in the DOM and hence should not be reachable by Tab.
    * Separators are never made tabbable: they are not interactive and shouldn't appear in the
-   * tab sequence
+   * tab sequence.
+   *
+   * Html items are a layout-only wrapper (role="none") around real controls, so the tabindex
+   * has to go on those controls themselves rather than on the wrapper - otherwise the controls
+   * stay stuck at the tabindex="-1" they're constructed with (see PopoverItemHtml) and are
+   * never reachable by Tab, while the non-interactive wrapper becomes a tab stop instead
    * @param isTabbable - true if the popover is opened
    */
   private toggleItemsTabbable(isTabbable: boolean): void {
     this.items.forEach((item) => {
+      if (item instanceof PopoverItemHtml) {
+        item.getControls().forEach((control) => {
+          control.tabIndex = isTabbable ? 0 : -1;
+        });
+
+        return;
+      }
+
       const element = item.getElement();
 
       if (element === null) {

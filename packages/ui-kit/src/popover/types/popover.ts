@@ -98,6 +98,12 @@ export interface PopoverEventMap {
    * Value is the item that was clicked
    */
   [PopoverEvent.ClosedOnActivate]: undefined;
+
+  /**
+   * Fired when the item highlighted by keyboard navigation changes.
+   * Value is the id of the highlighted item's root element, or null when nothing is highlighted
+   */
+  [PopoverEvent.ActiveDescendantChanged]: string | null;
 }
 
 /**

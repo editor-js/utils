@@ -225,6 +225,7 @@ export class PopoverDesktop extends PopoverAbstract {
 
     this.flipper?.deactivate();
     this.toggleItemsTabbable(false);
+    this.emit(PopoverEvent.ActiveDescendantChanged, null);
 
     this.previouslyHoveredItem = null;
 
@@ -591,12 +592,13 @@ export class PopoverDesktop extends PopoverAbstract {
    * A closed popover stays in the DOM, so all its items become untabbable on hide,
    * otherwise Tab pressed outside of the popover would land on a hidden item
    * @param isTabbable - true if the popover is opened and should be reachable by Tab
+   * @param elements - elements to make tabbable, defaults to all of them. Passed explicitly
+   * while searching, so that only the currently visible items are considered
    */
-  private toggleItemsTabbable(isTabbable: boolean): void {
-    const elements = this.flippableElements;
+  private toggleItemsTabbable(isTabbable: boolean, elements: HTMLElement[] = this.flippableElements): void {
     const hasRovingTabindex = this.flipper !== undefined && this.movesFocusToItems;
 
-    elements.forEach((element) => {
+    this.flippableElements.forEach((element) => {
       element.tabIndex = -1;
     });
 
@@ -620,6 +622,8 @@ export class PopoverDesktop extends PopoverAbstract {
     const focusedItem = this.itemsDefault.find(item => item.isFocused);
 
     focusedItem?.onFocus();
+
+    this.emit(PopoverEvent.ActiveDescendantChanged, focusedItem?.id ?? null);
   };
 
   /**
@@ -674,6 +678,13 @@ export class PopoverDesktop extends PopoverAbstract {
       /** Update flipper items with only visible */
       this.flipper.deactivate();
       this.flipper.activate(flippableElements as HTMLElement[]);
+
+      /**
+       * Deactivating dropped every item's tabindex and activating doesn't restore it without
+       * a cursor position, which would also steal focus from the search field. Restore it here,
+       * scoped to the currently visible items, so Tab still reaches the filtered results.
+       */
+      this.toggleItemsTabbable(true, flippableElements as HTMLElement[]);
     }
   };
 

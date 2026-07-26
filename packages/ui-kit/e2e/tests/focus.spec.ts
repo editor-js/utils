@@ -319,6 +319,44 @@ test.describe('inline popover keyboard navigation', () => {
       text: 'bold' });
   });
 
+  /**
+   * The popover never moves real focus here (see the test above), so a screen reader has no
+   * other way to learn which button is highlighted unless the consumer wires PopoverEvent
+   * .ActiveDescendantChanged up to aria-activedescendant on whichever element holds real focus
+   */
+  test('aria-activedescendant on the editable tracks the highlighted item', async ({ page }) => {
+    await openFixture(page, 'inlineSelection');
+
+    await selectWordAndShowPopover(page);
+
+    const editable = page.locator('#editable');
+
+    await expect(editable).not.toHaveAttribute('aria-activedescendant');
+
+    await page.keyboard.press('ArrowDown');
+
+    const bold = page.getByRole('button', { name: 'Bold',
+      exact: true });
+    const boldId = await bold.getAttribute('id');
+
+    expect(boldId).not.toBeNull();
+    await expect(editable).toHaveAttribute('aria-activedescendant', boldId as string);
+
+    await page.keyboard.press('ArrowDown');
+
+    const italic = page.getByRole('button', { name: 'Italic',
+      exact: true });
+    const italicId = await italic.getAttribute('id');
+
+    expect(italicId).not.toBeNull();
+    expect(italicId).not.toBe(boldId);
+    await expect(editable).toHaveAttribute('aria-activedescendant', italicId as string);
+
+    await hidePopover(page);
+
+    await expect(editable).not.toHaveAttribute('aria-activedescendant');
+  });
+
   test('click still activates an item', async ({ page }) => {
     await showPopover(page, 'inline');
 

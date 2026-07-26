@@ -17,6 +17,21 @@ import { css } from './popover-item-default.const';
  */
 export class PopoverItemDefault extends PopoverItem {
   /**
+   * Counter used to generate unique ids for item root elements
+   */
+  private static instancesCount = 0;
+
+  /**
+   * Id of the item's root element.
+   * Stable for the lifetime of the item, including across confirmation mode toggles -
+   * lets a consumer that moves focus elsewhere (e.g. an inline popover acting on a text
+   * selection) point aria-activedescendant at the currently highlighted item
+   */
+  public get id(): string | undefined {
+    return this.nodes.root?.id;
+  }
+
+  /**
    * True if item is disabled and hence not clickable
    */
   public get isDisabled(): boolean {
@@ -148,6 +163,9 @@ export class PopoverItemDefault extends PopoverItem {
     super(params);
 
     this.nodes.root = this.make(params, renderParams);
+
+    PopoverItemDefault.instancesCount += 1;
+    this.nodes.root.id = `${css.container}-${PopoverItemDefault.instancesCount.toString()}`;
   }
 
   /**

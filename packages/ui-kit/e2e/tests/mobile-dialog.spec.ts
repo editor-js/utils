@@ -92,6 +92,25 @@ test.describe('secondary item types', () => {
     await expect(page.getByRole('button', { name: 'Custom control' })).toHaveAttribute('tabindex', '-1');
   });
 
+  test('mobile dialog makes an html item\'s native control reachable by Tab, not its wrapper', async ({ page }) => {
+    /**
+     * The mobile dialog used to toggle tabindex on the html item's role="none" wrapper instead
+     * of its actual control, leaving the control permanently untabbable and breaking the Tab loop
+     */
+    await showPopover(page, 'mobileHtmlItem');
+
+    const control = page.getByRole('button', { name: 'Custom control' });
+
+    await expect(page.getByRole('menuitem', { name: 'Simple item' })).toBeFocused();
+    await expect(control).toHaveAttribute('tabindex', '0');
+
+    await page.keyboard.press('Tab');
+    await expect(control).toBeFocused();
+
+    await page.keyboard.press('Tab');
+    await expect(page.getByRole('menuitem', { name: 'Simple item' })).toBeFocused();
+  });
+
   test('filtered out items are excluded from the menu', async ({ page }) => {
     await showPopover(page, 'menu');
 

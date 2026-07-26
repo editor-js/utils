@@ -30,6 +30,25 @@ test.describe('search input', () => {
 
     await expect(search).not.toBeFocused();
   });
+
+  test('Tab still reaches the filtered results after typing a query', async ({ page }) => {
+    /**
+     * Filtering used to reactivate the Flipper without restoring any item's roving tabindex,
+     * so Tab from the search field landed nowhere until an arrow key was pressed first
+     */
+    const search = page.getByRole('searchbox', { name: 'Search' });
+
+    await search.fill('Align');
+
+    const firstResult = page.getByRole('menuitemradio', { name: 'Align Left' });
+
+    await expect(firstResult).toHaveAttribute('tabindex', '0');
+    await expect(search).toBeFocused();
+
+    await page.keyboard.press('Tab');
+
+    await expect(firstResult).toBeFocused();
+  });
 });
 
 test.describe('mobile popover header', () => {
