@@ -115,6 +115,11 @@ export interface PopoverItemHtmlParams {
 }
 
 /**
+ * Roles a default popover item can be exposed with
+ */
+export type PopoverItemRole = 'menuitem' | 'menuitemcheckbox' | 'menuitemradio' | 'option' | 'button';
+
+/**
  * Common parameters for all kinds of default popover items: with or without confirmation
  */
 export interface PopoverItemDefaultBaseParams {
@@ -170,6 +175,17 @@ export interface PopoverItemDefaultBaseParams {
    * Hint data to be displayed on item hover
    */
   hint?: HintParams;
+
+  /**
+   * Accessible name of the item.
+   * Defaults to the title, falling back to the hint title for icon-only items
+   */
+  ariaLabel?: string;
+
+  /**
+   * Overrides the ARIA role derived from the toggle param
+   */
+  role?: PopoverItemRole;
 
   /**
    * Popover item activation handler

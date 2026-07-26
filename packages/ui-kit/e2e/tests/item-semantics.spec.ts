@@ -30,6 +30,14 @@ test.describe('menu items', () => {
     await expect(item.locator('.ce-popover-item__icon')).toHaveAttribute('aria-hidden', 'true');
   });
 
+  test('explicit ariaLabel and role params override the derived ones', async ({ page }) => {
+    const item = page.getByRole('button', { name: 'Custom accessible name' });
+
+    await expect(item).toBeVisible();
+    await expect(item).toHaveText('Visible title');
+    await expect(page.getByRole('menuitem', { name: 'Visible title' })).toHaveCount(0);
+  });
+
   test('radio group items are wrapped into a group', async ({ page }) => {
     const group = page.getByRole('group');
 

@@ -50,6 +50,10 @@ export class PopoverItemDefault extends PopoverItem {
    * items as buttons in a toolbar rather than as menu items.
    */
   public get ariaRole(): string {
+    if (this.params.role !== undefined) {
+      return this.params.role;
+    }
+
     if (this.renderParams?.ariaRole !== undefined) {
       return this.renderParams.ariaRole;
     }
@@ -74,6 +78,8 @@ export class PopoverItemDefault extends PopoverItem {
       case 'menuitemradio':
       case 'menuitemcheckbox':
         return 'aria-checked';
+      case 'option':
+        return 'aria-selected';
       case 'button':
         return 'aria-pressed';
       default:
@@ -108,7 +114,7 @@ export class PopoverItemDefault extends PopoverItem {
    * Attributes describing the item for assistive technologies.
    * Kept in sync when the item's content is replaced, for example in confirmation mode
    */
-  private static readonly ariaAttributes = ['role', 'aria-label', 'aria-disabled', 'aria-checked', 'aria-pressed'];
+  private static readonly ariaAttributes = ['role', 'aria-label', 'aria-disabled', 'aria-checked', 'aria-pressed', 'aria-selected'];
 
   /**
    * Item html elements
@@ -172,6 +178,10 @@ export class PopoverItemDefault extends PopoverItem {
    * @param params - construction params of the item or of its confirmation state
    */
   private static getAccessibleName(params: PopoverItemDefaultParams): string | undefined {
+    if (params.ariaLabel !== undefined) {
+      return params.ariaLabel;
+    }
+
     if (params.title !== undefined && params.title !== '') {
       return params.title;
     }
