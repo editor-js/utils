@@ -215,6 +215,15 @@
     margin-bottom: 1px;
   }
 
+  /**
+   * Keyboard navigation moves real focus between items.
+   * The focus is already conveyed by the --focused modifier, so the default ring is suppressed
+   * to keep the popover appearance unchanged
+   */
+  &:focus-visible {
+    outline: none;
+  }
+
   &__icon {
     width: 26px;
     height: 26px;

@@ -38,6 +38,15 @@ export interface FlipperOptions {
    * Callback to set caret to the current element if possible. If not provided, caret is not set
    */
   setCaret?: (item: HTMLElement) => void;
+
+  /**
+   * If true, flipper moves real DOM focus to the current item and maintains a roving tabindex
+   * over the items: the current one becomes tabbable, the rest do not.
+   *
+   * Off by default, since moving focus may conflict with the caret position management
+   * of the module that uses the flipper.
+   */
+  focusItems?: boolean;
 }
 
 /**
@@ -82,6 +91,11 @@ export class Flipper {
   private setCaret?: (item: HTMLElement) => void;
 
   /**
+   * True if flipper should move real DOM focus to the current item
+   */
+  private readonly focusItems: boolean;
+
+  /**
    * @param options - different constructing settings
    */
   constructor(options: FlipperOptions) {
@@ -89,6 +103,7 @@ export class Flipper {
     this.activateCallback = options.activateCallback;
     this.allowedKeys = options.allowedKeys || Flipper.usedKeys;
     this.setCaret = options.setCaret;
+    this.focusItems = options.focusItems === true;
   }
 
   /**
@@ -121,6 +136,7 @@ export class Flipper {
 
     if (cursorPosition !== undefined) {
       this.iterator.setCursor(cursorPosition);
+      this.updateFocus();
     }
 
     /**
@@ -141,6 +157,7 @@ export class Flipper {
   public deactivate(): void {
     this.activated = false;
     this.dropCursor();
+    this.resetFocus();
 
     document.removeEventListener('keydown', this.onKeyDown);
   }
@@ -299,9 +316,43 @@ export class Flipper {
   }
 
   /**
+   * Moves real DOM focus to the current item and makes it the only tabbable one.
+   * Does nothing unless the flipper is constructed with the 'focusItems' option
+   */
+  private updateFocus(): void {
+    if (!this.focusItems) {
+      return;
+    }
+
+    const currentItem = this.iterator.currentItem;
+
+    this.iterator.allItems.forEach((item) => {
+      item.tabIndex = item === currentItem ? 0 : -1;
+    });
+
+    /** Scrolling is handled separately, right after the flip */
+    currentItem?.focus({ preventScroll: true });
+  }
+
+  /**
+   * Makes all the items untabbable. Called once the flipper is deactivated,
+   * so that items of a closed popover do not catch the Tab key
+   */
+  private resetFocus(): void {
+    if (!this.focusItems) {
+      return;
+    }
+
+    this.iterator.allItems.forEach((item) => {
+      item.tabIndex = -1;
+    });
+  }
+
+  /**
    * Fired after flipping in any direction
    */
   private flipCallback(): void {
+    this.updateFocus();
     this.setCaretToCurrentItem();
 
     if (this.iterator.currentItem) {

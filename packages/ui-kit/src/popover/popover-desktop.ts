@@ -91,6 +91,12 @@ export class PopoverDesktop extends PopoverAbstract {
       this.flipper = new Flipper({
         items: this.flippableElements,
         focusedItemClass: popoverItemCls.focused,
+
+        /**
+         * Keyboard navigation moves real focus between items,
+         * otherwise screen readers announce nothing while the highlight travels
+         */
+        focusItems: true,
         allowedKeys: [
           keyCodes.TAB,
           keyCodes.UP,
@@ -153,6 +159,7 @@ export class PopoverDesktop extends PopoverAbstract {
 
     super.show();
     this.flipper?.activate(this.flippableElements);
+    this.toggleItemsTabbable(true);
   }
 
   /**
@@ -164,6 +171,7 @@ export class PopoverDesktop extends PopoverAbstract {
     this.destroyNestedPopoverIfExists();
 
     this.flipper?.deactivate();
+    this.toggleItemsTabbable(false);
 
     this.previouslyHoveredItem = null;
   };
@@ -408,6 +416,27 @@ export class PopoverDesktop extends PopoverAbstract {
       .filter(item => item !== undefined && item !== null);
 
     return result;
+  }
+
+  /**
+   * Makes the first item of the opened popover reachable by Tab, so that the popover
+   * can be entered from the keyboard. Once navigation starts, flipper moves the tabbable
+   * state between items itself.
+   *
+   * A closed popover stays in the DOM, so all its items become untabbable on hide,
+   * otherwise Tab pressed outside of the popover would land on a hidden item
+   * @param isTabbable - true if the popover is opened and should be reachable by Tab
+   */
+  private toggleItemsTabbable(isTabbable: boolean): void {
+    const elements = this.flippableElements;
+
+    elements.forEach((element) => {
+      element.tabIndex = -1;
+    });
+
+    if (isTabbable && elements.length > 0) {
+      elements[0].tabIndex = 0;
+    }
   }
 
   /**

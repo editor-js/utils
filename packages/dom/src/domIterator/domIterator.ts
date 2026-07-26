@@ -40,6 +40,13 @@ export class DomIterator {
   }
 
   /**
+   * Returns the list of items being iterated
+   */
+  public get allItems(): HTMLElement[] {
+    return this.items;
+  }
+
+  /**
    * Returns Focused button Node
    */
   public get currentItem(): HTMLElement | null {

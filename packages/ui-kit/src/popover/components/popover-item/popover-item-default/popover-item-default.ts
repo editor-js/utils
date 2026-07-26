@@ -89,6 +89,10 @@ export class PopoverItemDefault extends PopoverItem {
       return false;
     }
 
+    if (document.activeElement === this.nodes.root) {
+      return true;
+    }
+
     return this.nodes.root.classList.contains(css.focused);
   }
 
@@ -215,6 +219,12 @@ export class PopoverItemDefault extends PopoverItem {
     if (params.name !== undefined) {
       el.dataset.itemName = params.name;
     }
+
+    /**
+     * Items are navigated with arrow keys, so they are focusable but not tabbable.
+     * Popover makes one of them tabbable while it is opened
+     */
+    el.tabIndex = -1;
 
     this.applyAriaAttributes(el, params);
 

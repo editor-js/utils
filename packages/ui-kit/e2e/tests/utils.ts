@@ -41,6 +41,29 @@ interface FixtureWindow {
 }
 
 /**
+ * Popover instance the fixture pages expose for direct manipulation
+ */
+interface PopoverWindow {
+  /**
+   * Popover under test
+   */
+  popover: {
+    /**
+     * Closes the popover
+     */
+    hide: () => void;
+  };
+}
+
+/**
+ * Closes the popover of the fixture page
+ * @param page - playwright page object
+ */
+export async function hidePopover(page: Page): Promise<void> {
+  await page.evaluate(() => (window as unknown as PopoverWindow).popover.hide());
+}
+
+/**
  * Returns names of the items activated on the page so far
  * @param page - playwright page object
  */

@@ -44,16 +44,20 @@ test.describe('inline items', () => {
   });
 
   test('icon-only item resolves by its accessible name', async ({ page }) => {
-    await expect(page.getByRole('button', { name: 'Bold', exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Bold',
+      exact: true })).toBeVisible();
   });
 
   test('icon-only item without title is named by its hint', async ({ page }) => {
-    await expect(page.getByRole('button', { name: 'Italic', exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Italic',
+      exact: true })).toBeVisible();
   });
 
   test('active state is exposed as aria-pressed', async ({ page }) => {
-    await expect(page.getByRole('button', { name: 'Bold', exact: true })).toHaveAttribute('aria-pressed', 'true');
-    await expect(page.getByRole('button', { name: 'Italic', exact: true })).toHaveAttribute('aria-pressed', 'false');
+    await expect(page.getByRole('button', { name: 'Bold',
+      exact: true })).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.getByRole('button', { name: 'Italic',
+      exact: true })).toHaveAttribute('aria-pressed', 'false');
   });
 });
 
@@ -80,7 +84,8 @@ test.describe('containers', () => {
     const toolbar = page.getByRole('toolbar');
 
     await expect(toolbar).toHaveCount(1);
-    await expect(toolbar.getByRole('button', { name: 'Bold', exact: true })).toBeVisible();
+    await expect(toolbar.getByRole('button', { name: 'Bold',
+      exact: true })).toBeVisible();
   });
 });
 
