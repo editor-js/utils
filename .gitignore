@@ -9,3 +9,7 @@ node_modules/
 
 # IDE files
 .idea/
+
+# e2e artifacts
+test-results/
+playwright-report/

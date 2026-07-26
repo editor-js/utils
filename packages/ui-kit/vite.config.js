@@ -56,7 +56,11 @@ export default {
 
   server: {
     port: 3300,
-    open: './preview/index.html',
+    /**
+     * NO_OPEN is set by the e2e runner, which starts the dev server itself and
+     * should not pop a browser window up on every run
+     */
+    open: process.env.NO_OPEN === 'true' ? false : './preview/index.html',
   },
 
   plugins: [

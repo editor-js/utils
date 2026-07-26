@@ -11,9 +11,12 @@
     "dev": "vite",
     "lint": "eslint",
     "lint:styles": "stylelint './src/**/*.css'",
-    "lint:styles:fix": "yarn lint:styles --fix"
+    "lint:styles:fix": "yarn lint:styles --fix",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.0",
     "postcss": "^8.5.9",
     "postcss-apply": "^0.12.0",
     "postcss-nested": "^7.0.2",

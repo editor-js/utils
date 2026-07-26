@@ -1,0 +1,38 @@
+import type { Page } from '@playwright/test';
+
+/**
+ * Fixture pages served by the vite dev server
+ */
+export const fixtures = {
+  menu: '/e2e/fixtures/menu.html',
+  inline: '/e2e/fixtures/inline.html',
+  mobile: '/e2e/fixtures/mobile.html',
+} as const;
+
+/**
+ * Opens the requested fixture and waits for the popover to be constructed
+ * @param page - playwright page object
+ * @param fixture - fixture page to open
+ */
+export async function openFixture(page: Page, fixture: keyof typeof fixtures): Promise<void> {
+  await page.goto(fixtures[fixture]);
+  await page.waitForSelector('body[data-ready="true"]');
+}
+
+/**
+ * Opens the fixture and shows the popover it contains
+ * @param page - playwright page object
+ * @param fixture - fixture page to open
+ */
+export async function showPopover(page: Page, fixture: keyof typeof fixtures): Promise<void> {
+  await openFixture(page, fixture);
+  await page.getByRole('button', { name: /^Open/ }).click();
+}
+
+/**
+ * Returns names of the items activated on the page so far
+ * @param page - playwright page object
+ */
+export async function activatedItems(page: Page): Promise<string[]> {
+  return page.evaluate(() => (window as unknown as { __activated: string[] }).__activated);
+}

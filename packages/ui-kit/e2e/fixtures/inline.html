@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>UI Kit e2e — inline</title>
+</head>
+<body>
+<div style="position: relative; width: 500px; padding: 12px;">
+  <button id="before">Before</button>
+  <div style="position: relative;">
+    <button id="trigger">Open inline toolbar</button>
+  </div>
+</div>
+
+<script type="module">
+  import { PopoverInline } from '/src/index.ts';
+
+  const icon = '<svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/></svg>';
+
+  window.__activated = [];
+
+  /**
+   * Records item activation so tests can assert it without relying on visuals
+   * @param {string} name - name of the activated item
+   */
+  const activate = (name) => () => window.__activated.push(name);
+
+  const popover = new PopoverInline({
+    scopeElement: document.body,
+    items: [
+      /**
+       * Icon-only item that gets its name from the title param
+       */
+      {
+        icon,
+        title: 'Bold',
+        name: 'bold',
+        toggle: true,
+        isActive: () => true,
+        onActivate: activate('bold'),
+      },
+      /**
+       * Icon-only item that has no title at all and gets its name from the hint
+       */
+      {
+        icon,
+        name: 'italic',
+        toggle: true,
+        isActive: () => false,
+        hint: {
+          title: 'Italic',
+          description: 'CMD + I',
+        },
+        onActivate: activate('italic'),
+      },
+    ],
+  });
+
+  document.getElementById('trigger').insertAdjacentElement('afterend', popover.getElement());
+  document.getElementById('trigger').addEventListener('click', () => popover.show());
+
+  window.popover = popover;
+  document.body.dataset.ready = 'true';
+</script>
+</body>
+</html>
