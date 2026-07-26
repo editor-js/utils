@@ -38,6 +38,15 @@ export class PopoverItemHtml extends PopoverItem {
 
     this.nodes.root.appendChild(params.element);
 
+    /**
+     * Native controls (buttons, inputs) are tabbable by default. Without this, one would be
+     * reachable by Tab from a cold page load, before the popover housing it is ever shown —
+     * the popover only strips tabindex from its items on hide(), which hasn't run yet
+     */
+    this.getControls().forEach((control) => {
+      control.tabIndex = -1;
+    });
+
     if (params.name !== undefined) {
       this.nodes.root.dataset.itemName = params.name;
     }

@@ -48,6 +48,23 @@ test.describe('mobile popover', () => {
 
     expect(tabbable).toBe(0);
   });
+
+  test('separator is not tabbable while the popover is open', async ({ page }) => {
+    await showPopover(page, 'mobile');
+
+    const separator = page.getByRole('separator');
+
+    await expect(separator).toHaveAttribute('tabindex', '-1');
+  });
+
+  test('Enter drills into a nested item', async ({ page }) => {
+    await showPopover(page, 'mobile');
+
+    await page.getByRole('menuitem', { name: 'Has children' }).focus();
+    await page.keyboard.press('Enter');
+
+    await expect(page.getByRole('menuitem', { name: 'Child A' })).toBeVisible();
+  });
 });
 
 test.describe('secondary item types', () => {
@@ -62,6 +79,17 @@ test.describe('secondary item types', () => {
 
     await expect(page.locator('.ce-popover-item-html')).toHaveAttribute('role', 'none');
     await expect(page.getByRole('menu').getByRole('button', { name: 'Custom control' })).toBeVisible();
+  });
+
+  test('a native control inside a never-opened popover is not tabbable', async ({ page }) => {
+    /**
+     * Unlike other item types, an html item's native controls (buttons, inputs) are tabbable by
+     * the browser's own default, so they need this checked before the popover is ever shown -
+     * that's the only point where the rest of the items get their tabindex stripped
+     */
+    await openFixture(page, 'menu');
+
+    await expect(page.getByRole('button', { name: 'Custom control' })).toHaveAttribute('tabindex', '-1');
   });
 
   test('filtered out items are excluded from the menu', async ({ page }) => {

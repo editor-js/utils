@@ -66,8 +66,14 @@ export interface PopoverMessages {
   back?: string;
 
   /**
-   * Announced after the items get filtered by the search query.
+   * Announced after the items get filtered by the search query, when exactly one item matches.
    * '{count}' is replaced with the number of found items
+   */
+  result?: string;
+
+  /**
+   * Announced after the items get filtered by the search query, when zero or more than one
+   * item matches. '{count}' is replaced with the number of found items
    */
   results?: string;
 

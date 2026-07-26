@@ -4,6 +4,7 @@ import { PopoverHeader } from './components/popover-header';
 import { PopoverStatesHistory } from './utils/popover-states-history';
 import type { PopoverMobileNodes, PopoverParams, PopoverItemParams } from './types';
 import type { PopoverItemDefault } from './components/popover-item';
+import { PopoverItemSeparator } from './components/popover-item';
 import { PopoverItemType } from './types';
 import { css } from './popover.const';
 import { make } from '@editorjs/dom';
@@ -229,7 +230,9 @@ export class PopoverMobile extends PopoverAbstract<PopoverMobileNodes> {
 
   /**
    * Items are plain elements, so they need an explicit tabindex to take part in the focus trap.
-   * A closed popover stays in the DOM and hence should not be reachable by Tab
+   * A closed popover stays in the DOM and hence should not be reachable by Tab.
+   * Separators are never made tabbable: they are not interactive and shouldn't appear in the
+   * tab sequence
    * @param isTabbable - true if the popover is opened
    */
   private toggleItemsTabbable(isTabbable: boolean): void {
@@ -240,7 +243,9 @@ export class PopoverMobile extends PopoverAbstract<PopoverMobileNodes> {
         return;
       }
 
-      element.tabIndex = isTabbable ? 0 : -1;
+      const isFocusable = !(item instanceof PopoverItemSeparator);
+
+      element.tabIndex = isTabbable && isFocusable ? 0 : -1;
     });
   }
 

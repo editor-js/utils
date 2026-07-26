@@ -70,6 +70,7 @@ export abstract class PopoverAbstract<Nodes extends PopoverNodes = PopoverNodes>
     nothingFound: 'Nothing found',
     search: 'Search',
     back: 'Back',
+    result: '{count} result',
     results: '{count} results',
   };
 
@@ -113,6 +114,14 @@ export abstract class PopoverAbstract<Nodes extends PopoverNodes = PopoverNodes>
     this.nodes.items = make('div', [css.items]);
     this.nodes.items.setAttribute('role', this.itemsContainerRole);
 
+    /**
+     * The items container scrolls when its content overflows, and browsers make scrollable
+     * regions sequentially focusable by default so they can be scrolled by keyboard.
+     * That would put the container itself in the Tab order (and, while closed, block Tab
+     * from reaching anything past it), so it explicitly opts out here.
+     */
+    this.nodes.items.tabIndex = -1;
+
     if (this.messages.label !== undefined) {
       this.nodes.items.setAttribute('aria-label', this.messages.label);
     }
@@ -122,6 +131,14 @@ export abstract class PopoverAbstract<Nodes extends PopoverNodes = PopoverNodes>
     this.nodes.popoverContainer.appendChild(this.nodes.items);
 
     this.listeners.on(this.nodes.popoverContainer, 'click', (event: Event) => this.handleClick(event));
+
+    /**
+     * Items are plain elements (not buttons), so Enter/Space need to be turned into a click
+     * explicitly. Flipper already does this for its focused item on Enter and stops the event
+     * from getting here, so this only fires when Flipper is inactive or doesn't own the key
+     * (no keyboard navigation configured, or a platform, like mobile, that has no Flipper at all).
+     */
+    this.listeners.on(this.nodes.popoverContainer, 'keydown', (event: Event) => this.handleItemKeyDown(event as KeyboardEvent));
 
     this.nodes.popover = make('div', [
       css.popover,
@@ -148,6 +165,13 @@ export abstract class PopoverAbstract<Nodes extends PopoverNodes = PopoverNodes>
    */
   public getElement(): HTMLElement {
     return this.nodes.popover;
+  }
+
+  /**
+   * Whether the popover is currently open
+   */
+  public get isShown(): boolean {
+    return this.nodes.popover.classList.contains(css.popoverOpened);
   }
 
   /**
@@ -397,6 +421,29 @@ export abstract class PopoverAbstract<Nodes extends PopoverNodes = PopoverNodes>
     }
 
     this.handleItemClick(item);
+  }
+
+  /**
+   * Activates an item via Enter/Space when its root element itself is the keydown target.
+   * Descendant controls (search input, custom HTML content) are left untouched, since they
+   * either handle these keys natively (buttons, links) or need them for their own purpose
+   * (text inputs).
+   * @param event - keydown event to handle
+   */
+  private handleItemKeyDown(event: KeyboardEvent): void {
+    if (event.key !== 'Enter' && event.key !== ' ') {
+      return;
+    }
+
+    const item = this.getTargetItem(event);
+    const itemEl = item?.getElement();
+
+    if (itemEl === undefined || itemEl === null || event.target !== itemEl) {
+      return;
+    }
+
+    event.preventDefault();
+    itemEl.click();
   }
 
   /**

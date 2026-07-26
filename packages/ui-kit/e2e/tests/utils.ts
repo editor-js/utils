@@ -8,6 +8,8 @@ export const fixtures = {
   inline: '/e2e/fixtures/inline.html',
   mobile: '/e2e/fixtures/mobile.html',
   inlineSelection: '/e2e/fixtures/inline-selection.html',
+  plainMenu: '/e2e/fixtures/plain-menu.html',
+  nestedInput: '/e2e/fixtures/nested-input.html',
 } as const;
 
 /**
@@ -53,6 +55,11 @@ interface PopoverWindow {
      * Closes the popover
      */
     hide: () => void;
+
+    /**
+     * Whether the popover is currently open
+     */
+    isShown: boolean;
   };
 }
 
@@ -62,6 +69,14 @@ interface PopoverWindow {
  */
 export async function hidePopover(page: Page): Promise<void> {
   await page.evaluate(() => (window as unknown as PopoverWindow).popover.hide());
+}
+
+/**
+ * Returns whether the fixture page's popover is currently open
+ * @param page - playwright page object
+ */
+export async function isPopoverShown(page: Page): Promise<boolean> {
+  return page.evaluate(() => (window as unknown as PopoverWindow).popover.isShown);
 }
 
 /**

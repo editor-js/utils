@@ -2,21 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>UI Kit e2e — mobile</title>
+  <title>UI Kit e2e — nested popover with a custom input</title>
 </head>
 <body>
-<div style="position: relative; width: 100%; padding: 12px;">
+<div style="position: relative; width: 500px; padding: 12px;">
   <button id="before">Before</button>
   <div style="position: relative;">
-    <button id="trigger">Open mobile popover</button>
+    <button id="trigger">Open menu</button>
   </div>
 </div>
 
 <script type="module">
-  import { PopoverMobile, PopoverItemType } from '/src/index.ts';
-
-  const icon = '<svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/></svg>';
+  import { PopoverDesktop, PopoverItemType } from '/src/index.ts';
 
   window.__activated = [];
 
@@ -26,33 +23,33 @@
    */
   const activate = (name) => () => window.__activated.push(name);
 
-  const popover = new PopoverMobile({
+  const nestedInput = document.createElement('input');
+
+  nestedInput.setAttribute('aria-label', 'Nested input');
+
+  const popover = new PopoverDesktop({
     scopeElement: document.body,
     items: [
       {
-        icon,
-        title: 'Simple Item',
+        title: 'Simple item',
         name: 'simple',
         onActivate: activate('simple'),
       },
-      { type: PopoverItemType.Separator },
       {
-        icon,
         title: 'Has children',
         name: 'with-children',
         children: {
+          onOpen: () => nestedInput.focus(),
           items: [
             {
-              icon,
               title: 'Child A',
               name: 'child-a',
               onActivate: activate('child-a'),
             },
             {
-              icon,
-              title: 'Child B',
-              name: 'child-b',
-              onActivate: activate('child-b'),
+              type: PopoverItemType.Html,
+              element: nestedInput,
+              name: 'input-item',
             },
           ],
         },
@@ -60,7 +57,7 @@
     ],
   });
 
-  document.body.appendChild(popover.getElement());
+  document.getElementById('trigger').insertAdjacentElement('afterend', popover.getElement());
   document.getElementById('trigger').addEventListener('click', () => popover.show());
 
   window.popover = popover;

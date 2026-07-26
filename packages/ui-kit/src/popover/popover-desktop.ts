@@ -19,6 +19,12 @@ import { focus } from '@editorjs/caret';
 const FOCUS_DELAY = 50;
 
 /**
+ * Delay before announcing search results, so a burst of keystrokes collapses into one
+ * announcement instead of restarting the screen reader on every character typed
+ */
+const SEARCH_RESULTS_ANNOUNCEMENT_DEBOUNCE = 500;
+
+/**
  * Desktop popover.
  * On desktop devices popover behaves like a floating element. Nested popover appears at right or left side.
  * @todo support rtl for nested popovers and search
@@ -51,6 +57,19 @@ export class PopoverDesktop extends PopoverAbstract {
    * Helps prevent reopening nested popover while cursor is moving inside one item area.
    */
   private previouslyHoveredItem: PopoverItem | null = null;
+
+  /**
+   * Id of the pending debounced search-results announcement, used to collapse a burst of
+   * keystrokes into a single announcement
+   */
+  private searchResultsAnnouncementTimeout: number | undefined;
+
+  /**
+   * Element that was focused right before the popover opened. Restored on close, but only
+   * when the close didn't already hand focus somewhere else (e.g. a click on another trigger,
+   * which focuses that trigger before this popover ever finds out it should close)
+   */
+  private previouslyFocusedElement: HTMLElement | null = null;
 
   /**
    * Element of the page that creates 'scope' of the Popover.
@@ -98,7 +117,13 @@ export class PopoverDesktop extends PopoverAbstract {
          */
         focusItems: this.movesFocusToItems,
         allowedKeys: [
-          keyCodes.TAB,
+          /**
+           * Tab is only Flipper's to handle while it actually moves real focus (roving
+           * tabindex). When it doesn't (inline popovers, see movesFocusToItems), claiming Tab
+           * here would only shift the highlight and swallow the keypress, leaving native Tab
+           * navigation between the individually-tabbable items with nothing to work with
+           */
+          ...(this.movesFocusToItems ? [keyCodes.TAB] : []),
           keyCodes.UP,
           keyCodes.DOWN,
           keyCodes.ENTER,
@@ -155,6 +180,8 @@ export class PopoverDesktop extends PopoverAbstract {
    * Open popover
    */
   public show(): void {
+    this.previouslyFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+
     this.nodes.popover.style.setProperty(CSSVariables.PopoverHeight, this.size.height + 'px');
 
     if (!this.shouldOpenBottom) {
@@ -168,12 +195,30 @@ export class PopoverDesktop extends PopoverAbstract {
     super.show();
     this.flipper?.activate(this.flippableElements);
     this.toggleItemsTabbable(true);
+
+    /**
+     * Only the root popover listens: it resolves the deepest currently open nested popover
+     * itself at event time, so a single listener is enough to handle the whole chain correctly
+     * regardless of how many levels are open
+     */
+    if (this.nestingLevel === 0) {
+      this.listeners.on(document, 'keydown', this.handleNestedNavigationKeyDown, { capture: true });
+    }
   }
 
   /**
    * Closes popover
    */
   public hide = (): void => {
+    window.clearTimeout(this.searchResultsAnnouncementTimeout);
+
+    /**
+     * Only restore focus if it is still where the popover left it (an item, the search field).
+     * A click on another trigger, for example, already moved focus there on mousedown, before
+     * this popover even learns it should close, and that focus should not be clobbered
+     */
+    const shouldRestoreFocus = document.activeElement !== null && this.nodes.popoverContainer.contains(document.activeElement);
+
     super.hide();
 
     this.destroyNestedPopoverIfExists();
@@ -182,6 +227,15 @@ export class PopoverDesktop extends PopoverAbstract {
     this.toggleItemsTabbable(false);
 
     this.previouslyHoveredItem = null;
+
+    if (shouldRestoreFocus) {
+      this.previouslyFocusedElement?.focus();
+    }
+    this.previouslyFocusedElement = null;
+
+    if (this.nestingLevel === 0) {
+      this.listeners.off(document, 'keydown', this.handleNestedNavigationKeyDown, { capture: true });
+    }
   };
 
   /**
@@ -321,8 +375,6 @@ export class PopoverDesktop extends PopoverAbstract {
       }
     };
 
-    item.onChildrenOpen(close);
-
     /**
      * Close nested popover when item with 'closeOnActivate' property set was clicked
      * parent popover should also be closed
@@ -343,8 +395,96 @@ export class PopoverDesktop extends PopoverAbstract {
 
     item.toggleExpanded(true);
 
+    /**
+     * Called only once the nested popover is attached to the document and shown, since
+     * a consumer's 'onOpen' handler may focus one of its elements (e.g. a custom input) —
+     * focus() is a no-op on an element that isn't connected to the document yet.
+     */
+    item.onChildrenOpen(close);
+
     return this.nestedPopover;
   }
+
+  /**
+   * Deepest popover in the currently open nested chain; itself when nothing is nested
+   */
+  private get deepestOpenPopover(): PopoverDesktop {
+    return this.nestedPopover != null ? this.nestedPopover.deepestOpenPopover : this;
+  }
+
+  /**
+   * Closes the innermost open nested popover in the chain and returns focus to the item that
+   * triggered it.
+   * @returns false when there is no nested popover open anywhere in the chain, so the caller
+   * can fall back to its own handling (e.g. closing the root popover on Escape)
+   */
+  private closeDeepestNestedPopover(): boolean {
+    if (this.nestedPopover == null) {
+      return false;
+    }
+
+    if (this.nestedPopover.closeDeepestNestedPopover()) {
+      return true;
+    }
+
+    const triggerItemEl = this.nestedPopoverTriggerItem?.getElement();
+
+    this.destroyNestedPopoverIfExists();
+    triggerItemEl?.focus();
+
+    return true;
+  }
+
+  /**
+   * Handles the keys the Flipper doesn't own: Escape backs out of the currently open submenu
+   * (or closes the whole popover once there is none), ArrowLeft/ArrowRight do the same plus
+   * open a submenu, matching the WAI-ARIA menu pattern.
+   *
+   * Registered only on the root popover (nestingLevel 0, see show()/hide()) and resolves which
+   * level of the chain is currently open by itself, so a single listener stays correct
+   * regardless of how many nested popovers are open at the time of the keypress.
+   * @param event - keydown event to handle
+   */
+  private handleNestedNavigationKeyDown = (event: KeyboardEvent): void => {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+
+      if (!this.closeDeepestNestedPopover()) {
+        this.hide();
+      }
+
+      return;
+    }
+
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') {
+      return;
+    }
+
+    const deepest = this.deepestOpenPopover;
+
+    /**
+     * Only act while focus is actually on one of the items, so ArrowLeft/ArrowRight keep their
+     * native meaning (moving the text cursor) inside the search input or a custom control
+     */
+    if (!deepest.flippableElements.includes(document.activeElement as HTMLElement)) {
+      return;
+    }
+
+    if (event.key === 'ArrowLeft') {
+      if (this.closeDeepestNestedPopover()) {
+        event.preventDefault();
+      }
+
+      return;
+    }
+
+    const focusedItem = deepest.itemsDefault.find(item => item.isFocused);
+
+    if (focusedItem?.hasChildren === true) {
+      event.preventDefault();
+      focusedItem.getElement()?.click();
+    }
+  };
 
   /**
    * Checks if popover should be opened bottom.
@@ -438,9 +578,15 @@ export class PopoverDesktop extends PopoverAbstract {
   }
 
   /**
-   * Makes the first item of the opened popover reachable by Tab, so that the popover
-   * can be entered from the keyboard. Once navigation starts, flipper moves the tabbable
-   * state between items itself.
+   * Makes the items of the opened popover reachable by Tab, so that the popover
+   * can be entered from the keyboard.
+   *
+   * When the Flipper actually moves real DOM focus between items (arrow-key roving tabindex),
+   * only the first item is made tabbable here and Flipper takes over moving the `0` as
+   * navigation happens. Otherwise – no Flipper at all (`flippable: false`), or one that only
+   * moves a visual highlight without touching focus (inline popovers, see `movesFocusToItems`) –
+   * there is no mechanism left to reach items past the first one, so every item is made an
+   * individual Tab stop instead.
    *
    * A closed popover stays in the DOM, so all its items become untabbable on hide,
    * otherwise Tab pressed outside of the popover would land on a hidden item
@@ -448,13 +594,22 @@ export class PopoverDesktop extends PopoverAbstract {
    */
   private toggleItemsTabbable(isTabbable: boolean): void {
     const elements = this.flippableElements;
+    const hasRovingTabindex = this.flipper !== undefined && this.movesFocusToItems;
 
     elements.forEach((element) => {
       element.tabIndex = -1;
     });
 
-    if (isTabbable && elements.length > 0) {
+    if (!isTabbable || elements.length === 0) {
+      return;
+    }
+
+    if (hasRovingTabindex) {
       elements[0].tabIndex = 0;
+    } else {
+      elements.forEach((element) => {
+        element.tabIndex = 0;
+      });
     }
   }
 
@@ -533,13 +688,19 @@ export class PopoverDesktop extends PopoverAbstract {
       return;
     }
 
-    if (count === 0) {
-      this.announce(this.messages.nothingFound ?? '');
+    window.clearTimeout(this.searchResultsAnnouncementTimeout);
 
-      return;
-    }
+    this.searchResultsAnnouncementTimeout = window.setTimeout(() => {
+      if (count === 0) {
+        this.announce(this.messages.nothingFound ?? '');
 
-    this.announce((this.messages.results ?? '').replace('{count}', count.toString()));
+        return;
+      }
+
+      const template = count === 1 ? this.messages.result : this.messages.results;
+
+      this.announce((template ?? '').replace('{count}', count.toString()));
+    }, SEARCH_RESULTS_ANNOUNCEMENT_DEBOUNCE);
   }
 
   /**

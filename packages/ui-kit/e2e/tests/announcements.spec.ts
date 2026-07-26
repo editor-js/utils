@@ -12,10 +12,29 @@ test.describe('search announcements', () => {
     await expect(page.getByRole('status').first()).toHaveText('2 results');
   });
 
+  test('uses the singular form when exactly one item matches', async ({ page }) => {
+    await page.getByRole('searchbox', { name: 'Search' }).fill('Bold');
+
+    await expect(page.getByRole('status').first()).toHaveText('1 result');
+  });
+
   test('reports that nothing was found', async ({ page }) => {
     await page.getByRole('searchbox', { name: 'Search' }).fill('nonexistent item');
 
     await expect(page.getByRole('status').first()).toHaveText('Nothing found');
+  });
+
+  test('collapses a burst of keystrokes into a single announcement instead of one per character', async ({ page }) => {
+    const status = page.getByRole('status').first();
+
+    /**
+     * Each keystroke would otherwise re-trigger the announcement, restarting the screen reader
+     * mid-sentence before it gets to finish reading the previous one
+     */
+    await page.getByRole('searchbox', { name: 'Search' }).pressSequentially('Align', { delay: 50 });
+
+    await expect(status).toHaveText('');
+    await expect(status).toHaveText('2 results');
   });
 });
 
