@@ -223,7 +223,8 @@ export class PopoverMobile extends PopoverAbstract<PopoverMobileNodes> {
   private focusFirstElement(): void {
     const [first] = this.focusableElements;
 
-    first?.focus();
+    /** Popover is already on screen, focusing should not scroll the page to it */
+    first?.focus({ preventScroll: true });
   }
 
   /**

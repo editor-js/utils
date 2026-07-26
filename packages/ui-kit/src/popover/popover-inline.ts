@@ -77,6 +77,17 @@ export class PopoverInline extends PopoverDesktop {
   }
 
   /**
+   * Inline popover acts on the selected text, and Safari drops the selection once the focus
+   * moves to a button. Keyboard navigation therefore only moves the highlight here,
+   * leaving the focus (and hence the selection) in the text being formatted.
+   *
+   * This is the same problem the 'button' wrapper tag works around, see the constructor
+   */
+  protected override get movesFocusToItems(): boolean {
+    return false;
+  }
+
+  /**
    * Returns visible element offset top
    */
   public get offsetLeft(): number {

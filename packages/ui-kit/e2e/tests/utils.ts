@@ -7,6 +7,7 @@ export const fixtures = {
   menu: '/e2e/fixtures/menu.html',
   inline: '/e2e/fixtures/inline.html',
   mobile: '/e2e/fixtures/mobile.html',
+  inlineSelection: '/e2e/fixtures/inline-selection.html',
 } as const;
 
 /**

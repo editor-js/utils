@@ -231,6 +231,14 @@
   }
 
   /**
+   * Radio group wrapper generates no box, but it does scope :last-of-type to itself.
+   * The margin of the item closing a group is restored, unless the group closes the list
+   */
+  .ce-popover__items-group:not(:last-of-type) > &:last-of-type {
+    margin-bottom: 1px;
+  }
+
+  /**
    * Keyboard navigation moves real focus between items.
    * The focus is already conveyed by the --focused modifier, so the default ring is suppressed
    * to keep the popover appearance unchanged

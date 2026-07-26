@@ -96,7 +96,7 @@ export class PopoverDesktop extends PopoverAbstract {
          * Keyboard navigation moves real focus between items,
          * otherwise screen readers announce nothing while the highlight travels
          */
-        focusItems: true,
+        focusItems: this.movesFocusToItems,
         allowedKeys: [
           keyCodes.TAB,
           keyCodes.UP,
@@ -108,6 +108,14 @@ export class PopoverDesktop extends PopoverAbstract {
 
       this.flipper.onFlip(this.onFlip);
     }
+  }
+
+  /**
+   * True if keyboard navigation should move real DOM focus between the items.
+   * Popovers that act on the text selection have to keep the focus where it is
+   */
+  protected get movesFocusToItems(): boolean {
+    return true;
   }
 
   /**

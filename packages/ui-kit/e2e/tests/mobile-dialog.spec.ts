@@ -76,19 +76,31 @@ test.describe('secondary item types', () => {
 });
 
 test.describe('hints', () => {
-  test('hint is referenced by the item and shown on focus', async ({ page }) => {
+  test('hint is referenced by its item', async ({ page }) => {
     await showPopover(page, 'inline');
 
     const italic = page.getByRole('button', { name: 'Italic',
       exact: true });
-    const describedBy = await italic.getAttribute('aria-describedby');
+
+    await expect(italic).toHaveAttribute('aria-describedby', /.+/);
+  });
+
+  test('hint is shown once the item gets keyboard focus', async ({ page }) => {
+    await showPopover(page, 'menu');
+
+    const item = page.getByRole('menuitemcheckbox', { name: 'Bold' });
+    const describedBy = await item.getAttribute('aria-describedby');
 
     expect(describedBy).not.toBeNull();
 
-    await page.keyboard.press('ArrowDown');
-    await page.keyboard.press('ArrowDown');
+    /** Bold is the fourth item of the menu */
+    const boldItemPosition = 4;
 
-    await expect(italic).toBeFocused();
+    for (let i = 0; i < boldItemPosition; i++) {
+      await page.keyboard.press('ArrowDown');
+    }
+
+    await expect(item).toBeFocused();
     await expect(page.locator(`#${describedBy as string}`)).toBeVisible();
   });
 });

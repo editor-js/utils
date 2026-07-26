@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>UI Kit e2e — inline popover over a selection</title></head>
+<body>
+<div id="editable" contenteditable="true" style="width:400px;padding:12px;border:1px solid #ccc">Some bold text here</div>
+<div id="anchor" style="position:relative"></div>
+<script type="module">
+  import { PopoverInline } from '/src/index.ts';
+  const icon = '<svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/></svg>';
+  const popover = new PopoverInline({
+    scopeElement: document.body,
+    items: [
+      { icon, title: 'Bold', name: 'bold', toggle: true, onActivate: () => { document.execCommand('bold'); } },
+      { icon, title: 'Italic', name: 'italic', toggle: true, onActivate: () => {} },
+    ],
+  });
+  document.getElementById('anchor').appendChild(popover.getElement());
+  window.popover = popover;
+  document.body.dataset.ready = 'true';
+</script>
+</body>
+</html>

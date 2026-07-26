@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
-import { activatedItems, hidePopover, showPopover } from './utils';
+import { activatedItems, hidePopover, openFixture, showPopover } from './utils';
 
 /**
  * Returns the accessible name of the currently focused element
@@ -8,6 +8,66 @@ import { activatedItems, hidePopover, showPopover } from './utils';
  */
 async function focusedName(page: Page): Promise<string | null> {
   return page.evaluate(() => document.activeElement?.getAttribute('aria-label') ?? null);
+}
+
+/**
+ * Offsets of the word 'bold' inside the text of the inline-selection fixture
+ */
+const BOLD_WORD_RANGE = {
+  start: 5,
+  end: 9,
+};
+
+/**
+ * Popover instance the inline-selection fixture exposes
+ */
+interface PopoverShowWindow {
+  /**
+   * Popover under test
+   */
+  popover: {
+    /**
+     * Opens the popover
+     */
+    show: () => void;
+  };
+}
+
+/**
+ * Selects a word inside the editable element of the fixture and opens the inline popover for it
+ * @param page - playwright page object
+ */
+async function selectWordAndShowPopover(page: Page): Promise<void> {
+  await page.evaluate(({ start, end }) => {
+    const node = (document.getElementById('editable') as HTMLElement).firstChild as Text;
+    const range = document.createRange();
+
+    range.setStart(node, start);
+    range.setEnd(node, end);
+
+    const selection = window.getSelection() as Selection;
+
+    selection.removeAllRanges();
+    selection.addRange(range);
+
+    (window as unknown as PopoverShowWindow).popover.show();
+  }, BOLD_WORD_RANGE);
+}
+
+/**
+ * Returns the state of the current document selection
+ * @param page - playwright page object
+ */
+// eslint-disable-next-line jsdoc/require-jsdoc -- JSDoc doesn't understand it's a type, not an object
+async function selectionState(page: Page): Promise<{ rangeCount: number; text: string }> {
+  return page.evaluate(() => {
+    const selection = window.getSelection() as Selection;
+
+    return {
+      rangeCount: selection.rangeCount,
+      text: selection.toString(),
+    };
+  });
 }
 
 test.describe('keyboard navigation moves real focus', () => {
@@ -55,13 +115,37 @@ test.describe('keyboard navigation moves real focus', () => {
 });
 
 test.describe('inline popover keyboard navigation', () => {
-  test('arrow down moves focus between toolbar buttons', async ({ page }) => {
+  test('arrow down highlights a toolbar button without taking the focus', async ({ page }) => {
     await showPopover(page, 'inline');
 
     await page.keyboard.press('ArrowDown');
 
-    await expect(page.getByRole('button', { name: 'Bold',
-      exact: true })).toBeFocused();
+    const bold = page.getByRole('button', { name: 'Bold',
+      exact: true });
+
+    await expect(bold).toHaveClass(/ce-popover-item--focused/);
+    await expect(bold).not.toBeFocused();
+  });
+
+  /**
+   * Safari drops the text selection once the focus moves to a button, which would break
+   * applying inline tools with the keyboard
+   */
+  test('selection of the formatted text survives keyboard navigation', async ({ page }) => {
+    await openFixture(page, 'inlineSelection');
+
+    await selectWordAndShowPopover(page);
+
+    await expect
+      .poll(async () => selectionState(page))
+      .toEqual({ rangeCount: 1,
+        text: 'bold' });
+
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('ArrowDown');
+
+    expect(await selectionState(page)).toEqual({ rangeCount: 1,
+      text: 'bold' });
   });
 
   test('click still activates an item', async ({ page }) => {
