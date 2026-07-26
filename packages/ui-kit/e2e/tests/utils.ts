@@ -30,9 +30,20 @@ export async function showPopover(page: Page, fixture: keyof typeof fixtures): P
 }
 
 /**
+ * Test hooks the fixture pages expose on the window object
+ */
+interface FixtureWindow {
+  /**
+   * Names of the items activated since the page was loaded
+   */
+  // eslint-disable-next-line @typescript-eslint/naming-convention -- matches the global set by the fixtures
+  __activated: string[];
+}
+
+/**
  * Returns names of the items activated on the page so far
  * @param page - playwright page object
  */
 export async function activatedItems(page: Page): Promise<string[]> {
-  return page.evaluate(() => (window as unknown as { __activated: string[] }).__activated);
+  return page.evaluate(() => (window as unknown as FixtureWindow).__activated);
 }

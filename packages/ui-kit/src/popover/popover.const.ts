@@ -18,6 +18,7 @@ export const css = {
   nothingFoundMessage: className('nothing-found-message'),
   nothingFoundMessageDisplayed: className('nothing-found-message', 'displayed'),
   items: className('items'),
+  itemsGroup: className('items-group'),
   overlay: className('overlay'),
   overlayHidden: className('overlay', 'hidden'),
   popoverNested: className(null, 'nested'),

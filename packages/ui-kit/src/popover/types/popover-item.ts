@@ -235,6 +235,13 @@ export type PopoverItemRenderParamsMap = {
     wrapperTag?: 'div' | 'button';
 
     /**
+     * ARIA role to be set on the item root element.
+     * By default it is derived from the item's toggle param.
+     * Inline popover renders items as toolbar buttons and hence overrides it
+     */
+    ariaRole?: string;
+
+    /**
      * Hint render params
      */
     hint?: PopoverItemHintRenderParams;

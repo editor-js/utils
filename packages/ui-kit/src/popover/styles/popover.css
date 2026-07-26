@@ -84,6 +84,14 @@
     overscroll-behavior: contain;
   }
 
+  /**
+   * Semantic wrapper for a group of radio-like items.
+   * Generates no box, so items keep participating in the layout of the items container
+   */
+  &__items-group {
+    display: contents;
+  }
+
   &__overlay {
     @media (--mobile) {
       position: fixed;

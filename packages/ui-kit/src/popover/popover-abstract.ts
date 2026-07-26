@@ -51,6 +51,13 @@ export abstract class PopoverAbstract<Nodes extends PopoverNodes = PopoverNodes>
   protected search: SearchInput | undefined;
 
   /**
+   * ARIA role for the items container. Menus by default; inline popovers are toolbars
+   */
+  protected get itemsContainerRole(): string {
+    return 'menu';
+  }
+
+  /**
    * Messages that will be displayed in popover
    */
   protected messages: PopoverMessages = {
@@ -90,16 +97,13 @@ export abstract class PopoverAbstract<Nodes extends PopoverNodes = PopoverNodes>
 
     this.nodes.popoverContainer.appendChild(this.nodes.nothingFoundMessage);
     this.nodes.items = make('div', [css.items]);
+    this.nodes.items.setAttribute('role', this.itemsContainerRole);
 
-    this.items.forEach((item) => {
-      const itemEl = item.getElement();
+    if (this.messages.label !== undefined) {
+      this.nodes.items.setAttribute('aria-label', this.messages.label);
+    }
 
-      if (itemEl === null) {
-        return;
-      }
-
-      this.nodes.items.appendChild(itemEl);
-    });
+    this.renderItems(this.items);
 
     this.nodes.popoverContainer.appendChild(this.nodes.items);
 
@@ -111,6 +115,18 @@ export abstract class PopoverAbstract<Nodes extends PopoverNodes = PopoverNodes>
     ]);
 
     this.nodes.popover.appendChild(this.nodes.popoverContainer);
+  }
+
+  /**
+   * Returns the radio-group key of the item, or null if the item does not belong to a group
+   * @param item - popover item to read the toggle param of. Undefined when looking past the last item
+   */
+  private static getToggleGroupKey(item: PopoverItem | undefined): string | null {
+    if (!(item instanceof PopoverItemDefault) || typeof item.toggle !== 'string') {
+      return null;
+    }
+
+    return item.toggle;
   }
 
   /**
@@ -226,6 +242,47 @@ export abstract class PopoverAbstract<Nodes extends PopoverNodes = PopoverNodes>
         default:
           return new PopoverItemDefault(item, this.itemsRenderParams[PopoverItemType.Default]);
       }
+    });
+  }
+
+  /**
+   * Appends items to the items container.
+   *
+   * Items sharing the same string 'toggle' key behave like a radio group, so neighbouring
+   * items with the same key get wrapped into a role="group" element to convey the grouping.
+   * The wrapper is not rendered as a box (display: contents), hence it does not affect layout.
+   * @param items - list of already constructed popover items to append
+   */
+  protected renderItems(items: Array<PopoverItem>): void {
+    /** Toggle key of the group being filled, null when items are appended to the container itself */
+    let currentGroupKey: string | null = null;
+    let currentGroupEl: HTMLElement | null = null;
+
+    items.forEach((item, index) => {
+      const itemEl = item.getElement();
+
+      if (itemEl === null) {
+        return;
+      }
+
+      const groupKey = PopoverAbstract.getToggleGroupKey(item);
+
+      if (groupKey === null || groupKey !== currentGroupKey) {
+        currentGroupKey = groupKey;
+        currentGroupEl = null;
+      }
+
+      const isGroupStart = groupKey !== null && currentGroupEl === null;
+      const hasGroupSibling = isGroupStart && PopoverAbstract.getToggleGroupKey(items[index + 1]) === groupKey;
+
+      if (hasGroupSibling) {
+        currentGroupEl = make('div', [css.itemsGroup]);
+        currentGroupEl.setAttribute('role', 'group');
+
+        this.nodes.items.appendChild(currentGroupEl);
+      }
+
+      (currentGroupEl ?? this.nodes.items).appendChild(itemEl);
     });
   }
 

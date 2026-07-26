@@ -58,6 +58,12 @@ export interface PopoverMessages {
 
   /** Search input label */
   search?: string;
+
+  /**
+   * Accessible name of the popover items container (menu or toolbar).
+   * Not rendered visually, used by screen readers to announce what the popover is
+   */
+  label?: string;
 }
 
 /**

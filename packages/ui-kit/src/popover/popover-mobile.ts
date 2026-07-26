@@ -158,18 +158,12 @@ export class PopoverMobile extends PopoverAbstract<PopoverMobileNodes> {
       }
     }
 
-    /** Re-render items */
+    /** Re-render items. Container is cleared to drop empty radio group wrappers as well */
     this.items.forEach(item => item.getElement()?.remove());
+    this.nodes.items.replaceChildren();
 
     this.items = this.buildItems(items);
 
-    this.items.forEach((item) => {
-      const itemEl = item.getElement();
-
-      if (itemEl === null) {
-        return;
-      }
-      this.nodes.items?.appendChild(itemEl);
-    });
+    this.renderItems(this.items);
   }
 }

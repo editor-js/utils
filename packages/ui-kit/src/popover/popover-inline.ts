@@ -30,6 +30,12 @@ export class PopoverInline extends PopoverDesktop {
            * @todo figure out better way to solve the issue
            */
           wrapperTag: 'button',
+
+          /**
+           * Inline popover is a toolbar of buttons, not a menu,
+           * so items get the button role and aria-pressed state
+           */
+          ariaRole: 'button',
           hint: {
             position: 'top',
             alignment: 'center',
@@ -61,6 +67,13 @@ export class PopoverInline extends PopoverDesktop {
           this.showNestedItems(item);
         }
       });
+  }
+
+  /**
+   * Inline popover is a horizontal bar of controls, not a menu
+   */
+  protected override get itemsContainerRole(): string {
+    return 'toolbar';
   }
 
   /**

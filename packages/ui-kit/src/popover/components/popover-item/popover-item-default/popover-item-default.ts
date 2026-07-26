@@ -45,6 +45,43 @@ export class PopoverItemDefault extends PopoverItem {
   }
 
   /**
+   * ARIA role for the item, derived from its toggle behavior.
+   * Can be overridden by the popover via render params — inline popovers render
+   * items as buttons in a toolbar rather than as menu items.
+   */
+  public get ariaRole(): string {
+    if (this.renderParams?.ariaRole !== undefined) {
+      return this.renderParams.ariaRole;
+    }
+
+    if (typeof this.params.toggle === 'string') {
+      return 'menuitemradio';
+    }
+
+    if (this.params.toggle === true) {
+      return 'menuitemcheckbox';
+    }
+
+    return 'menuitem';
+  }
+
+  /**
+   * Attribute conveying the item's active state, matching its role.
+   * Null for roles that have no pressed/checked state.
+   */
+  private get ariaStateAttribute(): string | null {
+    switch (this.ariaRole) {
+      case 'menuitemradio':
+      case 'menuitemcheckbox':
+        return 'aria-checked';
+      case 'button':
+        return 'aria-pressed';
+      default:
+        return null;
+    }
+  }
+
+  /**
    * True if item is focused in keyboard navigation process
    */
   public get isFocused(): boolean {
@@ -83,10 +120,24 @@ export class PopoverItemDefault extends PopoverItem {
    * @param renderParams - popover item render params.
    * The parameters that are not set by user via popover api but rather depend on technical implementation
    */
-  constructor(protected readonly params: PopoverItemDefaultParams, renderParams?: PopoverItemRenderParamsMap[PopoverItemType.Default]) {
+  constructor(protected readonly params: PopoverItemDefaultParams, private readonly renderParams?: PopoverItemRenderParamsMap[PopoverItemType.Default]) {
     super(params);
 
     this.nodes.root = this.make(params, renderParams);
+  }
+
+  /**
+   * Returns accessible name for the passed item params.
+   * Falls back to the hint title, since inline popover items are rendered icon-only
+   * and carry their name in the hint rather than in the title
+   * @param params - construction params of the item or of its confirmation state
+   */
+  private static getAccessibleName(params: PopoverItemDefaultParams): string | undefined {
+    if (params.title !== undefined && params.title !== '') {
+      return params.title;
+    }
+
+    return params.hint?.title;
   }
 
   /**
@@ -114,7 +165,16 @@ export class PopoverItemDefault extends PopoverItem {
    * @param isActive - true if item should strictly should become active
    */
   public toggleActive(isActive?: boolean): void {
-    this.nodes.root?.classList.toggle(css.active, isActive);
+    /** Undefined means the state should be flipped, which is what classList.toggle does */
+    const nextState = isActive ?? this.nodes.root?.classList.contains(css.active) !== true;
+
+    this.nodes.root?.classList.toggle(css.active, nextState);
+
+    const stateAttribute = this.ariaStateAttribute;
+
+    if (stateAttribute !== null) {
+      this.nodes.root?.setAttribute(stateAttribute, String(nextState));
+    }
   }
 
   /**
@@ -156,9 +216,14 @@ export class PopoverItemDefault extends PopoverItem {
       el.dataset.itemName = params.name;
     }
 
+    this.applyAriaAttributes(el, params);
+
     this.nodes.icon = make('div', [css.icon, css.iconTool], {
       innerHTML: params.icon ?? IconDotCircle,
     });
+
+    /** Icon is decorative, the item is named via aria-label */
+    this.nodes.icon.setAttribute('aria-hidden', 'true');
 
     el.appendChild(this.nodes.icon);
 
@@ -175,9 +240,14 @@ export class PopoverItemDefault extends PopoverItem {
     }
 
     if (this.hasChildren) {
-      el.appendChild(make('div', [css.icon, css.iconChevronRight], {
+      const chevron = make('div', [css.icon, css.iconChevronRight], {
         innerHTML: IconChevronRight,
-      }));
+      });
+
+      /** Chevron is decorative, nested items availability is conveyed via aria-haspopup */
+      chevron.setAttribute('aria-hidden', 'true');
+
+      el.appendChild(chevron);
     }
 
     if (this.isActive) {
@@ -196,6 +266,31 @@ export class PopoverItemDefault extends PopoverItem {
     }
 
     return el;
+  }
+
+  /**
+   * Sets item's role, accessible name and states on its root element
+   * @param el - item root element to apply attributes to
+   * @param params - item params the attributes are derived from
+   */
+  private applyAriaAttributes(el: HTMLElement, params: PopoverItemDefaultParams): void {
+    el.setAttribute('role', this.ariaRole);
+
+    const accessibleName = PopoverItemDefault.getAccessibleName(params);
+
+    if (accessibleName !== undefined) {
+      el.setAttribute('aria-label', accessibleName);
+    }
+
+    if (params.isDisabled === true) {
+      el.setAttribute('aria-disabled', 'true');
+    }
+
+    const stateAttribute = this.ariaStateAttribute;
+
+    if (stateAttribute !== null) {
+      el.setAttribute(stateAttribute, String(this.isActive));
+    }
   }
 
   /**
