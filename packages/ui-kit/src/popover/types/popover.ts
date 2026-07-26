@@ -60,6 +60,12 @@ export interface PopoverMessages {
   search?: string;
 
   /**
+   * Accessible name of the back button that leaves a nested popover.
+   * The button is rendered as an icon, so it has no name of its own
+   */
+  back?: string;
+
+  /**
    * Accessible name of the popover items container (menu or toolbar).
    * Not rendered visually, used by screen readers to announce what the popover is
    */

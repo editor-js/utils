@@ -37,7 +37,7 @@ export class SearchInput extends EventsDispatcher<SearchInputEventMap> {
   /**
    * @param options - available config
    */
-  constructor({ items, placeholder }: {
+  constructor({ items, placeholder, label }: {
     /**
      * @param options.items - searchable items list
      */
@@ -46,6 +46,10 @@ export class SearchInput extends EventsDispatcher<SearchInputEventMap> {
      * @param options.placeholder - placeholder string for the input
      */
     placeholder?: string;
+    /**
+     * @param options.label - accessible name of the input. Falls back to the placeholder
+     */
+    label?: string;
   }) {
     super();
 
@@ -59,15 +63,27 @@ export class SearchInput extends EventsDispatcher<SearchInputEventMap> {
       innerHTML: IconSearch,
     });
 
+    /** Icon is decorative, the input is named via aria-label */
+    iconWrapper.setAttribute('aria-hidden', 'true');
+
     this.input = make('input', css.input, {
       placeholder,
+      type: 'search',
       /**
        * Used to prevent focusing on the input by Tab key
        * (Popover in the Toolbar lays below the blocks,
-       * so Tab in the last block will focus this hidden input if this property is not set)
+       * so Tab in the last block will focus this hidden input if this property is not set).
+       * Popover makes the input tabbable while it is opened, see toggleTabbable()
        */
       tabIndex: -1,
     }) as HTMLInputElement;
+
+    /** A placeholder is not announced reliably and disappears on input, hence the label */
+    const accessibleName = label ?? placeholder;
+
+    if (accessibleName !== undefined) {
+      this.input.setAttribute('aria-label', accessibleName);
+    }
 
     this.wrapper.appendChild(iconWrapper);
     this.wrapper.appendChild(this.input);
@@ -102,6 +118,16 @@ export class SearchInput extends EventsDispatcher<SearchInputEventMap> {
    */
   public focus(): void {
     this.input.focus();
+  }
+
+  /**
+   * Makes the input reachable by Tab or hides it from the tab order.
+   * A closed popover stays in the DOM, so its input should not catch Tab presses
+   * happening outside of the popover
+   * @param isTabbable - true if the popover the input belongs to is opened
+   */
+  public toggleTabbable(isTabbable: boolean): void {
+    this.input.tabIndex = isTabbable ? 0 : -1;
   }
 
   /**

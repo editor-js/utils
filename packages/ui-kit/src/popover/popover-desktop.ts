@@ -286,12 +286,18 @@ export class PopoverDesktop extends PopoverAbstract {
    * @param item - item to display nested popover by
    */
   protected showNestedPopoverForItem(item: PopoverItem): PopoverDesktop {
+    /** Nested popover has no header, so it is named after the item it was opened from */
+    const label = item instanceof PopoverItemDefault ? item.title : undefined;
+
     this.nestedPopover = new PopoverDesktop({
       searchable: item.isChildrenSearchable,
       items: item.children,
       nestingLevel: this.nestingLevel + 1,
       flippable: item.isChildrenFlippable,
-      messages: this.messages,
+      messages: {
+        ...this.messages,
+        label: label ?? this.messages.label,
+      },
     });
 
     const close = (parent?: boolean): void => {
@@ -455,6 +461,7 @@ export class PopoverDesktop extends PopoverAbstract {
     this.search = new SearchInput({
       items: this.itemsDefault,
       placeholder: this.messages.search,
+      label: this.messages.search,
     });
 
     this.search.on(SearchInputEvent.Search, this.onSearch);

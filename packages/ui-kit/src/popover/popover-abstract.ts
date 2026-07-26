@@ -63,6 +63,7 @@ export abstract class PopoverAbstract<Nodes extends PopoverNodes = PopoverNodes>
   protected messages: PopoverMessages = {
     nothingFound: 'Nothing found',
     search: 'Search',
+    back: 'Back',
   };
 
   /**
@@ -171,6 +172,7 @@ export abstract class PopoverAbstract<Nodes extends PopoverNodes = PopoverNodes>
     this.nodes.popover.classList.add(css.popoverOpened);
 
     if (this.search !== undefined) {
+      this.search.toggleTabbable(true);
       this.search.focus();
     }
 
@@ -201,6 +203,7 @@ export abstract class PopoverAbstract<Nodes extends PopoverNodes = PopoverNodes>
 
     if (this.search !== undefined) {
       this.search.clear();
+      this.search.toggleTabbable(false);
     }
 
     this.listeners.off(document, 'click', this.outsideClickHandler);

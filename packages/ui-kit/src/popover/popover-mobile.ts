@@ -132,6 +132,26 @@ export class PopoverMobile extends PopoverAbstract<PopoverMobileNodes> {
   }
 
   /**
+   * Points the popover to the element naming it: the header text of the currently displayed
+   * nested items, or the label from messages when the root items are displayed
+   */
+  private updateAccessibleName(): void {
+    const textId = this.header?.textId;
+
+    if (textId !== undefined) {
+      this.nodes.popoverContainer.setAttribute('aria-labelledby', textId);
+
+      return;
+    }
+
+    this.nodes.popoverContainer.removeAttribute('aria-labelledby');
+
+    if (this.messages.label !== undefined) {
+      this.nodes.popoverContainer.setAttribute('aria-label', this.messages.label);
+    }
+  }
+
+  /**
    * Removes rendered popover items and header and displays new ones
    * @param items - new popover items
    * @param title - new popover header text
@@ -145,6 +165,7 @@ export class PopoverMobile extends PopoverAbstract<PopoverMobileNodes> {
     if (title !== undefined) {
       this.header = new PopoverHeader({
         text: title,
+        backButtonLabel: this.messages.back,
         onBackButtonClick: () => {
           this.history.pop();
 
@@ -157,6 +178,9 @@ export class PopoverMobile extends PopoverAbstract<PopoverMobileNodes> {
         this.nodes.popoverContainer.insertBefore(headerEl, this.nodes.popoverContainer.firstChild);
       }
     }
+
+    /** Nested popover is announced by its title, the root one by the label from messages */
+    this.updateAccessibleName();
 
     /** Re-render items. Container is cleared to drop empty radio group wrappers as well */
     this.items.forEach(item => item.getElement()?.remove());
