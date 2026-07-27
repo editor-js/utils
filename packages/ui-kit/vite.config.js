@@ -65,6 +65,14 @@ export default {
 
   plugins: [
     cssInjectedByJsPlugin(),
-    dts(),
+
+    /**
+     * The package tsconfig includes every file, so that the e2e suite is typechecked too,
+     * but their declarations must not reach dist: they import from '@playwright/test',
+     * a devDependency, which a consumer's TypeScript then fails to resolve
+     */
+    dts({
+      exclude: ['e2e/**', 'playwright.config.ts'],
+    }),
   ],
 };
