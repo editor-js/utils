@@ -1,6 +1,14 @@
 {
   "compilerOptions": {
     "composite": true,
+    /**
+     * 'bundler' resolution requires a module setting of es2015 or later, and without these
+     * tsc refuses the project outright (TS5095) rather than checking it — which is why nothing
+     * typechecked this package until now
+     */
+    "module": "esnext",
+    "target": "esnext",
+    "lib": ["dom", "esnext"],
     "declaration": true,
     "sourceMap": true,
     "noEmit": true,
