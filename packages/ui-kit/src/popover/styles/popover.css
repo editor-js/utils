@@ -50,6 +50,13 @@
     pointer-events: none;
     padding: 0;
     border: none;
+
+    /**
+     * opacity/max-height alone hide the popover visually but not from assistive tech - the
+     * inert attribute toggled in JS is not reliably enough on its own to pull a dynamic change
+     * like this out of Safari/VoiceOver's accessibility tree, so visibility is the backstop
+     */
+    visibility: hidden;
   }
 
   &--opened {
@@ -58,6 +65,7 @@
       padding: var(--padding);
       max-height: var(--max-height);
       pointer-events: auto;
+      visibility: visible;
       animation: panelShowing 100ms ease;
       border: 1px solid var(--color-border);
 

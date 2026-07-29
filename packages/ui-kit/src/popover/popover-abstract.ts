@@ -146,6 +146,13 @@ export abstract class PopoverAbstract<Nodes extends PopoverNodes = PopoverNodes>
     ]);
 
     this.nodes.popover.appendChild(this.nodes.popoverContainer);
+
+    /**
+     * The closed state is opacity/max-height driven so the open transition can animate,
+     * which leaves the popover in the accessibility tree even though nothing is visible
+     * on screen. inert keeps it out of both the AT tree and the tab order while closed
+     */
+    this.nodes.popover.inert = true;
   }
 
   /**
@@ -207,6 +214,7 @@ export abstract class PopoverAbstract<Nodes extends PopoverNodes = PopoverNodes>
    */
   public show(): void {
     this.nodes.popover.classList.add(css.popoverOpened);
+    this.nodes.popover.inert = false;
 
     if (this.search !== undefined) {
       this.search.toggleTabbable(true);
@@ -235,6 +243,7 @@ export abstract class PopoverAbstract<Nodes extends PopoverNodes = PopoverNodes>
   public hide(): void {
     this.nodes.popover.classList.remove(css.popoverOpened);
     this.nodes.popover.classList.remove(css.popoverOpenTop);
+    this.nodes.popover.inert = true;
 
     this.itemsDefault.forEach(item => item.reset());
 

@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
-import { activatedItems, hidePopover, isPopoverShown, openFixture, showPopover } from './utils';
+import { accessibleTreeNames, activatedItems, hidePopover, isPopoverShown, openFixture, showPopover } from './utils';
 
 /**
  * Returns the accessible name of the currently focused element
@@ -113,6 +113,50 @@ test.describe('keyboard navigation moves real focus', () => {
     expect(tabbable).toBe(0);
   });
 
+  test('a closed popover is hidden from assistive tech, not just visually collapsed', async ({ page }) => {
+    const popover = page.locator('.ce-popover');
+    const menu = page.getByRole('menu');
+    const item = page.getByRole('menuitem', { name: 'Simple Item' });
+
+    /**
+     * The closed state is opacity/max-height driven so the open animation has something to
+     * transition from, which does not remove the element from the accessibility tree on its
+     * own - a screen reader's virtual cursor could still land on menu items that are invisible
+     * and unclickable. visibility: hidden is what actually excludes it from assistive tech
+     * (inert is toggled alongside it too, but only covers focus/tab order: dynamically toggling
+     * it was not enough on its own to update Safari/VoiceOver's accessibility tree)
+     */
+    await expect(popover).toHaveJSProperty('inert', false);
+    await expect(menu).toBeVisible();
+    await expect(item).toBeVisible();
+
+    await hidePopover(page);
+
+    await expect(popover).toHaveJSProperty('inert', true);
+    await expect(menu).toHaveCount(0);
+    await expect(item).toHaveCount(0);
+
+    await page.getByRole('button', { name: /^Open/ }).click();
+
+    await expect(popover).toHaveJSProperty('inert', false);
+    await expect(menu).toBeVisible();
+    await expect(item).toBeVisible();
+  });
+
+  test('a closed popover is out of the real accessibility tree, not just Playwright\'s role computation', async ({ page, context, browserName }) => {
+    test.skip(browserName !== 'chromium', 'reading the real accessibility tree needs a CDP session, which only Chromium exposes');
+
+    /**
+     * getByRole() computes roles from the DOM/CSS itself, so it is not proof a screen reader
+     * would agree - this reads the tree via CDP instead, the same one a screen reader consumes
+     */
+    expect(await accessibleTreeNames(page, context)).toContain('Simple Item');
+
+    await hidePopover(page);
+
+    expect(await accessibleTreeNames(page, context)).not.toContain('Simple Item');
+  });
+
   test('isShown reflects whether the popover is open', async ({ page }) => {
     expect(await isPopoverShown(page)).toBe(true);
 
@@ -196,17 +240,94 @@ test.describe('nested submenu keyboard navigation', () => {
     await expect(page.getByRole('menuitem', { name: 'Child A' })).toBeVisible();
   });
 
-  test('ArrowLeft backs out of the submenu and refocuses the trigger item', async ({ page }) => {
+  test('opening a submenu moves the focus into it', async ({ page }) => {
     await openSubmenuFromKeyboard(page);
 
-    /** Move into the submenu itself, as ArrowDown inside it does today */
-    await page.keyboard.press('ArrowDown');
+    /**
+     * The focus has to follow, otherwise a screen reader announces nothing about the submenu
+     * that has just opened, and the arrows can not act on it while the focus is still outside
+     */
     await expect(page.getByRole('menuitem', { name: 'Child A' })).toBeFocused();
+  });
+
+  test('ArrowLeft backs out of the submenu right after it was opened', async ({ page }) => {
+    await openSubmenuFromKeyboard(page);
 
     await page.keyboard.press('ArrowLeft');
 
     await expect(page.getByRole('menuitem', { name: 'Child A' })).not.toBeVisible();
     await expect(page.getByRole('menuitem', { name: 'Has children' })).toBeFocused();
+  });
+
+  test('ArrowLeft backs out of the submenu and refocuses the trigger item', async ({ page }) => {
+    await openSubmenuFromKeyboard(page);
+
+    await page.keyboard.press('ArrowDown');
+    await expect(page.getByRole('menuitem', { name: 'Child B' })).toBeFocused();
+
+    await page.keyboard.press('ArrowLeft');
+
+    await expect(page.getByRole('menuitem', { name: 'Child A' })).not.toBeVisible();
+    await expect(page.getByRole('menuitem', { name: 'Has children' })).toBeFocused();
+  });
+
+  test('closing a submenu restores the highlight and the tab stop of the parent menu', async ({ page }) => {
+    await openSubmenuFromKeyboard(page);
+    await page.keyboard.press('ArrowLeft');
+
+    const triggerItem = page.getByRole('menuitem', { name: 'Has children' });
+
+    /**
+     * Focusing the trigger item is not enough on its own: the Flipper drops the cursor and
+     * every item's tabindex when it hands the keyboard over to the submenu. Without restoring
+     * them the item would hold the focus with no --focused class marking it (the default focus
+     * ring is suppressed, so the focus would be invisible), and the menu would be left without
+     * a single tab stop to be re-entered by
+     */
+    await expect(triggerItem).toHaveClass(/ce-popover-item--focused/);
+    await expect(triggerItem).toHaveAttribute('tabindex', '0');
+
+    const tabbable = await page.locator('.ce-popover-item').evaluateAll(items =>
+      items.filter(item => item.getAttribute('tabindex') === '0').length);
+
+    expect(tabbable).toBe(1);
+  });
+
+  test('arrow navigation resumes from the trigger item after a submenu was closed', async ({ page }) => {
+    await openSubmenuFromKeyboard(page);
+    await page.keyboard.press('ArrowLeft');
+
+    await page.keyboard.press('ArrowDown');
+
+    /** 'Delete' is the item right after 'Has children', not the first item of the list */
+    await expect(page.getByRole('menuitem', { name: 'Delete' })).toBeFocused();
+  });
+
+  test('Escape after a hover-opened submenu returns focus to the hovered item', async ({ page }) => {
+    await page.getByRole('menuitem', { name: 'Has children' }).hover();
+    await expect(page.getByRole('menuitem', { name: 'Child A' })).toBeVisible();
+
+    await page.keyboard.press('Escape');
+
+    /**
+     * Hovering opens a nested popover without going through showNestedItems(), so the item it
+     * was opened from used to go unrecorded and there was nothing to hand the focus back to
+     */
+    await expect(page.getByRole('menuitem', { name: 'Child A' })).toHaveCount(0);
+    await expect(page.getByRole('menuitem', { name: 'Has children' })).toBeFocused();
+  });
+
+  test('a submenu closed by hovering another item leaves the menu reachable by Tab', async ({ page }) => {
+    await page.getByRole('menuitem', { name: 'Has children' }).hover();
+    await expect(page.getByRole('menuitem', { name: 'Child A' })).toBeVisible();
+
+    await page.getByRole('menuitem', { name: 'Simple Item' }).hover();
+    await expect(page.getByRole('menuitem', { name: 'Child A' })).toHaveCount(0);
+
+    const tabbable = await page.locator('.ce-popover-item').evaluateAll(items =>
+      items.filter(item => item.getAttribute('tabindex') === '0').length);
+
+    expect(tabbable).toBe(1);
   });
 });
 
@@ -298,6 +419,39 @@ test.describe('inline popover keyboard navigation', () => {
     await expect(bold).not.toBeFocused();
   });
 
+  test('a closed inline popover is hidden from assistive tech too', async ({ page }) => {
+    await openFixture(page, 'inline');
+
+    const popover = page.locator('.ce-popover');
+    const bold = page.getByRole('button', { name: 'Bold',
+      exact: true });
+
+    await expect(popover).toHaveJSProperty('inert', true);
+    await expect(bold).toHaveCount(0);
+
+    await page.getByRole('button', { name: /^Open/ }).click();
+
+    await expect(popover).toHaveJSProperty('inert', false);
+    await expect(bold).toBeVisible();
+
+    await hidePopover(page);
+
+    await expect(popover).toHaveJSProperty('inert', true);
+    await expect(bold).toHaveCount(0);
+  });
+
+  test('a closed inline popover is out of the real accessibility tree too', async ({ page, context, browserName }) => {
+    test.skip(browserName !== 'chromium', 'reading the real accessibility tree needs a CDP session, which only Chromium exposes');
+
+    await showPopover(page, 'inline');
+
+    expect(await accessibleTreeNames(page, context)).toContain('Bold');
+
+    await hidePopover(page);
+
+    expect(await accessibleTreeNames(page, context)).not.toContain('Bold');
+  });
+
   /**
    * Safari drops the text selection once the focus moves to a button, which would break
    * applying inline tools with the keyboard
@@ -381,5 +535,44 @@ test.describe('inline popover keyboard navigation', () => {
 
     await page.keyboard.press('Tab');
     await expect(italic).toBeFocused();
+  });
+
+  test('the highlight follows the button Tab moved the focus to', async ({ page }) => {
+    await showPopover(page, 'inline');
+
+    const bold = page.getByRole('button', { name: 'Bold',
+      exact: true });
+
+    await page.getByRole('button', { name: 'Open inline toolbar' }).focus();
+    await page.keyboard.press('Tab');
+
+    /**
+     * Every item is an individual Tab stop here, so Tab can move the real focus behind the
+     * Flipper's back. Enter is handled by the Flipper and acts on its cursor, so the cursor
+     * has to follow the focus - otherwise the two point at different items
+     */
+    await expect(bold).toHaveClass(/ce-popover-item--focused/);
+
+    const highlighted = await page.locator('.ce-popover-item--focused').count();
+
+    expect(highlighted).toBe(1);
+  });
+
+  test('Enter activates the button the focus is on, not the one arrows highlighted earlier', async ({ page }) => {
+    await showPopover(page, 'inline');
+
+    /** Highlight the second item with the arrows, without moving the real focus */
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('ArrowDown');
+
+    await expect(page.getByRole('button', { name: 'Italic',
+      exact: true })).toHaveClass(/ce-popover-item--focused/);
+
+    /** Now Tab the real focus onto the first item and activate it */
+    await page.getByRole('button', { name: 'Open inline toolbar' }).focus();
+    await page.keyboard.press('Tab');
+    await page.keyboard.press('Enter');
+
+    expect(await activatedItems(page)).toEqual(['bold']);
   });
 });

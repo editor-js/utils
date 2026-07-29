@@ -56,7 +56,12 @@ test.describe('confirmation mode', () => {
 
     await hidePopover(page);
 
-    await expect(page.getByRole('menuitem', { name: 'Delete' })).toBeAttached();
+    /**
+     * The closed popover is hidden from assistive tech (visibility: hidden), so getByRole()
+     * can no longer find it - this checks the DOM directly to confirm the item itself is still
+     * there (not destroyed), just no longer exposed while the popover is closed
+     */
+    await expect(page.locator('[data-item-name="delete"]')).toBeAttached();
   });
 });
 

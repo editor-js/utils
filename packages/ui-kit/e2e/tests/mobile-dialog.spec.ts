@@ -89,7 +89,12 @@ test.describe('secondary item types', () => {
      */
     await openFixture(page, 'menu');
 
-    await expect(page.getByRole('button', { name: 'Custom control' })).toHaveAttribute('tabindex', '-1');
+    /**
+     * The closed popover is hidden from assistive tech (visibility: hidden), so getByRole()
+     * can no longer find it - this reaches it via its CSS class instead, since checking
+     * tabindex on a DOM node doesn't require it to be exposed to accessibility
+     */
+    await expect(page.locator('.ce-popover-item-html button')).toHaveAttribute('tabindex', '-1');
   });
 
   test('mobile dialog makes an html item\'s native control reachable by Tab, not its wrapper', async ({ page }) => {
@@ -118,7 +123,8 @@ test.describe('secondary item types', () => {
 
     await expect(page.getByRole('menuitem')).toHaveCount(0);
     await expect(page.getByRole('menuitemradio')).toHaveCount(2);
-    await expect(page.locator('.ce-popover-item[data-item-name="simple"]')).toHaveAttribute('hidden', '');
+    /** The item is still in the DOM, just hidden - and hence out of the accessibility tree */
+    await expect(page.locator('.ce-popover-item[data-item-name="simple"]')).toBeHidden();
   });
 });
 

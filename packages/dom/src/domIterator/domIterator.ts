@@ -62,11 +62,20 @@ export class DomIterator {
    * @param cursorPosition - new cursor position
    */
   public setCursor(cursorPosition: number): void {
-    if (cursorPosition < this.items.length && cursorPosition >= -1) {
-      this.dropCursor();
-      this.cursor = cursorPosition;
-      this.items[this.cursor].classList.add(this.focusedCssClass);
+    if (cursorPosition >= this.items.length || cursorPosition < -1) {
+      return;
     }
+
+    /** -1 is the 'nothing is active' position, there is no item to mark at it */
+    if (cursorPosition === -1) {
+      this.dropCursor();
+
+      return;
+    }
+
+    this.dropCursor();
+    this.cursor = cursorPosition;
+    this.items[this.cursor].classList.add(this.focusedCssClass);
   }
 
   /**

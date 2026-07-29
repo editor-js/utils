@@ -20,7 +20,12 @@ test.describe('search input', () => {
   test('is not reachable by Tab once the popover is closed', async ({ page }) => {
     await hidePopover(page);
 
-    const search = page.getByRole('searchbox', { name: 'Search' });
+    /**
+     * The closed popover is hidden from assistive tech (visibility: hidden), so getByRole()
+     * can no longer find the search field - this reaches it via its CSS class instead, since
+     * checking tabindex on a DOM node doesn't require it to be exposed to accessibility
+     */
+    const search = page.locator('.cdx-search-field__input');
 
     await expect(search).toHaveAttribute('tabindex', '-1');
 
@@ -48,6 +53,27 @@ test.describe('search input', () => {
     await page.keyboard.press('Tab');
 
     await expect(firstResult).toBeFocused();
+  });
+
+  test('arrow navigation after clicking a result stays within the matches', async ({ page }) => {
+    await page.getByRole('searchbox', { name: 'Search' }).fill('Align');
+
+    await expect(page.getByRole('menuitemradio')).toHaveCount(2);
+
+    /** A toggle item, so the popover stays open after the click */
+    await page.getByRole('menuitemradio', { name: 'Align Center' }).click();
+
+    /**
+     * Clicking gives the item the real focus, which moves the Flipper cursor to it. The cursor
+     * has to be indexed against the filtered list the Flipper is navigating - handing it the
+     * full list would silently put the filtered-out items back into the navigation, and the
+     * arrows would then travel through items that are not on screen
+     */
+    await page.keyboard.press('ArrowDown');
+    await expect(page.getByRole('menuitemradio', { name: 'Align Left' })).toBeFocused();
+
+    await page.keyboard.press('ArrowDown');
+    await expect(page.getByRole('menuitemradio', { name: 'Align Center' })).toBeFocused();
   });
 });
 

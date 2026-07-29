@@ -159,7 +159,11 @@ export class Flipper {
     this.dropCursor();
     this.resetFocus();
 
-    document.removeEventListener('keydown', this.onKeyDown);
+    /**
+     * Capturing flag has to match the one the listener was added with, otherwise nothing is
+     * removed and the handler stays on the document for the lifetime of the page
+     */
+    document.removeEventListener('keydown', this.onKeyDown, true);
   }
 
   /**
@@ -184,6 +188,15 @@ export class Flipper {
   public flipRight(): void {
     this.iterator.next();
     this.flipCallback();
+  }
+
+  /**
+   * Items the flipper currently navigates between.
+   * Not necessarily the full list it was constructed with: consumers narrow it down by
+   * re-activating the flipper with a subset, for example while a search filter is applied
+   */
+  public get currentItems(): HTMLElement[] {
+    return this.iterator.allItems;
   }
 
   /**

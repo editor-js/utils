@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test';
+import type { BrowserContext, Page } from '@playwright/test';
 
 /**
  * Fixture pages served by the vite dev server
@@ -86,4 +86,46 @@ export async function isPopoverShown(page: Page): Promise<boolean> {
  */
 export async function activatedItems(page: Page): Promise<string[]> {
   return page.evaluate(() => (window as unknown as FixtureWindow).__activated);
+}
+
+/**
+ * Subset of the accessibility tree returned by the Accessibility.getFullAXTree CDP command
+ */
+interface AXTree {
+  /**
+   * Every node of the tree, flattened
+   */
+  nodes: Array<{
+    /**
+     * Accessible name of the node, absent for the nodes that have none
+     */
+    name?: {
+      /**
+       * Computed name value
+       */
+      value?: string;
+    };
+  }>;
+}
+
+/**
+ * Returns every accessible name currently present in the page's real accessibility tree, via
+ * the same Chrome DevTools Protocol tree a screen reader like VoiceOver actually consumes.
+ * getByRole() is not enough for this: it computes roles from the DOM/CSS itself and does not
+ * honour `inert`, so it still finds elements a real screen reader would never reach
+ * @param page - playwright page object
+ * @param context - browser context the page belongs to, needed to open a CDP session
+ */
+export async function accessibleTreeNames(page: Page, context: BrowserContext): Promise<string[]> {
+  const client = await context.newCDPSession(page);
+
+  try {
+    const { nodes } = await client.send('Accessibility.getFullAXTree') as AXTree;
+
+    return nodes
+      .map(node => node.name?.value)
+      .filter((name): name is string => Boolean(name));
+  } finally {
+    await client.detach();
+  }
 }
