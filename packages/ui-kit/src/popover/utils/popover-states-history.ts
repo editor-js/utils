@@ -13,6 +13,12 @@ interface PopoverStatesHistoryItem {
    * Popover items
    */
   items: PopoverItemParams[];
+
+  /**
+   * False if the items of this state opted out of keyboard navigation.
+   * Undefined is treated as navigable, which is the default for every level
+   */
+  isFlippable?: boolean;
 }
 
 /**
@@ -59,6 +65,17 @@ export class PopoverStatesHistory {
     }
 
     return this.history[this.history.length - 1].items;
+  }
+
+  /**
+   * Whether the items of the current state take part in keyboard navigation
+   */
+  public get currentIsFlippable(): boolean {
+    if (this.history.length === 0) {
+      return true;
+    }
+
+    return this.history[this.history.length - 1].isFlippable !== false;
   }
 
   /**

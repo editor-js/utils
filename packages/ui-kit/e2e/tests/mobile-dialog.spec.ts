@@ -135,6 +135,29 @@ test.describe('mobile popover', () => {
     await expect(back).toBeFocused();
   });
 
+  test('a nested level with isFlippable false leaves its keys to its own controls', async ({ page }) => {
+    /**
+     * Nested levels render into the same panel as the root one, so the Flipper that navigates
+     * the root list would carry on claiming the arrows and Enter here too - and an item built
+     * around a text input needs both for itself
+     */
+    await showPopover(page, 'mobileNestedInput');
+
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('Enter');
+
+    const input = page.getByRole('textbox', { name: 'Nested input' });
+
+    await expect(input).toBeVisible();
+
+    await input.fill('editorjs');
+    await page.keyboard.press('ArrowDown');
+
+    /** The Flipper would have moved the focus off to the next item by now */
+    await expect(input).toBeFocused();
+    await expect(input).toHaveValue('editorjs');
+  });
+
   test('Enter drills into a nested item', async ({ page }) => {
     await showPopover(page, 'mobile');
 

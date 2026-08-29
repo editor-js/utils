@@ -16,6 +16,7 @@ export const fixtures = {
   confirmationToggle: '/e2e/fixtures/confirmation-toggle.html',
   mobilePlain: '/e2e/fixtures/mobile-plain.html',
   mobileEmpty: '/e2e/fixtures/mobile-empty.html',
+  mobileNestedInput: '/e2e/fixtures/mobile-nested-input.html',
 } as const;
 
 /**

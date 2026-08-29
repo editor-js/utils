@@ -259,6 +259,7 @@ export class PopoverDesktop extends PopoverAbstract {
 
     if (this.search !== undefined) {
       this.search.updateItems(this.itemsDefault);
+      this.search.reapplyQuery();
     }
   }
 
@@ -271,6 +272,7 @@ export class PopoverDesktop extends PopoverAbstract {
 
     if (this.search !== undefined) {
       this.search.updateItems(this.itemsDefault);
+      this.search.reapplyQuery();
     }
   }
 
