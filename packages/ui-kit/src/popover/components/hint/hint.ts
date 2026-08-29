@@ -1,4 +1,5 @@
 import { make } from '@editorjs/dom';
+import { generateId } from '@editorjs/helpers';
 import { css } from './hint.const';
 import type { HintParams } from '../../types';
 
@@ -8,11 +9,6 @@ import './hint.css';
  * Represents the hint content component
  */
 export class Hint {
-  /**
-   * Counter used to generate unique ids for hint elements
-   */
-  private static instancesCount = 0;
-
   /**
    * Html element used to display hint content on screen
    */
@@ -43,10 +39,8 @@ export class Hint {
       title: make('div', css.title, { textContent: params.title }),
     };
 
-    Hint.instancesCount += 1;
-
     /** Item refers to the hint via aria-describedby, so the hint needs an id and a role */
-    this.nodes.root.id = `${css.root}-${Hint.instancesCount.toString()}`;
+    this.nodes.root.id = generateId(`${css.root}-`);
     this.nodes.root.setAttribute('role', 'tooltip');
 
     this.nodes.root.appendChild(this.nodes.title);

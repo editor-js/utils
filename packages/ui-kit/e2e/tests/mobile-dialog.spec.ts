@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { openFixture, showPopover } from './utils';
+import { hidePopover, openFixture, showPopover } from './utils';
 
 test.describe('mobile popover', () => {
   test('is exposed as a modal dialog', async ({ page }) => {
@@ -11,16 +11,66 @@ test.describe('mobile popover', () => {
     await expect(dialog).toHaveAttribute('aria-modal', 'true');
   });
 
-  test('moves focus inside on open and keeps Tab within the dialog', async ({ page }) => {
+  test('moves focus inside on open and navigates the menu with the arrows', async ({ page }) => {
     await showPopover(page, 'mobile');
 
     await expect(page.getByRole('menuitem', { name: 'Simple Item' })).toBeFocused();
 
-    await page.keyboard.press('Tab');
+    await page.keyboard.press('ArrowDown');
     await expect(page.getByRole('menuitem', { name: 'Has children' })).toBeFocused();
 
-    await page.keyboard.press('Tab');
+    await page.keyboard.press('ArrowDown');
     await expect(page.getByRole('menuitem', { name: 'Simple Item' })).toBeFocused();
+  });
+
+  test('menu is a single Tab stop and Tab does not leave the dialog', async ({ page }) => {
+    await showPopover(page, 'mobile');
+
+    /**
+     * The item list is a menu, so it takes part in the tab sequence as a whole: only the item
+     * the user is currently on is tabbable, the arrows move between the items. Tab has nothing
+     * else to reach in this dialog, so it stays where it is rather than leaving for the page
+     */
+    const item = page.getByRole('menuitem', { name: 'Simple Item' });
+
+    await expect(item).toHaveAttribute('tabindex', '0');
+    await expect(page.getByRole('menuitem', { name: 'Has children' })).toHaveAttribute('tabindex', '-1');
+
+    await page.keyboard.press('Tab');
+    await expect(item).toBeFocused();
+
+    await page.keyboard.press('Shift+Tab');
+    await expect(item).toBeFocused();
+  });
+
+  test('the roving tabindex follows the arrows', async ({ page }) => {
+    await showPopover(page, 'mobile');
+
+    await page.keyboard.press('ArrowDown');
+
+    await expect(page.getByRole('menuitem', { name: 'Has children' })).toHaveAttribute('tabindex', '0');
+    await expect(page.getByRole('menuitem', { name: 'Simple Item' })).toHaveAttribute('tabindex', '-1');
+  });
+
+  test('keeps the focus that moved out of the dialog while it was open', async ({ page }) => {
+    await openFixture(page, 'mobile');
+
+    const trigger = page.getByRole('button', { name: 'Open mobile popover' });
+
+    await trigger.focus();
+    await page.keyboard.press('Enter');
+    await expect(page.getByRole('dialog')).toBeVisible();
+
+    /**
+     * Focus has been moved out of the popover by something else, so closing it must not yank
+     * the focus back to whatever opened it
+     */
+    const outside = page.getByRole('button', { name: 'Before' });
+
+    await outside.focus();
+    await hidePopover(page);
+
+    await expect(outside).toBeFocused();
   });
 
   test('Escape closes the dialog and returns focus to the trigger', async ({ page }) => {
@@ -55,6 +105,31 @@ test.describe('mobile popover', () => {
     const separator = page.getByRole('separator');
 
     await expect(separator).toHaveAttribute('tabindex', '-1');
+  });
+
+  test('Tab moves between the back button and the menu once nested', async ({ page }) => {
+    await showPopover(page, 'mobile');
+
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('Enter');
+
+    /**
+     * The menu counts as one tab stop, so the nested panel has exactly two: the back button
+     * that leaves this level, and whichever item the arrows are currently on
+     */
+    const back = page.getByRole('button', { name: 'Back' });
+    const child = page.getByRole('menuitem', { name: 'Child A' });
+
+    await expect(child).toBeFocused();
+
+    await page.keyboard.press('Tab');
+    await expect(back).toBeFocused();
+
+    await page.keyboard.press('Tab');
+    await expect(child).toBeFocused();
+
+    await page.keyboard.press('Shift+Tab');
+    await expect(back).toBeFocused();
   });
 
   test('Enter drills into a nested item', async ({ page }) => {
@@ -97,22 +172,22 @@ test.describe('secondary item types', () => {
     await expect(page.locator('.ce-popover-item-html button')).toHaveAttribute('tabindex', '-1');
   });
 
-  test('mobile dialog makes an html item\'s native control reachable by Tab, not its wrapper', async ({ page }) => {
+  test('mobile dialog navigates to an html item\'s native control, not to its wrapper', async ({ page }) => {
     /**
      * The mobile dialog used to toggle tabindex on the html item's role="none" wrapper instead
-     * of its actual control, leaving the control permanently untabbable and breaking the Tab loop
+     * of its actual control, leaving the control permanently unreachable from the keyboard
      */
     await showPopover(page, 'mobileHtmlItem');
 
     const control = page.getByRole('button', { name: 'Custom control' });
 
     await expect(page.getByRole('menuitem', { name: 'Simple item' })).toBeFocused();
+
+    await page.keyboard.press('ArrowDown');
+    await expect(control).toBeFocused();
     await expect(control).toHaveAttribute('tabindex', '0');
 
-    await page.keyboard.press('Tab');
-    await expect(control).toBeFocused();
-
-    await page.keyboard.press('Tab');
+    await page.keyboard.press('ArrowDown');
     await expect(page.getByRole('menuitem', { name: 'Simple item' })).toBeFocused();
   });
 
@@ -136,6 +211,23 @@ test.describe('hints', () => {
       exact: true });
 
     await expect(italic).toHaveAttribute('aria-describedby', /.+/);
+  });
+
+  test('html item hint describes its control and is shown once that control gets focus', async ({ page }) => {
+    /**
+     * An html item's root is a role="none" wrapper the focus never lands on, so the hint used
+     * to be tied to an element that never fires focus - it was hover-only for such items
+     */
+    await showPopover(page, 'menu');
+
+    const control = page.getByRole('button', { name: 'Custom control' });
+    const describedBy = await control.getAttribute('aria-describedby');
+
+    expect(describedBy).not.toBeNull();
+
+    await control.focus();
+
+    await expect(page.locator(`#${describedBy as string}`)).toBeVisible();
   });
 
   test('hint is shown once the item gets keyboard focus', async ({ page }) => {

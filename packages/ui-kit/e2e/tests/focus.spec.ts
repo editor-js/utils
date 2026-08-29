@@ -331,6 +331,33 @@ test.describe('nested submenu keyboard navigation', () => {
   });
 });
 
+test.describe('Tab leafs the items', () => {
+  test('Tab cycles the items of a popover without a search field', async ({ page }) => {
+    /**
+     * Editor.js relies on Tab leafing the items rather than leaving the popover, which is a
+     * deliberate departure from the WAI-ARIA menu pattern. The items share one roving tabindex,
+     * so the browser sees a single stop here and the ring has to be walked by the popover
+     */
+    await showPopover(page, 'nestedInput');
+
+    const first = page.getByRole('menuitem', { name: 'Simple item' });
+    const last = page.getByRole('menuitem', { name: 'Has children' });
+
+    await page.keyboard.press('ArrowDown');
+    await expect(first).toBeFocused();
+
+    await page.keyboard.press('Tab');
+    await expect(last).toBeFocused();
+
+    /** Round the end of the list rather than out of the popover */
+    await page.keyboard.press('Tab');
+    await expect(first).toBeFocused();
+
+    await page.keyboard.press('Shift+Tab');
+    await expect(last).toBeFocused();
+  });
+});
+
 test.describe('nested popover with a custom focus target', () => {
   test('onOpen focuses its element on a keyboard-triggered open, not just on hover', async ({ page }) => {
     await showPopover(page, 'nestedInput');

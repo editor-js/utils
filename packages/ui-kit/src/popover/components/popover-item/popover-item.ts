@@ -97,9 +97,13 @@ export abstract class PopoverItem {
    * Adds hint to the item element if hint data is provided
    * @param itemElement - popover item root element to add hint to
    * @param hintData - hint constructor data and it's position relative to the item element
+   * @param describedElements - elements that should reference the hint via aria-describedby.
+   * Defaults to the item root, which is what takes the focus for most of the item types.
+   * An html item passes its inner controls instead: the focus lands on those, and its own
+   * root is a role="none" wrapper no screen reader would read the description of
    */
   // eslint-disable-next-line jsdoc/require-jsdoc -- ESLint doesn't understand an object is a type there
-  protected addHint(itemElement: HTMLElement, hintData: HintParams & { position: HintPosition }): void {
+  protected addHint(itemElement: HTMLElement, hintData: HintParams & { position: HintPosition }, describedElements: HTMLElement[] = [itemElement]): void {
     const content = new Hint(hintData);
     const contentElement = content.getElement();
     const options = {
@@ -113,13 +117,19 @@ export abstract class PopoverItem {
      * Hint holds the shortcut description, so it should be available to the keyboard users too,
      * not only on hover
      */
-    itemElement.setAttribute('aria-describedby', contentElement.id);
+    describedElements.forEach((element) => {
+      element.setAttribute('aria-describedby', contentElement.id);
+    });
 
-    this.listeners.on(itemElement, 'focus', () => {
+    /**
+     * focusin/focusout rather than focus/blur: the latter do not bubble, so they would never
+     * reach the item root when the focus lands on a control nested inside it
+     */
+    this.listeners.on(itemElement, 'focusin', () => {
       tooltip.show(itemElement, contentElement, options);
     });
 
-    this.listeners.on(itemElement, 'blur', () => {
+    this.listeners.on(itemElement, 'focusout', () => {
       tooltip.hide(true);
     });
   }

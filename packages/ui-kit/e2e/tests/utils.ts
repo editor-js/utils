@@ -61,6 +61,16 @@ interface PopoverWindow {
      * Whether the popover is currently open
      */
     isShown: boolean;
+
+    /**
+     * Appends an item to the popover
+     */
+    addItem: (params: Record<string, unknown>) => void;
+
+    /**
+     * Removes an item from the popover by its name
+     */
+    removeItemByName: (name: string) => void;
   };
 }
 
@@ -70,6 +80,30 @@ interface PopoverWindow {
  */
 export async function hidePopover(page: Page): Promise<void> {
   await page.evaluate(() => (window as unknown as PopoverWindow).popover.hide());
+}
+
+/**
+ * Appends an item to the fixture page's popover
+ * @param page - playwright page object
+ * @param params - parameters of the item to add
+ */
+export async function addItem(page: Page, params: Record<string, unknown>): Promise<void> {
+  await page.evaluate(
+    itemParams => (window as unknown as PopoverWindow).popover.addItem(itemParams),
+    params
+  );
+}
+
+/**
+ * Removes an item from the fixture page's popover
+ * @param page - playwright page object
+ * @param name - the item's 'name' as it was given in its construction params
+ */
+export async function removeItemByName(page: Page, name: string): Promise<void> {
+  await page.evaluate(
+    itemName => (window as unknown as PopoverWindow).popover.removeItemByName(itemName),
+    name
+  );
 }
 
 /**

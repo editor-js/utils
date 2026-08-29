@@ -36,6 +36,22 @@ test.describe('search announcements', () => {
     await expect(status).toHaveText('');
     await expect(status).toHaveText('2 results');
   });
+
+  test('drops a pending announcement once the query is cleared', async ({ page }) => {
+    const search = page.getByRole('searchbox', { name: 'Search' });
+    const status = page.getByRole('status').first();
+
+    await search.fill('Align');
+
+    /** Well within the announcement debounce, so the '2 results' report is still pending */
+    await search.fill('');
+
+    /** Long enough for that report to have fired, had clearing the box not cancelled it */
+    // eslint-disable-next-line @typescript-eslint/no-magic-numbers -- comfortably past the 500ms debounce
+    await page.waitForTimeout(1000);
+
+    await expect(status).toHaveText('');
+  });
 });
 
 test.describe('confirmation mode', () => {

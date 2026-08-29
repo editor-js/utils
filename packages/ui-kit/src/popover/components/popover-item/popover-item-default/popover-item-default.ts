@@ -1,4 +1,5 @@
 import { make } from '@editorjs/dom';
+import { generateId } from '@editorjs/helpers';
 import { IconDotCircle, IconChevronRight } from '@codexteam/icons';
 import type {
   PopoverItemDefaultParams as PopoverItemDefaultParams,
@@ -16,11 +17,6 @@ import { css } from './popover-item-default.const';
  * @todo display icon on the right side of the item for rtl languages
  */
 export class PopoverItemDefault extends PopoverItem {
-  /**
-   * Counter used to generate unique ids for item root elements
-   */
-  private static instancesCount = 0;
-
   /**
    * Id of the item's root element.
    * Stable for the lifetime of the item, including across confirmation mode toggles -
@@ -164,8 +160,7 @@ export class PopoverItemDefault extends PopoverItem {
 
     this.nodes.root = this.make(params, renderParams);
 
-    PopoverItemDefault.instancesCount += 1;
-    this.nodes.root.id = `${css.container}-${PopoverItemDefault.instancesCount.toString()}`;
+    this.nodes.root.id = generateId(`${css.container}-`);
   }
 
   /**

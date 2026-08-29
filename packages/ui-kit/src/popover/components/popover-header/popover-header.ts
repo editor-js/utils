@@ -2,17 +2,12 @@ import type { PopoverHeaderParams } from './popover-header.types';
 import * as Dom from '@editorjs/dom';
 import { css } from './popover-header.const';
 import { IconChevronLeft } from '@codexteam/icons';
-import { Listeners } from '@editorjs/helpers';
+import { Listeners, generateId } from '@editorjs/helpers';
 
 /**
  * Represents popover header ui element
  */
 export class PopoverHeader {
-  /**
-   * Counter used to generate unique ids for header text elements
-   */
-  private static instancesCount = 0;
-
   /**
    * Listeners util instance
    */
@@ -74,17 +69,8 @@ export class PopoverHeader {
     this.listeners.on(this.nodes.backButton, 'click', this.onBackButtonClick);
 
     this.nodes.text.innerText = this.text;
-    this.nodes.text.id = PopoverHeader.createTextId();
+    this.nodes.text.id = generateId(`${css.text}-`);
     this.nodes.root.appendChild(this.nodes.text);
-  }
-
-  /**
-   * Returns an id that is unique among the headers rendered on the page
-   */
-  private static createTextId(): string {
-    PopoverHeader.instancesCount += 1;
-
-    return `${css.text}-${PopoverHeader.instancesCount.toString()}`;
   }
 
   /**

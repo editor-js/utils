@@ -55,6 +55,45 @@ test.describe('search input', () => {
     await expect(firstResult).toBeFocused();
   });
 
+  test('Shift+Tab from the first item returns to the search field', async ({ page }) => {
+    /**
+     * The search field is not one of the items the Flipper navigates, so a Tab ring made of
+     * the items alone would strand it: once the focus moved into the list there would be no
+     * way back to the query the list is filtered by
+     */
+    const search = page.getByRole('searchbox', { name: 'Search' });
+
+    await page.keyboard.press('Tab');
+    await expect(page.getByRole('menuitem', { name: 'Simple Item' })).toBeFocused();
+
+    await page.keyboard.press('Shift+Tab');
+    await expect(search).toBeFocused();
+  });
+
+  test('Tab from the last item wraps round to the search field', async ({ page }) => {
+    /** The html item's control is the last stop of the ring before it comes back round */
+    const control = page.getByRole('button', { name: 'Custom control' });
+
+    await control.focus();
+    await page.keyboard.press('Tab');
+
+    await expect(page.getByRole('searchbox', { name: 'Search' })).toBeFocused();
+  });
+
+  test('Shift+Tab leafs the items backwards instead of leaving the popover', async ({ page }) => {
+    /**
+     * Flipper.handleTabPress() always read the modifier to pick a direction, but the handler
+     * bailed out of every Shift-modified key before reaching it, so Shift+Tab fell through to
+     * the browser and dropped the user out of the list they were half way through
+     */
+    await page.keyboard.press('Tab');
+    await page.keyboard.press('Tab');
+    await expect(page.getByRole('menuitemradio', { name: 'Align Left' })).toBeFocused();
+
+    await page.keyboard.press('Shift+Tab');
+    await expect(page.getByRole('menuitem', { name: 'Simple Item' })).toBeFocused();
+  });
+
   test('arrow navigation after clicking a result stays within the matches', async ({ page }) => {
     await page.getByRole('searchbox', { name: 'Search' }).fill('Align');
 

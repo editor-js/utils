@@ -114,6 +114,14 @@ export class SearchInput extends EventsDispatcher<SearchInputEventMap> {
   }
 
   /**
+   * Element that actually takes the focus. The popover places it in its Tab ring, which is
+   * matched against document.activeElement, so the wrapper getElement() returns is no use there
+   */
+  public get inputElement(): HTMLElement {
+    return this.input;
+  }
+
+  /**
    * Sets focus to the input
    */
   public focus(): void {

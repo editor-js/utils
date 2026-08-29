@@ -31,11 +31,6 @@ const SEARCH_RESULTS_ANNOUNCEMENT_DEBOUNCE = 500;
  */
 export class PopoverDesktop extends PopoverAbstract {
   /**
-   * Flipper - module for keyboard iteration between elements
-   */
-  public flipper?: Flipper;
-
-  /**
    * Popover nesting level. 0 value means that it is a root popover
    */
   public nestingLevel = 0;
@@ -102,17 +97,6 @@ export class PopoverDesktop extends PopoverAbstract {
       this.listeners.on(this.nodes.popoverContainer, 'mouseover', (event: Event) => this.handleHover(event));
     }
 
-    /**
-     * Real focus can land on an item without the Flipper knowing about it: in a popover that
-     * doesn't move focus itself every item is an individual Tab stop, so Tab walks between them
-     * behind the Flipper's back. Enter, however, is handled by the Flipper and acts on its
-     * cursor, so the two would activate different items unless the cursor follows the focus.
-     *
-     * Keeping them in sync also guarantees a focused item always carries the --focused class,
-     * which is what conveys the focus visually (the default ring is suppressed, see popover.css)
-     */
-    this.listeners.on(this.nodes.items, 'focusin', (event: Event) => this.syncFlipperCursor(event as FocusEvent));
-
     if (params.searchable === true) {
       this.addSearch();
     }
@@ -129,20 +113,14 @@ export class PopoverDesktop extends PopoverAbstract {
         focusItems: this.movesFocusToItems,
         allowedKeys: [
           /**
-           * Tab is only Flipper's to handle while it actually moves real focus (roving
-           * tabindex). When it doesn't (inline popovers, see movesFocusToItems), claiming Tab
-           * here would only shift the highlight and swallow the keypress, leaving native Tab
-           * navigation between the individually-tabbable items with nothing to work with.
+           * Tab is the popover's own to handle rather than the Flipper's, see handleTabKeyDown().
+           * The Flipper would only ever leaf its items, and the ring Tab walks has to take in
+           * the search field too, which is not one of them.
            *
-           * KNOWN ASYMMETRY: Flipper handles Tab but bails out of every Shift-modified key, so
-           * Tab cycles around the items forever while Shift+Tab leaves the popover natively.
-           * The WAI-ARIA menu pattern would have Tab leave the menu too, which is what dropping
-           * this key would give — it is kept for now because consumers rely on Tab leafing the
-           * items. Escape and ArrowLeft both leave the popover, so this is not a keyboard trap.
-           * The Flipper's Tab handling predates the roving tabindex, which is what made the
-           * asymmetry reachable: before it, the real focus never entered the popover at all
+           * Note this departs from the WAI-ARIA menu pattern, where Tab leaves the menu
+           * altogether: Editor.js wants it to leaf the items. Escape and ArrowLeft both exit,
+           * so the popover is not a keyboard trap
            */
-          ...(this.movesFocusToItems ? [keyCodes.TAB] : []),
           keyCodes.UP,
           keyCodes.DOWN,
           keyCodes.ENTER,
@@ -155,20 +133,15 @@ export class PopoverDesktop extends PopoverAbstract {
   }
 
   /**
-   * True if the element needs the horizontal arrow keys for itself, which is the case
-   * for anything the user can type into: the arrows move the text cursor there
+   * True if the element needs the horizontal arrow keys for itself: anything the user can type
+   * into (the arrows move the text cursor there) and a select (they change the picked option)
    * @param element - currently focused element
    */
   private static consumesArrowKeys(element: HTMLElement): boolean {
-    return element.isContentEditable || element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement;
-  }
-
-  /**
-   * True if keyboard navigation should move real DOM focus between the items.
-   * Popovers that act on the text selection have to keep the focus where it is
-   */
-  protected get movesFocusToItems(): boolean {
-    return true;
+    return element.isContentEditable
+      || element instanceof HTMLInputElement
+      || element instanceof HTMLTextAreaElement
+      || element instanceof HTMLSelectElement;
   }
 
   /**
@@ -466,6 +439,17 @@ export class PopoverDesktop extends PopoverAbstract {
   }
 
   /**
+   * Called on flipper navigation
+   */
+  protected override onFlip = (): void => {
+    const focusedItem = this.itemsDefault.find(item => item.isFocused);
+
+    focusedItem?.onFocus();
+
+    this.emit(PopoverEvent.ActiveDescendantChanged, focusedItem?.id ?? null);
+  };
+
+  /**
    * Deepest popover in the currently open nested chain; itself when nothing is nested
    */
   private get deepestOpenPopover(): PopoverDesktop {
@@ -496,38 +480,6 @@ export class PopoverDesktop extends PopoverAbstract {
   }
 
   /**
-   * Moves the keyboard navigation cursor to the specified element, so that the highlight, the
-   * roving tabindex and — in the popovers that move it — the real focus all point at the same
-   * item. Going through the Flipper rather than focusing the element directly is what keeps
-   * its cursor in sync: otherwise the next arrow press would resume from the top of the list
-   * @param element - one of the items the popover navigates between
-   * @returns false when the element is not one the Flipper navigates, so that the caller can
-   * decide what to do about the focus itself
-   */
-  private moveCursorTo(element: HTMLElement): boolean {
-    if (this.flipper === undefined) {
-      return false;
-    }
-
-    /**
-     * Indexed against the Flipper's own list rather than against flippableElements, and
-     * activated without passing a list at all: while a search query is applied the Flipper
-     * navigates only the matching items, and handing it the full list here would silently
-     * put the filtered-out ones back into the navigation
-     */
-    const index = this.flipper.currentItems.indexOf(element);
-
-    if (index === -1) {
-      return false;
-    }
-
-    this.flipper.activate(undefined, index);
-    this.onFlip();
-
-    return true;
-  }
-
-  /**
    * Returns the highlight, the real focus and the roving tabindex to the specified item
    * @param item - item to move the keyboard navigation cursor to
    */
@@ -545,30 +497,10 @@ export class PopoverDesktop extends PopoverAbstract {
   }
 
   /**
-   * Moves the Flipper cursor to the item that has just received the real DOM focus,
-   * so that Enter (handled by the Flipper) always acts on the item the user is actually on
-   * @param event - focusin event fired inside the items container
-   */
-  private syncFlipperCursor(event: FocusEvent): void {
-    /** While a nested popover is open the keyboard belongs to it, this one stays deactivated */
-    if (this.nestedPopover != null) {
-      return;
-    }
-
-    const target = event.target as HTMLElement;
-
-    /** Cursor is already there: this is the focus the Flipper has just moved itself */
-    if (target.classList.contains(popoverItemCls.focused)) {
-      return;
-    }
-
-    this.moveCursorTo(target);
-  }
-
-  /**
    * Handles the keys the Flipper doesn't own: Escape backs out of the currently open submenu
    * (or closes the whole popover once there is none), ArrowLeft/ArrowRight do the same plus
-   * open a submenu, matching the WAI-ARIA menu pattern.
+   * open a submenu, matching the WAI-ARIA menu pattern, and Tab leafs the items of whichever
+   * popover of the chain is currently open.
    *
    * Registered only on the root popover (nestingLevel 0, see show()/hide()) and resolves which
    * level of the chain is currently open by itself, so a single listener stays correct
@@ -582,6 +514,12 @@ export class PopoverDesktop extends PopoverAbstract {
       if (!this.closeDeepestNestedPopover()) {
         this.hide();
       }
+
+      return;
+    }
+
+    if (event.key === 'Tab') {
+      this.deepestOpenPopover.handleTabKeyDown(event);
 
       return;
     }
@@ -622,6 +560,57 @@ export class PopoverDesktop extends PopoverAbstract {
     /** Clicking opens the submenu and moves the focus into it, see showNestedItems() */
     focusedItem.getElement()?.click();
   };
+
+  /**
+   * Walks the popover's Tab ring, wrapping around at its ends.
+   *
+   * The items share a single roving tabindex, so the browser sees the whole list as one stop
+   * and Tab would leave the popover the moment it entered. Editor.js expects Tab to leaf the
+   * items instead, so the ring is walked here rather than natively - and it takes in the search
+   * field, which is not one of the items the Flipper navigates and would otherwise fall out of
+   * reach as soon as the focus moved into the list
+   * @param event - Tab keydown event to handle
+   */
+  private handleTabKeyDown(event: KeyboardEvent): void {
+    /**
+     * Only the popovers keeping a single Tab stop for the whole list need this. Where every
+     * item is an individual stop - inline popovers, or one built with 'flippable: false' -
+     * native Tab already walks them and claiming the key here would break that
+     */
+    if (!this.hasRovingTabindex) {
+      return;
+    }
+
+    const stops = this.tabRing;
+    const active = document.activeElement;
+    const currentIndex = active instanceof HTMLElement ? stops.indexOf(active) : -1;
+
+    /** Focus is not on a stop of this ring, so the keypress is none of the popover's business */
+    if (currentIndex === -1) {
+      return;
+    }
+
+    event.preventDefault();
+
+    const step = event.shiftKey ? -1 : 1;
+
+    stops[(currentIndex + step + stops.length) % stops.length].focus();
+  }
+
+  /**
+   * Stops of the Tab ring, in the document order: the search field, when the popover has one,
+   * followed by the items the Flipper is currently navigating. That is the filtered subset
+   * while a search query is applied, so the ring never visits an item that is off screen
+   */
+  private get tabRing(): HTMLElement[] {
+    const items = this.flipper?.currentItems ?? [];
+
+    if (this.search === undefined) {
+      return items;
+    }
+
+    return [this.search.inputElement, ...items];
+  }
 
   /**
    * Moves the keyboard navigation cursor to the first item of the popover
@@ -713,71 +702,11 @@ export class PopoverDesktop extends PopoverAbstract {
   }
 
   /**
-   * Returns list of elements available for keyboard navigation.
+   * While a nested popover is open the keyboard belongs to it, this one stays deactivated
    */
-  private get flippableElements(): HTMLElement[] {
-    const result = this.items
-      .map((item) => {
-        if (item instanceof PopoverItemDefault) {
-          return item.getElement();
-        }
-        if (item instanceof PopoverItemHtml) {
-          return item.getControls();
-        }
-      })
-      .flat()
-      .filter(item => item !== undefined && item !== null);
-
-    return result;
+  protected override get isFlipperCursorSyncEnabled(): boolean {
+    return this.nestedPopover == null;
   }
-
-  /**
-   * Makes the items of the opened popover reachable by Tab, so that the popover
-   * can be entered from the keyboard.
-   *
-   * When the Flipper actually moves real DOM focus between items (arrow-key roving tabindex),
-   * only the first item is made tabbable here and Flipper takes over moving the `0` as
-   * navigation happens. Otherwise – no Flipper at all (`flippable: false`), or one that only
-   * moves a visual highlight without touching focus (inline popovers, see `movesFocusToItems`) –
-   * there is no mechanism left to reach items past the first one, so every item is made an
-   * individual Tab stop instead.
-   *
-   * A closed popover stays in the DOM, so all its items become untabbable on hide,
-   * otherwise Tab pressed outside of the popover would land on a hidden item
-   * @param isTabbable - true if the popover is opened and should be reachable by Tab
-   * @param elements - elements to make tabbable, defaults to all of them. Passed explicitly
-   * while searching, so that only the currently visible items are considered
-   */
-  private toggleItemsTabbable(isTabbable: boolean, elements: HTMLElement[] = this.flippableElements): void {
-    const hasRovingTabindex = this.flipper !== undefined && this.movesFocusToItems;
-
-    this.flippableElements.forEach((element) => {
-      element.tabIndex = -1;
-    });
-
-    if (!isTabbable || elements.length === 0) {
-      return;
-    }
-
-    if (hasRovingTabindex) {
-      elements[0].tabIndex = 0;
-    } else {
-      elements.forEach((element) => {
-        element.tabIndex = 0;
-      });
-    }
-  }
-
-  /**
-   * Called on flipper navigation
-   */
-  private onFlip = (): void => {
-    const focusedItem = this.itemsDefault.find(item => item.isFocused);
-
-    focusedItem?.onFocus();
-
-    this.emit(PopoverEvent.ActiveDescendantChanged, focusedItem?.id ?? null);
-  };
 
   /**
    * Adds search to the popover
@@ -847,12 +776,16 @@ export class PopoverDesktop extends PopoverAbstract {
    * @param count - number of the items matching the query
    */
   private announceSearchResults(query: string, count: number): void {
+    /**
+     * Dropped first, so that a pending announcement of the previous query never outlives it -
+     * clearing the search box mid-debounce would otherwise still report the stale result count
+     */
+    window.clearTimeout(this.searchResultsAnnouncementTimeout);
+
     /** Clearing the query is not a result of a user search, nothing to report */
     if (query === '') {
       return;
     }
-
-    window.clearTimeout(this.searchResultsAnnouncementTimeout);
 
     this.searchResultsAnnouncementTimeout = window.setTimeout(() => {
       if (count === 0) {

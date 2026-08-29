@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { showPopover } from './utils';
+import { addItem, removeItemByName, showPopover } from './utils';
 
 test.describe('menu items', () => {
   test.beforeEach(async ({ page }) => {
@@ -43,6 +43,67 @@ test.describe('menu items', () => {
 
     await expect(group).toHaveCount(1);
     await expect(group.getByRole('menuitemradio')).toHaveCount(2);
+  });
+
+  test('removing the item the keyboard is on keeps the list usable', async ({ page }) => {
+    /**
+     * Re-seeding the Flipper without dropping its cursor first left it pointing past the end
+     * of the now shorter list, and DomIterator indexes that array straight out - the next
+     * arrow press, or simply closing the popover, threw. Taking the container apart to lay it
+     * out again also dropped the focus onto the document body
+     */
+    const errors: string[] = [];
+
+    page.on('pageerror', error => errors.push(error.message));
+
+    /** Walk the cursor onto the last stop of the list, the html item's control */
+    const lastItemPosition = 9;
+
+    for (let i = 0; i < lastItemPosition; i++) {
+      await page.keyboard.press('ArrowDown');
+    }
+
+    const last = page.getByRole('button', { name: 'Custom control' });
+
+    await expect(last).toBeFocused();
+
+    await removeItemByName(page, 'simple');
+
+    await expect(last).toBeFocused();
+
+    /** The cursor came back with the focus, so the arrows resume from there and wrap round */
+    await page.keyboard.press('ArrowDown');
+    await expect(page.getByRole('menuitemradio', { name: 'Align Left' })).toBeFocused();
+
+    expect(errors).toEqual([]);
+  });
+
+  test('items added to the opened popover are laid out and navigable right away', async ({ page }) => {
+    /**
+     * Adding used to append the element straight to the container, bypassing the layout pass:
+     * the item skipped the role="group" wrapping and stayed out of the keyboard navigation
+     * until the popover was closed and opened again
+     */
+    await addItem(page, {
+      title: 'Align Right',
+      name: 'align-right',
+      toggle: 'extra',
+    });
+    await addItem(page, {
+      title: 'Align Justify',
+      name: 'align-justify',
+      toggle: 'extra',
+    });
+
+    /** Appended next to each other with the same toggle key, so they form a group of their own */
+    const groupsCount = 2;
+
+    await expect(page.getByRole('group')).toHaveCount(groupsCount);
+
+    /** ArrowUp wraps the navigation round to the last item, which is the one just added */
+    await page.keyboard.press('ArrowUp');
+
+    await expect(page.getByRole('menuitemradio', { name: 'Align Justify' })).toBeFocused();
   });
 });
 

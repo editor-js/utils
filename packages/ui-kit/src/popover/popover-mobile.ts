@@ -4,16 +4,28 @@ import { PopoverHeader } from './components/popover-header';
 import { PopoverStatesHistory } from './utils/popover-states-history';
 import type { PopoverMobileNodes, PopoverParams, PopoverItemParams } from './types';
 import type { PopoverItemDefault } from './components/popover-item';
-import { PopoverItemSeparator } from './components/popover-item';
-import { PopoverItemHtml } from './components/popover-item/popover-item-html/popover-item-html';
+import { css as popoverItemCls } from './components/popover-item';
 import { PopoverItemType } from './types';
 import { css } from './popover.const';
-import { make } from '@editorjs/dom';
+import { make, Flipper } from '@editorjs/dom';
+import { keyCodes } from '@editorjs/helpers';
 
 /**
- * Elements that can hold the focus inside the popover
+ * Elements that can hold the focus inside the popover panel.
+ *
+ * Everything explicitly taken out of the tab order is excluded, which is what keeps the trap
+ * in sync with the roving tabindex of the item list: only the item the Flipper currently
+ * points at is a tab stop, so the whole menu counts as one, as the menu pattern prescribes
  */
-const FOCUSABLE_SELECTOR = 'a[href], button:not([disabled]), input:not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])';
+const FOCUSABLE_SELECTOR = [
+  'a[href]',
+  'button:not([disabled])',
+  'input:not([disabled])',
+  'select:not([disabled])',
+  'textarea:not([disabled])',
+  '[contenteditable]:not([contenteditable="false"])',
+  '[tabindex]',
+].map(selector => `${selector}:not([tabindex="-1"])`).join(', ');
 
 /**
  * Mobile Popover.
@@ -82,6 +94,28 @@ export class PopoverMobile extends PopoverAbstract<PopoverMobileNodes> {
     this.nodes.popoverContainer.setAttribute('aria-modal', 'true');
     this.updateAccessibleName();
 
+    /**
+     * The item list is a menu, so the arrows navigate it while the Flipper keeps a roving
+     * tabindex over the items. Tab is deliberately left out of the allowed keys: it belongs
+     * to the dialog's own trap, which loops it between the panel's parts (the header and the
+     * menu) rather than between the individual items.
+     *
+     * A popover built with 'flippable: false' opts out of keyboard navigation altogether, and
+     * then every item becomes an individual stop of the trap instead - see toggleItemsTabbable()
+     */
+    if (params.flippable !== false) {
+      this.flipper = new Flipper({
+        items: this.flippableElements,
+        focusedItemClass: popoverItemCls.focused,
+        focusItems: true,
+        allowedKeys: [
+          keyCodes.UP,
+          keyCodes.DOWN,
+          keyCodes.ENTER,
+        ],
+      });
+    }
+
     /* Save state to history for proper navigation between nested and parent popovers */
     this.history.push({ items: params.items });
   }
@@ -98,6 +132,8 @@ export class PopoverMobile extends PopoverAbstract<PopoverMobileNodes> {
     super.show();
 
     this.scrollLocker.lock();
+
+    this.flipper?.activate(this.flippableElements);
     this.toggleItemsTabbable(true);
 
     this.listeners.on(document, 'keydown', this.handleKeyDown as (event: Event) => void, { capture: true });
@@ -115,10 +151,19 @@ export class PopoverMobile extends PopoverAbstract<PopoverMobileNodes> {
       return;
     }
 
+    /**
+     * Focus is only pulled back if it is still where the popover left it. A click on another
+     * control, for example, has already moved it there on mousedown, before this popover even
+     * learns it should close, and that focus should not be clobbered
+     */
+    const shouldRestoreFocus = document.activeElement !== null && this.nodes.popoverContainer.contains(document.activeElement);
+
     super.hide();
     this.nodes.overlay.classList.add(css.overlayHidden);
 
     this.scrollLocker.unlock();
+
+    this.flipper?.deactivate();
     this.toggleItemsTabbable(false);
 
     this.listeners.off(document, 'keydown', this.handleKeyDown as (event: Event) => void, { capture: true });
@@ -127,7 +172,9 @@ export class PopoverMobile extends PopoverAbstract<PopoverMobileNodes> {
 
     this.isHidden = true;
 
-    this.previouslyFocusedElement?.focus();
+    if (shouldRestoreFocus) {
+      this.previouslyFocusedElement?.focus();
+    }
     this.previouslyFocusedElement = null;
   }
 
@@ -202,65 +249,54 @@ export class PopoverMobile extends PopoverAbstract<PopoverMobileNodes> {
       return;
     }
 
-    const first = elements[0];
-    const last = elements[elements.length - 1];
-    const active = document.activeElement;
+    event.preventDefault();
+    this.focusNextStop(elements, event.shiftKey);
+  };
 
-    if (event.shiftKey && (active === first || !this.nodes.popoverContainer.contains(active))) {
-      event.preventDefault();
-      last.focus();
+  /**
+   * Moves the focus to the neighbouring stop of the dialog, looping around its ends.
+   *
+   * The trap walks the list itself rather than intercepting Tab only at its ends: the browsers
+   * do not agree on which elements native Tab visits - WebKit leaves buttons out of the
+   * sequence unless full keyboard access is turned on - so leaving the steps in between to
+   * them would make the header's back button unreachable on some of them
+   * @param elements - stops of the dialog, in the document order
+   * @param isBackwards - true when Shift is held, so the focus moves to the previous stop
+   */
+  private focusNextStop(elements: HTMLElement[], isBackwards: boolean): void {
+    const active = document.activeElement;
+    const currentIndex = active instanceof HTMLElement ? elements.indexOf(active) : -1;
+
+    /** Focus is somewhere outside the dialog: it comes back in at the end it is heading for */
+    if (currentIndex === -1) {
+      elements[isBackwards ? elements.length - 1 : 0].focus();
 
       return;
     }
 
-    if (!event.shiftKey && (active === last || !this.nodes.popoverContainer.contains(active))) {
-      event.preventDefault();
-      first.focus();
-    }
-  };
+    const step = isBackwards ? -1 : 1;
+
+    elements[(currentIndex + step + elements.length) % elements.length].focus();
+  }
 
   /**
-   * Moves focus inside the dialog once it is opened
+   * Moves focus inside the dialog once it is opened.
+   *
+   * The menu is entered at its first item, so that the arrows navigate from there right away.
+   * A list without a single navigable item (only separators, for example) has nothing for the
+   * Flipper to point at, so the trap's own first stop is used instead
    */
   private focusFirstElement(): void {
+    if (this.flippableElements.length > 0) {
+      this.flipper?.focusFirst();
+
+      return;
+    }
+
     const [first] = this.focusableElements;
 
     /** Popover is already on screen, focusing should not scroll the page to it */
     first?.focus({ preventScroll: true });
-  }
-
-  /**
-   * Items are plain elements, so they need an explicit tabindex to take part in the focus trap.
-   * A closed popover stays in the DOM and hence should not be reachable by Tab.
-   * Separators are never made tabbable: they are not interactive and shouldn't appear in the
-   * tab sequence.
-   *
-   * Html items are a layout-only wrapper (role="none") around real controls, so the tabindex
-   * has to go on those controls themselves rather than on the wrapper - otherwise the controls
-   * stay stuck at the tabindex="-1" they're constructed with (see PopoverItemHtml) and are
-   * never reachable by Tab, while the non-interactive wrapper becomes a tab stop instead
-   * @param isTabbable - true if the popover is opened
-   */
-  private toggleItemsTabbable(isTabbable: boolean): void {
-    this.items.forEach((item) => {
-      if (item instanceof PopoverItemHtml) {
-        item.getControls().forEach((control) => {
-          control.tabIndex = isTabbable ? 0 : -1;
-        });
-
-        return;
-      }
-
-      const element = item.getElement();
-
-      if (element === null) {
-        return;
-      }
-
-      const isFocusable = !(item instanceof PopoverItemSeparator);
-
-      element.tabIndex = isTabbable && isFocusable ? 0 : -1;
-    });
   }
 
   /**
@@ -323,6 +359,14 @@ export class PopoverMobile extends PopoverAbstract<PopoverMobileNodes> {
     this.renderItems(this.items);
 
     if (!this.isHidden) {
+      /**
+       * Deactivated before being re-activated, so that the Flipper drops its cursor while it
+       * still points into the old list - the new one may well be shorter than the position
+       * the cursor is left at
+       */
+      this.flipper?.deactivate();
+      this.flipper?.activate(this.flippableElements);
+
       /** Element that was focused has just been removed, so focus is moved into the new list */
       this.toggleItemsTabbable(true);
       this.focusFirstElement();

@@ -57,10 +57,12 @@ export class PopoverItemHtml extends PopoverItem {
     }
 
     if (params.hint !== undefined && renderParams?.hint?.enabled !== false) {
+      const controls = this.getControls();
+
       this.addHint(this.nodes.root, {
         ...params.hint,
         position: renderParams?.hint?.position || 'right',
-      });
+      }, controls.length > 0 ? controls : undefined);
     }
   }
 
