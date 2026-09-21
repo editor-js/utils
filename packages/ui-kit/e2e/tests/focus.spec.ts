@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
-import { accessibleTreeNames, activatedItems, activeDescendants, hidePopover, isPopoverShown, openFixture, showPopover } from './utils';
+import { accessibleTreeNames, activatedItems, activeDescendants, callShow, hidePopover, isPopoverShown, openFixture, showPopover, showPopoverWithKeyboard } from './utils';
 
 /**
  * Returns the accessible name of the currently focused element
@@ -696,5 +696,58 @@ test.describe('html items in the keyboard navigation', () => {
 
     await page.keyboard.press('ArrowUp');
     await expect(page.getByRole('checkbox', { name: 'Check' })).toBeFocused();
+  });
+});
+
+test.describe('focus of the opened popover', () => {
+  test('a submenu built with isFlippable: false takes the focus when opened from the keyboard', async ({ page }) => {
+    await showPopover(page, 'nestedNonFlippable');
+
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('Enter');
+
+    await expect(page.getByRole('menuitem', { name: 'Child A' })).toBeFocused();
+  });
+
+  test('show() on an opened popover keeps the original opener to return the focus to', async ({ page }) => {
+    await showPopoverWithKeyboard(page, 'menu');
+
+    /** The search field has the focus now, it must not become the element to return it to */
+    await expect(page.getByRole('searchbox', { name: 'Search' })).toBeFocused();
+
+    await callShow(page);
+    await page.keyboard.press('Escape');
+
+    await expect(page.getByRole('button', { name: 'Open menu' })).toBeFocused();
+  });
+
+  test('closing the root while a submenu has the focus returns it to the opener', async ({ page }) => {
+    /**
+     * The submenu's onOpen focuses an input inside it, and the root is then closed directly -
+     * the way a link tool closes the toolbar once its URL is submitted
+     */
+    await showPopoverWithKeyboard(page, 'nestedInput');
+
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('Enter');
+    await expect(page.getByRole('textbox', { name: 'Nested input' })).toBeFocused();
+
+    await hidePopover(page);
+
+    await expect(page.getByRole('button', { name: 'Open menu' })).toBeFocused();
+  });
+
+  test('items of a flippable: false popover keep the default focus ring', async ({ page }) => {
+    /** There is no Flipper to apply the --focused highlight, the ring is the only indicator */
+    await showPopover(page, 'plainMenu');
+
+    await page.getByRole('button', { name: 'Open menu' }).focus();
+    await page.keyboard.press('Tab');
+
+    const copy = page.getByRole('menuitem', { name: 'Copy' });
+
+    await expect(copy).toBeFocused();
+    expect(await copy.evaluate(element => getComputedStyle(element).outlineStyle)).not.toBe('none');
   });
 });

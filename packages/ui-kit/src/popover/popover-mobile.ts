@@ -91,6 +91,13 @@ export class PopoverMobile extends PopoverAbstract<PopoverMobileNodes> {
     this.updateAccessibleName();
 
     /**
+     * Focusable programmatically, but not a Tab stop: the dialog itself holds the focus when
+     * there is nothing inside to put it on (an empty list, or separators only), so that the focus
+     * is inside the modal rather than left behind on the page underneath
+     */
+    this.nodes.popoverContainer.tabIndex = -1;
+
+    /**
      * The item list is a menu, so the arrows navigate it while the Flipper keeps a roving
      * tabindex over the items. Tab is deliberately left out of the allowed keys: it belongs
      * to the dialog's own trap, which loops it between the panel's parts (the header and the
@@ -122,8 +129,15 @@ export class PopoverMobile extends PopoverAbstract<PopoverMobileNodes> {
   public show(): void {
     this.nodes.overlay.classList.remove(css.overlayHidden);
 
-    /** Focus should return to whatever the popover was opened from */
-    this.previouslyFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    /**
+     * Focus should return to whatever the popover was opened from. Recorded on the
+     * closed-to-open transition only: calling show() on an opened dialog would otherwise replace
+     * the opener with the item focused inside, and closing would then return the focus into the
+     * dialog that has just become inert
+     */
+    if (this.isHidden) {
+      this.previouslyFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    }
 
     super.show();
 
@@ -178,6 +192,12 @@ export class PopoverMobile extends PopoverAbstract<PopoverMobileNodes> {
    * Clears memory
    */
   public destroy(): void {
+    /**
+     * Closed first, so that an opened popover deactivates its Flipper: that one listens to the
+     * keys on the document, and would otherwise keep acting on the detached items
+     */
+    this.hide();
+
     super.destroy();
 
     this.scrollLocker.unlock();
@@ -241,11 +261,15 @@ export class PopoverMobile extends PopoverAbstract<PopoverMobileNodes> {
 
     const elements = this.focusableElements;
 
+    event.preventDefault();
+
+    /** Nothing to move to, the focus stays on the dialog itself, see focusFirstElement() */
     if (elements.length === 0) {
+      this.nodes.popoverContainer.focus({ preventScroll: true });
+
       return;
     }
 
-    event.preventDefault();
     this.focusNextStop(elements, event.shiftKey);
   };
 
@@ -279,12 +303,13 @@ export class PopoverMobile extends PopoverAbstract<PopoverMobileNodes> {
    * Moves focus inside the dialog once it is opened.
    *
    * The menu is entered at its first item, so that the arrows navigate from there right away.
-   * A list without a single navigable item (only separators, for example) has nothing for the
-   * Flipper to point at, so the trap's own first stop is used instead
+   * Without a Flipper ('flippable: false'), or with a list that has nothing for it to point at
+   * (only separators, for example), the trap's own first stop is used instead. And when there
+   * is no stop at all, the dialog itself takes the focus
    */
   private focusFirstElement(): void {
-    if (this.flippableElements.length > 0) {
-      this.flipper?.focusFirst();
+    if (this.flipper !== undefined && this.flippableElements.length > 0) {
+      this.flipper.focusFirst();
 
       return;
     }
@@ -292,7 +317,7 @@ export class PopoverMobile extends PopoverAbstract<PopoverMobileNodes> {
     const [first] = this.focusableElements;
 
     /** Popover is already on screen, focusing should not scroll the page to it */
-    first?.focus({ preventScroll: true });
+    (first ?? this.nodes.popoverContainer).focus({ preventScroll: true });
   }
 
   /**

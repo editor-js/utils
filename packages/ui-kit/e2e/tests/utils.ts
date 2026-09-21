@@ -12,6 +12,9 @@ export const fixtures = {
   plainMenu: '/e2e/fixtures/plain-menu.html',
   nestedInput: '/e2e/fixtures/nested-input.html',
   htmlItems: '/e2e/fixtures/html-items.html',
+  nestedNonFlippable: '/e2e/fixtures/nested-non-flippable.html',
+  mobilePlain: '/e2e/fixtures/mobile-plain.html',
+  mobileEmpty: '/e2e/fixtures/mobile-empty.html',
 } as const;
 
 /**
@@ -35,6 +38,20 @@ export async function showPopover(page: Page, fixture: keyof typeof fixtures): P
 }
 
 /**
+ * Opens the fixture and shows the popover it contains from the keyboard.
+ *
+ * Needed wherever the test relies on the focus returning to the trigger: Safari does not focus
+ * a button on click, and a popover opened by a click there has no opener to return the focus to
+ * @param page - playwright page object
+ * @param fixture - fixture page to open
+ */
+export async function showPopoverWithKeyboard(page: Page, fixture: keyof typeof fixtures): Promise<void> {
+  await openFixture(page, fixture);
+  await page.getByRole('button', { name: /^Open/ }).focus();
+  await page.keyboard.press('Enter');
+}
+
+/**
  * Test hooks the fixture pages expose on the window object
  */
 interface FixtureWindow {
@@ -54,9 +71,19 @@ interface PopoverWindow {
    */
   popover: {
     /**
+     * Opens the popover
+     */
+    show: () => void;
+
+    /**
      * Closes the popover
      */
     hide: () => void;
+
+    /**
+     * Tears the popover down
+     */
+    destroy: () => void;
 
     /**
      * Whether the popover is currently open
@@ -81,6 +108,22 @@ interface PopoverWindow {
  */
 export async function hidePopover(page: Page): Promise<void> {
   await page.evaluate(() => (window as unknown as PopoverWindow).popover.hide());
+}
+
+/**
+ * Calls show() on the fixture page's popover directly, e.g. on one that is already open
+ * @param page - playwright page object
+ */
+export async function callShow(page: Page): Promise<void> {
+  await page.evaluate(() => (window as unknown as PopoverWindow).popover.show());
+}
+
+/**
+ * Destroys the fixture page's popover
+ * @param page - playwright page object
+ */
+export async function destroyPopover(page: Page): Promise<void> {
+  await page.evaluate(() => (window as unknown as PopoverWindow).popover.destroy());
 }
 
 /**

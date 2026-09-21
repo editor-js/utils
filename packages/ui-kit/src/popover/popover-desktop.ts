@@ -181,7 +181,14 @@ export class PopoverDesktop extends PopoverAbstract {
    * Open popover
    */
   public show(): void {
-    this.previouslyFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    /**
+     * Recorded on the closed-to-open transition only. Calling show() on a popover that is
+     * already open would otherwise replace the opener with the item or the search field that
+     * holds the focus now, and closing would then return the focus into the inert popover
+     */
+    if (!this.isShown) {
+      this.previouslyFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    }
 
     this.nodes.popover.style.setProperty(CSSVariables.PopoverHeight, this.size.height + 'px');
 
@@ -216,9 +223,12 @@ export class PopoverDesktop extends PopoverAbstract {
     /**
      * Only restore focus if it is still where the popover left it (an item, the search field).
      * A click on another trigger, for example, already moved focus there on mousedown, before
-     * this popover even learns it should close, and that focus should not be clobbered
+     * this popover even learns it should close, and that focus should not be clobbered.
+     *
+     * Checked against the whole popover element rather than its container: nested popovers are
+     * appended next to the container, and the focus may well be in one of them
      */
-    const shouldRestoreFocus = document.activeElement !== null && this.nodes.popoverContainer.contains(document.activeElement);
+    const shouldRestoreFocus = document.activeElement !== null && this.nodes.popover.contains(document.activeElement);
 
     super.hide();
 
@@ -724,7 +734,18 @@ export class PopoverDesktop extends PopoverAbstract {
       return;
     }
 
-    this.flipper?.focusFirst();
+    if (this.flipper !== undefined) {
+      this.flipper.focusFirst();
+
+      return;
+    }
+
+    /**
+     * Built with 'flippable: false', so there is no Flipper to move the cursor. Every item is
+     * a Tab stop of its own then, the first one is focused directly, so that the submenu is
+     * announced and usable right away rather than leaving the focus on the parent's trigger
+     */
+    this.flippableElements[0]?.focus({ preventScroll: true });
   }
 
   /**

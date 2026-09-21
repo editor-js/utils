@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { hidePopover, openFixture, showPopover } from './utils';
+import { callShow, destroyPopover, hidePopover, openFixture, showPopover, showPopoverWithKeyboard } from './utils';
 
 test.describe('mobile popover', () => {
   test('is exposed as a modal dialog', async ({ page }) => {
@@ -247,5 +247,63 @@ test.describe('hints', () => {
 
     await expect(item).toBeFocused();
     await expect(page.locator(`#${describedBy as string}`)).toBeVisible();
+  });
+});
+
+test.describe('mobile dialog focus edge cases', () => {
+  test('a flippable: false dialog still moves the focus inside on open', async ({ page }) => {
+    await showPopover(page, 'mobilePlain');
+
+    await expect(page.getByRole('menuitem', { name: 'First' })).toBeFocused();
+  });
+
+  test('a dialog with nothing focusable holds the focus itself and keeps it on Tab', async ({ page }) => {
+    await showPopover(page, 'mobileEmpty');
+
+    const dialog = page.getByRole('dialog');
+
+    await expect(dialog).toBeFocused();
+
+    await page.keyboard.press('Tab');
+    await expect(dialog).toBeFocused();
+
+    await page.keyboard.press('Shift+Tab');
+    await expect(dialog).toBeFocused();
+  });
+
+  test('show() on an opened dialog keeps the original opener to return the focus to', async ({ page }) => {
+    await showPopoverWithKeyboard(page, 'mobile');
+
+    /** The first item has the focus now, it must not become the element to return it to */
+    await expect(page.getByRole('menuitem', { name: 'Simple Item' })).toBeFocused();
+
+    await callShow(page);
+    await page.keyboard.press('Escape');
+
+    await expect(page.getByRole('button', { name: 'Open mobile popover' })).toBeFocused();
+  });
+
+  test('destroying an opened dialog stops its keyboard handling', async ({ page }) => {
+    await showPopover(page, 'mobile');
+
+    /** The Flipper claims ArrowDown with preventDefault() for as long as it stays activated */
+    const isArrowDownClaimed = async (): Promise<boolean> => page.evaluate(() => {
+      const event = new KeyboardEvent('keydown', {
+        key: 'ArrowDown',
+        keyCode: 40,
+        bubbles: true,
+        cancelable: true,
+      });
+
+      document.body.dispatchEvent(event);
+
+      return event.defaultPrevented;
+    });
+
+    expect(await isArrowDownClaimed()).toBe(true);
+
+    await destroyPopover(page);
+
+    expect(await isArrowDownClaimed()).toBe(false);
   });
 });

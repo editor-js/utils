@@ -251,9 +251,12 @@
   /**
    * Keyboard navigation moves real focus between items.
    * The focus is already conveyed by the --focused modifier, so the default ring is suppressed
-   * to keep the popover appearance unchanged
+   * to keep the popover appearance unchanged.
+   *
+   * Only where the modifier is actually there: a popover built with 'flippable: false' has no
+   * Flipper to apply it, and the default ring is the only focus indicator its items have
    */
-  &:focus-visible {
+  &--focused:focus-visible {
     outline: none;
   }
 
