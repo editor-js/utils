@@ -99,12 +99,15 @@ test.describe('mobile popover', () => {
     expect(tabbable).toBe(0);
   });
 
-  test('separator is not tabbable while the popover is open', async ({ page }) => {
+  test('separator is not focusable while the popover is open', async ({ page }) => {
     await showPopover(page, 'mobile');
 
     const separator = page.getByRole('separator');
 
-    await expect(separator).toHaveAttribute('tabindex', '-1');
+    /**
+     * Not even with tabindex="-1": a focusable separator is a splitter, which requires a value
+     */
+    await expect(separator).not.toHaveAttribute('tabindex');
   });
 
   test('Tab moves between the back button and the menu once nested', async ({ page }) => {

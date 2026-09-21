@@ -31,13 +31,12 @@ export class PopoverItemSeparator extends PopoverItem {
       line: make('div', css.line),
     };
 
-    this.nodes.root.setAttribute('role', 'separator');
-
     /**
-     * A separator is not interactive, so it never takes part in the popover's keyboard
-     * navigation and stays out of the tab order for the whole of its life
+     * Deliberately given no tabindex, not even -1: a focusable separator is a splitter widget
+     * by ARIA, which requires aria-valuenow. A plain div is out of the tab order already, and
+     * the popover only toggles the tabindex of flippable elements, which separators never are
      */
-    this.nodes.root.tabIndex = -1;
+    this.nodes.root.setAttribute('role', 'separator');
 
     this.nodes.root.appendChild(this.nodes.line);
   }
