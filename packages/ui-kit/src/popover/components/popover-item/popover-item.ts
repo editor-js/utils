@@ -1,4 +1,4 @@
-import { tooltip } from '@editorjs/helpers';
+import { tooltip, Listeners } from '@editorjs/helpers';
 import { Hint } from '../hint';
 import type { PopoverItemParams, HintPosition, HintParams } from '../../types';
 
@@ -6,6 +6,11 @@ import type { PopoverItemParams, HintPosition, HintParams } from '../../types';
  * Popover item abstract class
  */
 export abstract class PopoverItem {
+  /**
+   * Listeners util instance
+   */
+  protected listeners = new Listeners();
+
   /**
    * Constructs the instance
    * @param params - instance parameters
@@ -29,6 +34,7 @@ export abstract class PopoverItem {
    */
   public destroy(): void {
     tooltip.hide();
+    this.listeners.removeAll();
   }
 
   /**
@@ -44,6 +50,19 @@ export abstract class PopoverItem {
     if ('children' in this.params && typeof this.params.children?.onOpen === 'function') {
       this.params.children.onOpen(close);
     }
+  }
+
+  /**
+   * Reflects the state of the popover with children items opened from this item.
+   * Does nothing for the items that have no children
+   * @param isExpanded - true if the children popover is currently displayed
+   */
+  public toggleExpanded(isExpanded: boolean): void {
+    if (!this.hasChildren) {
+      return;
+    }
+
+    this.getElement()?.setAttribute('aria-expanded', String(isExpanded));
   }
 
   /**
@@ -78,14 +97,40 @@ export abstract class PopoverItem {
    * Adds hint to the item element if hint data is provided
    * @param itemElement - popover item root element to add hint to
    * @param hintData - hint constructor data and it's position relative to the item element
+   * @param describedElements - elements that should reference the hint via aria-describedby.
+   * Defaults to the item root, which is what takes the focus for most of the item types.
+   * An html item passes its inner controls instead: the focus lands on those, and its own
+   * root is a role="none" wrapper no screen reader would read the description of
    */
   // eslint-disable-next-line jsdoc/require-jsdoc -- ESLint doesn't understand an object is a type there
-  protected addHint(itemElement: HTMLElement, hintData: HintParams & { position: HintPosition }): void {
+  protected addHint(itemElement: HTMLElement, hintData: HintParams & { position: HintPosition }, describedElements: HTMLElement[] = [itemElement]): void {
     const content = new Hint(hintData);
-
-    tooltip.onHover(itemElement, content.getElement(), {
+    const contentElement = content.getElement();
+    const options = {
       placement: hintData.position,
       hidingDelay: 100,
+    };
+
+    tooltip.onHover(itemElement, contentElement, options);
+
+    /**
+     * Hint holds the shortcut description, so it should be available to the keyboard users too,
+     * not only on hover
+     */
+    describedElements.forEach((element) => {
+      element.setAttribute('aria-describedby', contentElement.id);
+    });
+
+    /**
+     * focusin/focusout rather than focus/blur: the latter do not bubble, so they would never
+     * reach the item root when the focus lands on a control nested inside it
+     */
+    this.listeners.on(itemElement, 'focusin', () => {
+      tooltip.show(itemElement, contentElement, options);
+    });
+
+    this.listeners.on(itemElement, 'focusout', () => {
+      tooltip.hide(true);
     });
   }
 

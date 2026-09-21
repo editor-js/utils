@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>UI Kit e2e — nested non-flippable</title>
+</head>
+<body>
+<div style="position: relative; width: 500px; padding: 12px;">
+  <button id="before">Before</button>
+  <div style="position: relative;">
+    <button id="trigger">Open menu</button>
+  </div>
+</div>
+
+<script type="module">
+  import { PopoverDesktop } from '/src/index.ts';
+
+  const icon = '<svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/></svg>';
+
+  window.__activated = [];
+
+  /**
+   * Records item activation so tests can assert it without relying on visuals
+   * @param {string} name - name of the activated item
+   */
+  const activate = (name) => () => window.__activated.push(name);
+
+  const popover = new PopoverDesktop({
+    scopeElement: document.body,
+    items: [
+      {
+        icon,
+        title: 'Parent',
+        name: 'parent',
+        children: {
+          /** No Flipper in the submenu: every item is a Tab stop of its own */
+          isFlippable: false,
+          items: [
+            {
+              icon,
+              title: 'Child A',
+              name: 'child-a',
+              onActivate: activate('child-a'),
+            },
+            {
+              icon,
+              title: 'Child B',
+              name: 'child-b',
+              onActivate: activate('child-b'),
+            },
+          ],
+        },
+      },
+    ],
+  });
+
+  document.getElementById('trigger').insertAdjacentElement('afterend', popover.getElement());
+  document.getElementById('trigger').addEventListener('click', () => popover.show());
+
+  window.popover = popover;
+  document.body.dataset.ready = 'true';
+</script>
+</body>
+</html>

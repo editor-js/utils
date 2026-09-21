@@ -38,6 +38,23 @@ export interface FlipperOptions {
    * Callback to set caret to the current element if possible. If not provided, caret is not set
    */
   setCaret?: (item: HTMLElement) => void;
+
+  /**
+   * If true, flipper moves real DOM focus to the current item and maintains a roving tabindex
+   * over the items: the current one becomes tabbable, the rest do not.
+   *
+   * Set it to true when the items are the thing the user is interacting with, e.g. a menu
+   * opened from a button (Block Tunes, Toolbox): screen readers only announce the element that
+   * holds the real focus, so with a highlight alone the navigation is silent for them.
+   *
+   * Leave it false when the focus has to stay somewhere else while the items are navigated,
+   * e.g. a toolbar acting on a text selection (Inline Toolbar): focusing a button drops the
+   * selection in Safari, and the formatting would have nothing left to apply to. Such a
+   * consumer can expose the highlighted item via aria-activedescendant instead.
+   *
+   * Off by default, so that the existing consumers keep their focus and caret management intact
+   */
+  focusItems?: boolean;
 }
 
 /**
@@ -82,6 +99,12 @@ export class Flipper {
   private setCaret?: (item: HTMLElement) => void;
 
   /**
+   * True if flipper should move real DOM focus to the current item
+   * @see FlipperOptions.focusItems for when either value is expected
+   */
+  private readonly focusItems: boolean;
+
+  /**
    * @param options - different constructing settings
    */
   constructor(options: FlipperOptions) {
@@ -89,6 +112,7 @@ export class Flipper {
     this.activateCallback = options.activateCallback;
     this.allowedKeys = options.allowedKeys || Flipper.usedKeys;
     this.setCaret = options.setCaret;
+    this.focusItems = options.focusItems === true;
   }
 
   /**
@@ -121,6 +145,7 @@ export class Flipper {
 
     if (cursorPosition !== undefined) {
       this.iterator.setCursor(cursorPosition);
+      this.updateFocus();
     }
 
     /**
@@ -141,8 +166,13 @@ export class Flipper {
   public deactivate(): void {
     this.activated = false;
     this.dropCursor();
+    this.resetFocus();
 
-    document.removeEventListener('keydown', this.onKeyDown);
+    /**
+     * Capturing flag has to match the one the listener was added with, otherwise nothing is
+     * removed and the handler stays on the document for the lifetime of the page
+     */
+    document.removeEventListener('keydown', this.onKeyDown, true);
   }
 
   /**
@@ -167,6 +197,22 @@ export class Flipper {
   public flipRight(): void {
     this.iterator.next();
     this.flipCallback();
+  }
+
+  /**
+   * Items the flipper currently navigates between.
+   * Not necessarily the full list it was constructed with: consumers narrow it down by
+   * re-activating the flipper with a subset, for example while a search filter is applied
+   */
+  public get currentItems(): HTMLElement[] {
+    return this.iterator.allItems;
+  }
+
+  /**
+   * Item the cursor currently points at, null when no item is focused
+   */
+  public get currentItem(): HTMLElement | null {
+    return this.iterator.currentItem;
   }
 
   /**
@@ -299,9 +345,43 @@ export class Flipper {
   }
 
   /**
+   * Moves real DOM focus to the current item and makes it the only tabbable one.
+   * Does nothing unless the flipper is constructed with the 'focusItems' option
+   */
+  private updateFocus(): void {
+    if (!this.focusItems) {
+      return;
+    }
+
+    const currentItem = this.iterator.currentItem;
+
+    this.iterator.allItems.forEach((item) => {
+      item.tabIndex = item === currentItem ? 0 : -1;
+    });
+
+    /** Scrolling is handled separately, right after the flip */
+    currentItem?.focus({ preventScroll: true });
+  }
+
+  /**
+   * Makes all the items untabbable. Called once the flipper is deactivated,
+   * so that items of a closed popover do not catch the Tab key
+   */
+  private resetFocus(): void {
+    if (!this.focusItems) {
+      return;
+    }
+
+    this.iterator.allItems.forEach((item) => {
+      item.tabIndex = -1;
+    });
+  }
+
+  /**
    * Fired after flipping in any direction
    */
   private flipCallback(): void {
+    this.updateFocus();
     this.setCaretToCurrentItem();
 
     if (this.iterator.currentItem) {

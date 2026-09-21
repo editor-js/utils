@@ -2,63 +2,784 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>UI Kit Preview</title>
-  <script type="module">
-    import { PopoverDesktop, PopoverItemType } from '/src/index.ts';
+  <style>
+    body {
+      margin: 0;
+      padding: 24px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: #1d202b;
+      background: #f8f9fb;
+    }
 
-    const triggerElement = document.getElementById('trigger');
+    h1 {
+      font-size: 20px;
+      margin: 0 0 4px;
+    }
 
-    const input = document.createElement('input');
+    .page-note {
+      margin: 0 0 24px;
+      color: #707684;
+      font-size: 13px;
+    }
 
-    const popover = new PopoverDesktop(
-      {
-        scopeElement: document.body,
-        searchable: true,
-        items: [
-          { title: 'Simple Item', onActivate: () => { console.log('Simple item activated'); }, closeOnActivate: true },
-          {
-            title: 'Has children',
-            children: {
-              searchable: false,
-              onOpen: (close) => {
-                console.log('children popover opened');
+    .demos {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: flex-start;
+      max-width: 1100px;
+    }
 
-                input.addEventListener('keydown', e => {
-                  if (e.key === 'Enter') {
-                    close(true);
-                  }
-                });
+    .demo {
+      position: relative;
+      box-sizing: border-box;
+      width: 340px;
+      padding: 16px;
+      border: 1px solid #e8e8eb;
+      border-radius: 8px;
+      background: #fff;
+    }
 
-                input.focus();
-              },
-              items: [
-                { title: 'Child A', name: 'child-a', onActivate: () => { console.log('Child A activated'); } },
-                { title: 'Child B', name: 'child-b', onActivate: () => { console.log('Child B activated'); } },
-                { type: PopoverItemType.Html, element: input, name: 'input-item', onActivate: undefined }
-              ],
-            },
-          },
-        ],
+    .demo__title {
+      margin: 0 0 4px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .demo__description {
+      margin: 0 0 12px;
+      font-size: 12px;
+      line-height: 1.4;
+      color: #707684;
+    }
+
+    .demo__trigger-wrapper {
+      position: relative;
+    }
+
+    button {
+      font: inherit;
+      font-size: 13px;
+      padding: 6px 12px;
+      border: 1px solid #e8e8eb;
+      border-radius: 6px;
+      background: #fff;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #f8f9fb;
+    }
+
+    .editable {
+      padding: 8px;
+      border: 1px solid #e8e8eb;
+      border-radius: 6px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .selection-anchor {
+      position: absolute;
+      width: 0;
+      height: 0;
+    }
+
+    /**
+     * The package pins the mobile popover to the bottom of the screen inside `@media (--mobile)`,
+     * and that custom media query is not resolved at build time (see the `make css variables work`
+     * todo in popover.css), so the rule never reaches the browser. Repeated here, scoped to the
+     * preview popover only, to keep the demo representative. Remove once the package resolves it
+     */
+    @media (max-width: 650px) {
+      .preview-mobile .ce-popover__container {
+        position: fixed;
+        z-index: 4;
+        max-width: none;
+        min-width: calc(100% - 10px);
+        inset: auto 5px calc(5px + env(safe-area-inset-bottom)) 5px;
+        border-radius: 10px;
       }
-    );
 
-    window.popover = popover;
+      .preview-mobile .ce-popover__overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 3;
+        background: #1d202b;
+        opacity: 0.5;
+      }
 
-    const trigger = document.getElementById('trigger');
+      .log {
+        display: none;
+      }
+    }
 
-    trigger.insertAdjacentElement('afterend', popover.getElement())
-
-
-    triggerElement.addEventListener('click', () => {
-        popover.show();
-    });
-  </script>
+    .log {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      width: 260px;
+      max-height: 200px;
+      overflow: auto;
+      margin: 0;
+      padding: 12px;
+      border-radius: 8px;
+      background: #1d202b;
+      color: #e8e8eb;
+      font-size: 12px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+  </style>
 </head>
 <body>
-<div style="position: relative; width: 500px; height: 100vh; border: 1px solid black; display: flex; flex-direction: column; gap: 12px; padding: 12px;">
-  <div style="position: relative;">
-    <div id="trigger">Popover</div>
-  </div>
+<h1>UI Kit Preview</h1>
+<p class="page-note">
+  Every popover the package exports. The mobile popover only gets its bottom-sheet look
+  below 650px of viewport width, so narrow the window to see it as it is on a phone.
+</p>
+
+<div class="demos">
+  <section class="demo">
+    <h2 class="demo__title">Desktop — every item type</h2>
+    <p class="demo__description">
+      Searchable menu with icons, secondary labels, a radio group, a toggle, a disabled item,
+      a hint, a confirmation, a separator, custom HTML and overridden item semantics.
+    </p>
+    <div class="demo__trigger-wrapper">
+      <button id="trigger-desktop-full">Open menu</button>
+    </div>
+  </section>
+
+  <section class="demo">
+    <h2 class="demo__title">Desktop — plain menu</h2>
+    <p class="demo__description">
+      No search, no icons, items close the popover on activation. Keyboard navigation is
+      disabled with <code>flippable: false</code>.
+    </p>
+    <div class="demo__trigger-wrapper">
+      <button id="trigger-desktop-plain">Open menu</button>
+    </div>
+  </section>
+
+  <section class="demo">
+    <h2 class="demo__title">Desktop — nested popover</h2>
+    <p class="demo__description">
+      Nested items open as a separate popover on hover. Children are rendered with their own
+      params: no search here, plus an <code>onOpen</code> handler that focuses a custom input.
+    </p>
+    <div class="demo__trigger-wrapper">
+      <button id="trigger-desktop-nested">Open menu</button>
+    </div>
+  </section>
+
+  <section class="demo">
+    <h2 class="demo__title">Desktop — translated messages</h2>
+    <p class="demo__description">
+      All the texts the popover renders or announces are overridden via <code>messages</code>.
+      Search for something missing to see the "nothing found" message.
+    </p>
+    <div class="demo__trigger-wrapper">
+      <button id="trigger-desktop-messages">Ouvrir le menu</button>
+    </div>
+  </section>
+
+  <section class="demo">
+    <h2 class="demo__title">Inline — toolbar</h2>
+    <p class="demo__description">
+      Horizontal bar of toggle buttons. The second item has no title and gets its accessible
+      name from the hint instead.
+    </p>
+    <div class="demo__trigger-wrapper">
+      <button id="trigger-inline">Open toolbar</button>
+    </div>
+  </section>
+
+  <section class="demo">
+    <h2 class="demo__title">Inline — with nested popover</h2>
+    <p class="demo__description">
+      The "Link" item has children opened right away via <code>isOpen</code>, the way the link
+      tool shows the URL input. Clicking the item toggles the nested popover.
+    </p>
+    <div class="demo__trigger-wrapper">
+      <button id="trigger-inline-nested">Open toolbar</button>
+    </div>
+  </section>
+
+  <section class="demo">
+    <h2 class="demo__title">Inline — over a selection</h2>
+    <p class="demo__description">
+      What the inline popover is made for: select the text below and the toolbar appears near
+      the selection, keeping it intact.
+    </p>
+    <div class="demo__trigger-wrapper">
+      <div class="editable" id="editable" contenteditable="true">Select any part of this text to see the inline popover.</div>
+      <div class="selection-anchor" id="selection-anchor"></div>
+    </div>
+  </section>
+
+  <section class="demo">
+    <h2 class="demo__title">Mobile — bottom sheet</h2>
+    <p class="demo__description">
+      Modal dialog pinned to the bottom of the screen. Nested items replace the current ones and
+      get a header with the back button. Narrow the window below 650px to see the real layout.
+    </p>
+    <div class="demo__trigger-wrapper">
+      <button id="trigger-mobile">Open mobile popover</button>
+    </div>
+  </section>
 </div>
+
+<pre class="log" id="log">Activation log</pre>
+
+<script type="module">
+  import { PopoverDesktop, PopoverInline, PopoverMobile, PopoverItemType } from '/src/index.ts';
+
+  const icons = {
+    circle: '<svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="currentColor"/></svg>',
+    square: '<svg width="16" height="16" viewBox="0 0 16 16"><rect x="2" y="2" width="12" height="12" rx="2" fill="currentColor"/></svg>',
+    triangle: '<svg width="16" height="16" viewBox="0 0 16 16"><path d="M8 2 14 13H2z" fill="currentColor"/></svg>',
+    cross: '<svg width="16" height="16" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" fill="none"/></svg>',
+  };
+
+  /**
+   * Gap between the selected text and the popover displayed below it
+   */
+  const SELECTION_OFFSET = 6;
+
+  const logElement = document.getElementById('log');
+
+  /**
+   * Prints the message to the on-page log, so that activations are visible without the devtools
+   * @param {string} message - text to print
+   */
+  function log(message) {
+    logElement.textContent += `\n${message}`;
+    logElement.scrollTop = logElement.scrollHeight;
+  }
+
+  /**
+   * Creates an item activation handler that logs the item name
+   * @param {string} name - name of the item to log on activation
+   */
+  const activate = (name) => () => log(`activated: ${name}`);
+
+  /**
+   * Renders the popover near its trigger and shows it on the trigger click
+   * @param {string} triggerId - id of the button that opens the popover
+   * @param {object} popover - popover instance to display
+   */
+  function attachToTrigger(triggerId, popover) {
+    const trigger = document.getElementById(triggerId);
+
+    trigger.insertAdjacentElement('afterend', popover.getElement());
+
+    /**
+     * The popover's own outside-click-closer treats a click on the trigger as "outside" too,
+     * and it runs in the document capture phase — before this same click reaches the trigger's
+     * own listener below — so by the time that listener sees it, an already-open popover has
+     * just been closed out from under it. Registering this snapshot listener up front (before
+     * the popover ever calls show(), which is what attaches its capture-phase closer) makes it
+     * run first for every future click, so it always captures the real state of things.
+     */
+    let wasShownBeforeThisClick = false;
+
+    document.addEventListener('click', () => {
+      wasShownBeforeThisClick = popover.isShown;
+    }, true);
+
+    trigger.addEventListener('click', () => {
+      if (!wasShownBeforeThisClick) {
+        popover.show();
+      }
+    });
+  }
+
+  /**
+   * Desktop popover with every supported item type
+   */
+  const customElement = document.createElement('div');
+  const customButton = document.createElement('button');
+
+  customButton.textContent = 'Custom HTML control';
+  customButton.addEventListener('click', activate('html-item'));
+  customElement.appendChild(customButton);
+
+  const desktopFull = new PopoverDesktop({
+    scopeElement: document.body,
+    searchable: true,
+    items: [
+      {
+        icon: icons.circle,
+        title: 'Simple item',
+        name: 'simple',
+        onActivate: activate('simple'),
+      },
+      {
+        icon: icons.circle,
+        title: 'With secondary label',
+        secondaryLabel: 'Tab',
+        name: 'secondary-label',
+        onActivate: activate('secondary-label'),
+      },
+      {
+        icon: icons.square,
+        title: 'Align left',
+        name: 'align-left',
+        toggle: 'align',
+        isActive: true,
+        onActivate: activate('align-left'),
+      },
+      {
+        icon: icons.square,
+        title: 'Align center',
+        name: 'align-center',
+        toggle: 'align',
+        onActivate: activate('align-center'),
+      },
+      {
+        icon: icons.triangle,
+        title: 'Bold',
+        name: 'bold',
+        toggle: true,
+        hint: {
+          title: 'Bold',
+          description: 'CMD + B',
+        },
+        onActivate: activate('bold'),
+      },
+      {
+        icon: icons.circle,
+        title: 'Disabled item',
+        name: 'disabled',
+        isDisabled: true,
+        onActivate: activate('disabled'),
+      },
+      {
+        icon: icons.circle,
+        title: 'Has children',
+        name: 'with-children',
+        children: {
+          items: [
+            {
+              icon: icons.circle,
+              title: 'Child A',
+              name: 'child-a',
+              onActivate: activate('child-a'),
+            },
+            {
+              icon: icons.circle,
+              title: 'Child B',
+              name: 'child-b',
+              onActivate: activate('child-b'),
+            },
+          ],
+        },
+      },
+      {
+        icon: icons.cross,
+        title: 'Delete',
+        name: 'delete',
+        confirmation: {
+          icon: icons.cross,
+          title: 'Are you sure?',
+          name: 'delete-confirm',
+          onActivate: activate('delete-confirm'),
+        },
+      },
+      {
+        icon: icons.circle,
+        title: 'Visible title',
+        name: 'custom-semantics',
+        ariaLabel: 'Custom accessible name',
+        role: 'button',
+        onActivate: activate('custom-semantics'),
+      },
+      { type: PopoverItemType.Separator },
+      {
+        type: PopoverItemType.Html,
+        element: customElement,
+        name: 'html-item',
+      },
+    ],
+    messages: {
+      label: 'Block settings',
+    },
+  });
+
+  attachToTrigger('trigger-desktop-full', desktopFull);
+
+  /**
+   * Desktop popover without search, icons and keyboard navigation
+   */
+  const desktopPlain = new PopoverDesktop({
+    scopeElement: document.body,
+    flippable: false,
+    items: [
+      {
+        title: 'Copy',
+        name: 'copy',
+        closeOnActivate: true,
+        onActivate: activate('copy'),
+      },
+      {
+        title: 'Cut',
+        name: 'cut',
+        closeOnActivate: true,
+        onActivate: activate('cut'),
+      },
+      {
+        title: 'Paste',
+        name: 'paste',
+        closeOnActivate: true,
+        onActivate: activate('paste'),
+      },
+    ],
+  });
+
+  attachToTrigger('trigger-desktop-plain', desktopPlain);
+
+  /**
+   * Desktop popover with a nested popover holding a custom input
+   */
+  const nestedInput = document.createElement('input');
+
+  nestedInput.placeholder = 'Type and press Enter';
+
+  const desktopNested = new PopoverDesktop({
+    scopeElement: document.body,
+    searchable: true,
+    items: [
+      {
+        title: 'Simple item',
+        name: 'simple',
+        closeOnActivate: true,
+        onActivate: activate('simple'),
+      },
+      {
+        title: 'Has children',
+        name: 'with-children',
+        children: {
+          searchable: false,
+          onOpen: (close) => {
+            log('nested popover opened');
+
+            nestedInput.addEventListener('keydown', (event) => {
+              if (event.key === 'Enter') {
+                log(`submitted: ${nestedInput.value}`);
+                close(true);
+              }
+            });
+
+            nestedInput.focus();
+          },
+          onClose: () => log('nested popover closed'),
+          items: [
+            {
+              title: 'Child A',
+              name: 'child-a',
+              onActivate: activate('child-a'),
+            },
+            {
+              title: 'Child B',
+              name: 'child-b',
+              onActivate: activate('child-b'),
+            },
+            {
+              type: PopoverItemType.Html,
+              element: nestedInput,
+              name: 'input-item',
+            },
+          ],
+        },
+      },
+    ],
+  });
+
+  attachToTrigger('trigger-desktop-nested', desktopNested);
+
+  /**
+   * Desktop popover with all the texts overridden
+   */
+  const desktopMessages = new PopoverDesktop({
+    scopeElement: document.body,
+    searchable: true,
+    messages: {
+      nothingFound: 'Rien trouvé',
+      search: 'Rechercher',
+      back: 'Retour',
+      result: '{count} résultat',
+      results: '{count} résultats',
+      label: 'Paramètres du bloc',
+    },
+    items: [
+      {
+        icon: icons.circle,
+        title: 'Titre',
+        name: 'heading',
+        onActivate: activate('heading'),
+      },
+      {
+        icon: icons.square,
+        title: 'Liste',
+        name: 'list',
+        onActivate: activate('list'),
+      },
+      {
+        icon: icons.triangle,
+        title: 'Citation',
+        name: 'quote',
+        onActivate: activate('quote'),
+      },
+    ],
+  });
+
+  attachToTrigger('trigger-desktop-messages', desktopMessages);
+
+  /**
+   * Inline popover: a toolbar of icon-only toggles
+   */
+  const inline = new PopoverInline({
+    scopeElement: document.body,
+    items: [
+      {
+        icon: icons.circle,
+        title: 'Bold',
+        name: 'bold',
+        toggle: true,
+        isActive: () => true,
+        onActivate: activate('bold'),
+      },
+      {
+        icon: icons.square,
+        name: 'italic',
+        toggle: true,
+        hint: {
+          title: 'Italic',
+          description: 'CMD + I',
+        },
+        onActivate: activate('italic'),
+      },
+      { type: PopoverItemType.Separator },
+      {
+        icon: icons.triangle,
+        title: 'Marker',
+        name: 'marker',
+        toggle: true,
+        onActivate: activate('marker'),
+      },
+    ],
+  });
+
+  attachToTrigger('trigger-inline', inline);
+
+  /**
+   * Inline popover with a nested popover opened along with the toolbar itself
+   */
+  const linkInput = document.createElement('input');
+
+  linkInput.placeholder = 'Paste or type a link';
+  linkInput.setAttribute('aria-label', 'Link');
+
+  const createInlineNested = () => new PopoverInline({
+    scopeElement: document.body,
+    items: [
+      {
+        icon: icons.circle,
+        title: 'Bold',
+        name: 'bold',
+        toggle: true,
+        onActivate: activate('bold'),
+      },
+      {
+        icon: icons.square,
+        title: 'Link',
+        name: 'link',
+        children: {
+          isOpen: true,
+          isFlippable: false,
+          searchable: false,
+          onOpen: () => {
+            log('link popover opened');
+            linkInput.focus();
+          },
+          items: [
+            {
+              type: PopoverItemType.Html,
+              element: linkInput,
+              name: 'link-input',
+            },
+          ],
+        },
+      },
+    ],
+  });
+
+  /**
+   * Children marked as 'isOpen' are displayed right in the constructor, so the popover is
+   * built on every trigger click instead of upfront — just like the tools do it
+   */
+  const inlineNestedTrigger = document.getElementById('trigger-inline-nested');
+
+  inlineNestedTrigger.addEventListener('click', () => {
+    window.popovers.inlineNested?.destroy();
+
+    const popover = createInlineNested();
+
+    inlineNestedTrigger.insertAdjacentElement('afterend', popover.getElement());
+    popover.show();
+
+    window.popovers.inlineNested = popover;
+  });
+
+  /**
+   * Inline popover displayed over the text selection
+   */
+  const editable = document.getElementById('editable');
+  const selectionAnchor = document.getElementById('selection-anchor');
+
+  const inlineSelection = new PopoverInline({
+    scopeElement: document.body,
+    items: [
+      {
+        icon: icons.circle,
+        title: 'Bold',
+        name: 'bold',
+        toggle: true,
+        onActivate: () => {
+          document.execCommand('bold');
+          log('activated: bold');
+        },
+      },
+      {
+        icon: icons.square,
+        title: 'Italic',
+        name: 'italic',
+        toggle: true,
+        onActivate: () => {
+          document.execCommand('italic');
+          log('activated: italic');
+        },
+      },
+    ],
+  });
+
+  selectionAnchor.appendChild(inlineSelection.getElement());
+
+  /**
+   * Moves the popover to the current selection and shows it, hiding the popover
+   * once the selection is gone
+   */
+  function showPopoverBySelection() {
+    const selection = window.getSelection();
+
+    if (selection === null || selection.isCollapsed || !editable.contains(selection.anchorNode)) {
+      inlineSelection.hide();
+
+      return;
+    }
+
+    const selectionRect = selection.getRangeAt(0).getBoundingClientRect();
+    const anchorRect = selectionAnchor.parentElement.getBoundingClientRect();
+
+    selectionAnchor.style.left = `${selectionRect.left - anchorRect.left + selectionRect.width / 2}px`;
+    selectionAnchor.style.top = `${selectionRect.bottom - anchorRect.top + SELECTION_OFFSET}px`;
+
+    inlineSelection.show();
+  }
+
+  /**
+   * 'click' rather than 'mouseup': show() subscribes to the document clicks to close the popover
+   * on an outside click, so opening it on mouseup would make the click that follows close it again
+   */
+  editable.addEventListener('click', showPopoverBySelection);
+  editable.addEventListener('keyup', showPopoverBySelection);
+
+  /**
+   * Mobile popover: a modal bottom sheet with nested "pages"
+   */
+  const mobile = new PopoverMobile({
+    scopeElement: document.body,
+    class: 'preview-mobile',
+    messages: {
+      label: 'Block settings',
+    },
+    items: [
+      {
+        icon: icons.circle,
+        title: 'Simple item',
+        name: 'simple',
+        onActivate: activate('simple'),
+      },
+      {
+        icon: icons.square,
+        title: 'Align left',
+        name: 'align-left',
+        toggle: 'align',
+        isActive: true,
+        onActivate: activate('align-left'),
+      },
+      {
+        icon: icons.square,
+        title: 'Align center',
+        name: 'align-center',
+        toggle: 'align',
+        onActivate: activate('align-center'),
+      },
+      {
+        icon: icons.cross,
+        title: 'Delete',
+        name: 'delete',
+        confirmation: {
+          icon: icons.cross,
+          title: 'Are you sure?',
+          name: 'delete-confirm',
+          onActivate: activate('delete-confirm'),
+        },
+      },
+      { type: PopoverItemType.Separator },
+      {
+        icon: icons.triangle,
+        title: 'Has children',
+        name: 'with-children',
+        children: {
+          items: [
+            {
+              icon: icons.circle,
+              title: 'Child A',
+              name: 'child-a',
+              onActivate: activate('child-a'),
+            },
+            {
+              icon: icons.circle,
+              title: 'Child B',
+              name: 'child-b',
+              onActivate: activate('child-b'),
+            },
+          ],
+        },
+      },
+    ],
+  });
+
+  document.body.appendChild(mobile.getElement());
+  document.getElementById('trigger-mobile').addEventListener('click', () => mobile.show());
+
+  /**
+   * Instances are exposed for poking around from the devtools console
+   */
+  window.popovers = {
+    desktopFull,
+    desktopPlain,
+    desktopNested,
+    desktopMessages,
+    inline,
+    inlineNested: null,
+    inlineSelection,
+    mobile,
+  };
+</script>
 </body>
 </html>

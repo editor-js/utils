@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>UI Kit e2e — mobile with an html item</title>
+</head>
+<body>
+<div style="position: relative; width: 100%; padding: 12px;">
+  <button id="before">Before</button>
+  <div style="position: relative;">
+    <button id="trigger">Open mobile popover</button>
+  </div>
+</div>
+
+<script type="module">
+  import { PopoverMobile, PopoverItemType } from '/src/index.ts';
+
+  window.__activated = [];
+
+  /**
+   * Records item activation so tests can assert it without relying on visuals
+   * @param {string} name - name of the activated item
+   */
+  const activate = (name) => () => window.__activated.push(name);
+
+  const customButton = document.createElement('button');
+
+  customButton.textContent = 'Custom control';
+
+  const popover = new PopoverMobile({
+    scopeElement: document.body,
+    items: [
+      {
+        title: 'Simple item',
+        name: 'simple',
+        onActivate: activate('simple'),
+      },
+      {
+        type: PopoverItemType.Html,
+        element: customButton,
+        name: 'html-item',
+      },
+    ],
+  });
+
+  document.body.appendChild(popover.getElement());
+  document.getElementById('trigger').addEventListener('click', () => popover.show());
+
+  window.popover = popover;
+  document.body.dataset.ready = 'true';
+</script>
+</body>
+</html>

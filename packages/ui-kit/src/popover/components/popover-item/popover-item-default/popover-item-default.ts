@@ -1,4 +1,5 @@
 import { make } from '@editorjs/dom';
+import { generateId } from '@editorjs/helpers';
 import { IconDotCircle, IconChevronRight } from '@codexteam/icons';
 import type {
   PopoverItemDefaultParams as PopoverItemDefaultParams,
@@ -16,6 +17,16 @@ import { css } from './popover-item-default.const';
  * @todo display icon on the right side of the item for rtl languages
  */
 export class PopoverItemDefault extends PopoverItem {
+  /**
+   * Id of the item's root element.
+   * Stable for the lifetime of the item, including across confirmation mode toggles -
+   * lets a consumer that moves focus elsewhere (e.g. an inline popover acting on a text
+   * selection) point aria-activedescendant at the currently highlighted item
+   */
+  public get id(): string | undefined {
+    return this.nodes.root?.id;
+  }
+
   /**
    * True if item is disabled and hence not clickable
    */
@@ -45,6 +56,62 @@ export class PopoverItemDefault extends PopoverItem {
   }
 
   /**
+   * ARIA role for the item, derived from its toggle behavior.
+   * Can be overridden by the popover via render params — inline popovers render
+   * items as buttons in a toolbar rather than as menu items.
+   */
+  public get ariaRole(): string {
+    if (this.params.role !== undefined) {
+      return this.params.role;
+    }
+
+    if (this.renderParams?.ariaRole !== undefined) {
+      return this.renderParams.ariaRole;
+    }
+
+    if (typeof this.params.toggle === 'string') {
+      return 'menuitemradio';
+    }
+
+    if (this.params.toggle === true) {
+      return 'menuitemcheckbox';
+    }
+
+    return 'menuitem';
+  }
+
+  /**
+   * Attribute conveying the item's active state, matching its role.
+   * Null for roles that have no pressed/checked state.
+   */
+  private get ariaStateAttribute(): string | null {
+    switch (this.ariaRole) {
+      case 'menuitemradio':
+      case 'menuitemcheckbox':
+        return 'aria-checked';
+      case 'option':
+        return 'aria-selected';
+      /**
+       * aria-pressed turns a button into a toggle button, which is announced differently.
+       * Only the items that do have an on/off state get it: toggles, and the ones reporting
+       * whether they are active (e.g. inline formatting tools)
+       */
+      case 'button':
+        return this.params.toggle !== undefined || this.params.isActive !== undefined ? 'aria-pressed' : null;
+      default:
+        return null;
+    }
+  }
+
+  /**
+   * Accessible name the item currently exposes.
+   * Differs from the title while the item is in confirmation state
+   */
+  public get accessibleName(): string | undefined {
+    return PopoverItemDefault.getAccessibleName(this.confirmationState ?? this.params);
+  }
+
+  /**
    * True if item is focused in keyboard navigation process
    */
   public get isFocused(): boolean {
@@ -52,8 +119,18 @@ export class PopoverItemDefault extends PopoverItem {
       return false;
     }
 
+    if (document.activeElement === this.nodes.root) {
+      return true;
+    }
+
     return this.nodes.root.classList.contains(css.focused);
   }
+
+  /**
+   * Attributes describing the item for assistive technologies.
+   * Kept in sync when the item's content is replaced, for example in confirmation mode
+   */
+  private static readonly ariaAttributes = ['role', 'aria-label', 'aria-disabled', 'aria-checked', 'aria-pressed', 'aria-selected'];
 
   /**
    * Item html elements
@@ -83,10 +160,51 @@ export class PopoverItemDefault extends PopoverItem {
    * @param renderParams - popover item render params.
    * The parameters that are not set by user via popover api but rather depend on technical implementation
    */
-  constructor(protected readonly params: PopoverItemDefaultParams, renderParams?: PopoverItemRenderParamsMap[PopoverItemType.Default]) {
+  constructor(protected readonly params: PopoverItemDefaultParams, private readonly renderParams?: PopoverItemRenderParamsMap[PopoverItemType.Default]) {
     super(params);
 
     this.nodes.root = this.make(params, renderParams);
+
+    this.nodes.root.id = generateId(`${css.container}-`);
+  }
+
+  /**
+   * Copies semantics from the freshly constructed element to the element rendered on the page.
+   * The item root is reused across states, only its content is replaced, so the attributes
+   * have to be transferred separately
+   * @param source - element the attributes are read from
+   * @param target - element the attributes are applied to
+   */
+  private static copyAriaAttributes(source: HTMLElement, target: HTMLElement): void {
+    PopoverItemDefault.ariaAttributes.forEach((attribute) => {
+      const value = source.getAttribute(attribute);
+
+      if (value === null) {
+        target.removeAttribute(attribute);
+
+        return;
+      }
+
+      target.setAttribute(attribute, value);
+    });
+  }
+
+  /**
+   * Returns accessible name for the passed item params.
+   * Falls back to the hint title, since inline popover items are rendered icon-only
+   * and carry their name in the hint rather than in the title
+   * @param params - construction params of the item or of its confirmation state
+   */
+  private static getAccessibleName(params: PopoverItemDefaultParams): string | undefined {
+    if (params.ariaLabel !== undefined) {
+      return params.ariaLabel;
+    }
+
+    if (params.title !== undefined && params.title !== '') {
+      return params.title;
+    }
+
+    return params.hint?.title;
   }
 
   /**
@@ -114,7 +232,16 @@ export class PopoverItemDefault extends PopoverItem {
    * @param isActive - true if item should strictly should become active
    */
   public toggleActive(isActive?: boolean): void {
-    this.nodes.root?.classList.toggle(css.active, isActive);
+    /** Undefined means the state should be flipped, which is what classList.toggle does */
+    const nextState = isActive ?? this.nodes.root?.classList.contains(css.active) !== true;
+
+    this.nodes.root?.classList.toggle(css.active, nextState);
+
+    const stateAttribute = this.ariaStateAttribute;
+
+    if (stateAttribute !== null) {
+      this.nodes.root?.setAttribute(stateAttribute, String(nextState));
+    }
   }
 
   /**
@@ -123,6 +250,10 @@ export class PopoverItemDefault extends PopoverItem {
    */
   public override toggleHidden(isHidden: boolean): void {
     this.nodes.root?.classList.toggle(css.hidden, isHidden);
+
+    if (this.nodes.root !== null) {
+      this.nodes.root.hidden = isHidden;
+    }
   }
 
   /**
@@ -156,9 +287,20 @@ export class PopoverItemDefault extends PopoverItem {
       el.dataset.itemName = params.name;
     }
 
+    /**
+     * Items are navigated with arrow keys, so they are focusable but not tabbable.
+     * Popover makes one of them tabbable while it is opened
+     */
+    el.tabIndex = -1;
+
+    this.applyAriaAttributes(el, params);
+
     this.nodes.icon = make('div', [css.icon, css.iconTool], {
       innerHTML: params.icon ?? IconDotCircle,
     });
+
+    /** Icon is decorative, the item is named via aria-label */
+    this.nodes.icon.setAttribute('aria-hidden', 'true');
 
     el.appendChild(this.nodes.icon);
 
@@ -175,9 +317,14 @@ export class PopoverItemDefault extends PopoverItem {
     }
 
     if (this.hasChildren) {
-      el.appendChild(make('div', [css.icon, css.iconChevronRight], {
+      const chevron = make('div', [css.icon, css.iconChevronRight], {
         innerHTML: IconChevronRight,
-      }));
+      });
+
+      /** Chevron is decorative, nested items availability is conveyed via aria-haspopup */
+      chevron.setAttribute('aria-hidden', 'true');
+
+      el.appendChild(chevron);
     }
 
     if (this.isActive) {
@@ -199,6 +346,37 @@ export class PopoverItemDefault extends PopoverItem {
   }
 
   /**
+   * Sets item's role, accessible name and states on its root element
+   * @param el - item root element to apply attributes to
+   * @param params - item params the attributes are derived from
+   */
+  private applyAriaAttributes(el: HTMLElement, params: PopoverItemDefaultParams): void {
+    el.setAttribute('role', this.ariaRole);
+
+    const accessibleName = PopoverItemDefault.getAccessibleName(params);
+
+    if (accessibleName !== undefined) {
+      el.setAttribute('aria-label', accessibleName);
+    }
+
+    if (params.isDisabled === true) {
+      el.setAttribute('aria-disabled', 'true');
+    }
+
+    const stateAttribute = this.ariaStateAttribute;
+
+    if (stateAttribute !== null) {
+      el.setAttribute(stateAttribute, String(this.isActive));
+    }
+
+    if (this.hasChildren) {
+      /** Items of the inline popover open panels rather than menus */
+      el.setAttribute('aria-haspopup', this.ariaRole === 'button' ? 'true' : 'menu');
+      el.setAttribute('aria-expanded', 'false');
+    }
+  }
+
+  /**
    * Activates confirmation mode for the item.
    * @param newState - new popover item params that should be applied
    */
@@ -215,6 +393,9 @@ export class PopoverItemDefault extends PopoverItem {
     const confirmationEl = this.make(params);
 
     this.nodes.root.innerHTML = confirmationEl.innerHTML;
+    /** Item becomes a different control, so its name and state should follow */
+    PopoverItemDefault.copyAriaAttributes(confirmationEl, this.nodes.root);
+    this.syncActiveStateAttribute();
     this.nodes.root.classList.add(css.confirmationState);
 
     this.confirmationState = newState;
@@ -232,11 +413,31 @@ export class PopoverItemDefault extends PopoverItem {
     const itemWithOriginalParams = this.make(this.params);
 
     this.nodes.root.innerHTML = itemWithOriginalParams.innerHTML;
+    PopoverItemDefault.copyAriaAttributes(itemWithOriginalParams, this.nodes.root);
+    this.syncActiveStateAttribute();
     this.nodes.root.classList.remove(css.confirmationState);
 
     this.confirmationState = null;
 
     this.disableSpecialHoverAndFocusBehavior();
+  }
+
+  /**
+   * Brings the pressed/checked state back in line with the active class of the item root.
+   *
+   * The attributes copied over from a freshly made element carry the state from the item
+   * params, i.e. the one the item was constructed with. The root element, on the other hand,
+   * is reused across the states and keeps the active class toggleActive() has left it with,
+   * which is the state the item is actually in
+   */
+  private syncActiveStateAttribute(): void {
+    const stateAttribute = this.ariaStateAttribute;
+
+    if (this.nodes.root === null || stateAttribute === null) {
+      return;
+    }
+
+    this.nodes.root.setAttribute(stateAttribute, String(this.nodes.root.classList.contains(css.active)));
   }
 
   /**

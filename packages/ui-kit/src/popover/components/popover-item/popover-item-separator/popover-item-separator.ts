@@ -31,6 +31,13 @@ export class PopoverItemSeparator extends PopoverItem {
       line: make('div', css.line),
     };
 
+    /**
+     * Deliberately given no tabindex, not even -1: a focusable separator is a splitter widget
+     * by ARIA, which requires aria-valuenow. A plain div is out of the tab order already, and
+     * the popover only toggles the tabindex of flippable elements, which separators never are
+     */
+    this.nodes.root.setAttribute('role', 'separator');
+
     this.nodes.root.appendChild(this.nodes.line);
   }
 
@@ -46,6 +53,7 @@ export class PopoverItemSeparator extends PopoverItem {
    * @param isHidden - true if item should be hidden
    */
   public toggleHidden(isHidden: boolean): void {
-    this.nodes.root?.classList.toggle(css.hidden, isHidden);
+    this.nodes.root.classList.toggle(css.hidden, isHidden);
+    this.nodes.root.hidden = isHidden;
   }
 }

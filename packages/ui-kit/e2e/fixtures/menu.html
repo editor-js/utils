@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>UI Kit e2e — menu</title>
+</head>
+<body>
+<div style="position: relative; width: 500px; padding: 12px;">
+  <button id="before">Before</button>
+  <div style="position: relative;">
+    <button id="trigger">Open menu</button>
+  </div>
+</div>
+
+<script type="module">
+  import { PopoverDesktop, PopoverItemType } from '/src/index.ts';
+
+  const icon = '<svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/></svg>';
+
+  window.__activated = [];
+
+  /**
+   * Records item activation so tests can assert it without relying on visuals
+   * @param {string} name - name of the activated item
+   */
+  const activate = (name) => () => window.__activated.push(name);
+
+  const customElement = document.createElement('div');
+  const customButton = document.createElement('button');
+
+  customButton.textContent = 'Custom control';
+  customElement.appendChild(customButton);
+
+  const popover = new PopoverDesktop({
+    scopeElement: document.body,
+    searchable: true,
+    items: [
+      {
+        icon,
+        title: 'Simple Item',
+        name: 'simple',
+        onActivate: activate('simple'),
+      },
+      {
+        icon,
+        title: 'Align Left',
+        name: 'align-left',
+        toggle: 'align',
+        isActive: true,
+        onActivate: activate('align-left'),
+      },
+      {
+        icon,
+        title: 'Align Center',
+        name: 'align-center',
+        toggle: 'align',
+        onActivate: activate('align-center'),
+      },
+      {
+        icon,
+        title: 'Bold',
+        name: 'bold',
+        toggle: true,
+        hint: { title: 'Bold', description: 'CMD + B' },
+        onActivate: activate('bold'),
+      },
+      {
+        icon,
+        title: 'Disabled Item',
+        name: 'disabled',
+        isDisabled: true,
+        onActivate: activate('disabled'),
+      },
+      {
+        icon,
+        title: 'Has children',
+        name: 'with-children',
+        children: {
+          items: [
+            {
+              icon,
+              title: 'Child A',
+              name: 'child-a',
+              onActivate: activate('child-a'),
+            },
+            {
+              icon,
+              title: 'Child B',
+              name: 'child-b',
+              onActivate: activate('child-b'),
+            },
+          ],
+        },
+      },
+      {
+        icon,
+        title: 'Delete',
+        name: 'delete',
+        confirmation: {
+          icon,
+          title: 'Are you sure?',
+          name: 'delete-confirm',
+          onActivate: activate('delete-confirm'),
+        },
+      },
+      {
+        icon,
+        title: 'Visible title',
+        name: 'custom-semantics',
+        ariaLabel: 'Custom accessible name',
+        role: 'button',
+        onActivate: activate('custom-semantics'),
+      },
+      { type: PopoverItemType.Separator },
+      {
+        type: PopoverItemType.Html,
+        element: customElement,
+        name: 'html-item',
+        hint: { title: 'Custom control', description: 'CMD + K' },
+      },
+    ],
+  });
+
+  document.getElementById('trigger').insertAdjacentElement('afterend', popover.getElement());
+  document.getElementById('trigger').addEventListener('click', () => popover.show());
+
+  window.popover = popover;
+  document.body.dataset.ready = 'true';
+</script>
+</body>
+</html>
