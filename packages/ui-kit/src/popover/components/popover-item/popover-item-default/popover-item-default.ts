@@ -91,8 +91,13 @@ export class PopoverItemDefault extends PopoverItem {
         return 'aria-checked';
       case 'option':
         return 'aria-selected';
+      /**
+       * aria-pressed turns a button into a toggle button, which is announced differently.
+       * Only the items that do have an on/off state get it: toggles, and the ones reporting
+       * whether they are active (e.g. inline formatting tools)
+       */
       case 'button':
-        return 'aria-pressed';
+        return this.params.toggle !== undefined || this.params.isActive !== undefined ? 'aria-pressed' : null;
       default:
         return null;
     }
@@ -245,6 +250,10 @@ export class PopoverItemDefault extends PopoverItem {
    */
   public override toggleHidden(isHidden: boolean): void {
     this.nodes.root?.classList.toggle(css.hidden, isHidden);
+
+    if (this.nodes.root !== null) {
+      this.nodes.root.hidden = isHidden;
+    }
   }
 
   /**
@@ -386,6 +395,7 @@ export class PopoverItemDefault extends PopoverItem {
     this.nodes.root.innerHTML = confirmationEl.innerHTML;
     /** Item becomes a different control, so its name and state should follow */
     PopoverItemDefault.copyAriaAttributes(confirmationEl, this.nodes.root);
+    this.syncActiveStateAttribute();
     this.nodes.root.classList.add(css.confirmationState);
 
     this.confirmationState = newState;
@@ -404,11 +414,30 @@ export class PopoverItemDefault extends PopoverItem {
 
     this.nodes.root.innerHTML = itemWithOriginalParams.innerHTML;
     PopoverItemDefault.copyAriaAttributes(itemWithOriginalParams, this.nodes.root);
+    this.syncActiveStateAttribute();
     this.nodes.root.classList.remove(css.confirmationState);
 
     this.confirmationState = null;
 
     this.disableSpecialHoverAndFocusBehavior();
+  }
+
+  /**
+   * Brings the pressed/checked state back in line with the active class of the item root.
+   *
+   * The attributes copied over from a freshly made element carry the state from the item
+   * params, i.e. the one the item was constructed with. The root element, on the other hand,
+   * is reused across the states and keeps the active class toggleActive() has left it with,
+   * which is the state the item is actually in
+   */
+  private syncActiveStateAttribute(): void {
+    const stateAttribute = this.ariaStateAttribute;
+
+    if (this.nodes.root === null || stateAttribute === null) {
+      return;
+    }
+
+    this.nodes.root.setAttribute(stateAttribute, String(this.nodes.root.classList.contains(css.active)));
   }
 
   /**

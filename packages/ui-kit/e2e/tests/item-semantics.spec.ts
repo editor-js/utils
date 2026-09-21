@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { addItem, removeItemByName, showPopover } from './utils';
+import { addItem, hidePopover, removeItemByName, showPopover } from './utils';
 
 test.describe('menu items', () => {
   test.beforeEach(async ({ page }) => {
@@ -178,6 +178,56 @@ test.describe('active state stays in sync', () => {
 
     await item.click();
     await expect(item).toHaveAttribute('aria-checked', 'false');
+  });
+});
+
+test.describe('item states', () => {
+  test('an inline button without an on/off state is not exposed as a toggle', async ({ page }) => {
+    await showPopover(page, 'inline');
+
+    await expect(page.getByRole('button', { name: 'Link',
+      exact: true })).not.toHaveAttribute('aria-pressed');
+    await expect(page.getByRole('button', { name: 'Italic',
+      exact: true })).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  test('the toggled state survives leaving confirmation mode', async ({ page }) => {
+    await showPopover(page, 'confirmationToggle');
+
+    /** The click toggles the item on and brings it into confirmation mode */
+    await page.getByRole('menuitemcheckbox', { name: 'Pin' }).click();
+    await expect(page.getByRole('menuitemcheckbox', { name: 'Sure?' })).toHaveAttribute('aria-checked', 'true');
+
+    /** Closing resets the confirmation mode, which used to reset aria-checked to the initial params */
+    await hidePopover(page);
+
+    const item = page.locator('[data-item-name="pin"]');
+
+    await expect(item).toHaveClass(/ce-popover-item--active/);
+    await expect(item).toHaveAttribute('aria-checked', 'true');
+  });
+
+  test('items filtered out by the search are hidden, not only styled away', async ({ page }) => {
+    await showPopover(page, 'menu');
+
+    await page.getByRole('searchbox', { name: 'Search' }).fill('Align');
+
+    await expect(page.locator('[data-item-name="simple"]')).toHaveJSProperty('hidden', true);
+    await expect(page.locator('[data-item-name="align-left"]')).toHaveJSProperty('hidden', false);
+  });
+});
+
+test.describe('default accessible names', () => {
+  test('a popover without a label of its own is still named', async ({ page }) => {
+    await showPopover(page, 'menu');
+
+    await expect(page.getByRole('menu', { name: 'Menu' })).toBeVisible();
+  });
+
+  test('an inline popover without a label of its own is named as a toolbar', async ({ page }) => {
+    await showPopover(page, 'inline');
+
+    await expect(page.getByRole('toolbar', { name: 'Toolbar' })).toBeVisible();
   });
 });
 

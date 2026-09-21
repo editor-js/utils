@@ -95,6 +95,12 @@ export abstract class PopoverAbstract<Nodes extends PopoverNodes = PopoverNodes>
     back: 'Back',
     result: '{count} result',
     results: '{count} results',
+
+    /**
+     * Menus and the mobile dialog have to be named, so an overridable default is there for the
+     * callers that do not pass a label of their own
+     */
+    label: 'Menu',
   };
 
   /**

@@ -13,6 +13,7 @@ export const fixtures = {
   nestedInput: '/e2e/fixtures/nested-input.html',
   htmlItems: '/e2e/fixtures/html-items.html',
   nestedNonFlippable: '/e2e/fixtures/nested-non-flippable.html',
+  confirmationToggle: '/e2e/fixtures/confirmation-toggle.html',
   mobilePlain: '/e2e/fixtures/mobile-plain.html',
   mobileEmpty: '/e2e/fixtures/mobile-empty.html',
 } as const;

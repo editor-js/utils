@@ -2,18 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>UI Kit e2e — inline</title>
+  <title>UI Kit e2e — confirmation toggle</title>
 </head>
 <body>
 <div style="position: relative; width: 500px; padding: 12px;">
   <button id="before">Before</button>
   <div style="position: relative;">
-    <button id="trigger">Open inline toolbar</button>
+    <button id="trigger">Open menu</button>
   </div>
 </div>
 
 <script type="module">
-  import { PopoverInline } from '/src/index.ts';
+  import { PopoverDesktop } from '/src/index.ts';
 
   const icon = '<svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/></svg>';
 
@@ -25,42 +25,22 @@
    */
   const activate = (name) => () => window.__activated.push(name);
 
-  const popover = new PopoverInline({
+  const popover = new PopoverDesktop({
     scopeElement: document.body,
     items: [
-      /**
-       * Icon-only item that gets its name from the title param
-       */
       {
         icon,
-        title: 'Bold',
-        name: 'bold',
+        title: 'Pin',
+        name: 'pin',
+        /** A toggle that asks for a confirmation too: clicking both toggles it and swaps it into confirmation mode */
         toggle: true,
-        isActive: () => true,
-        onActivate: activate('bold'),
-      },
-      /**
-       * Icon-only item that has no title at all and gets its name from the hint
-       */
-      {
-        icon,
-        name: 'italic',
-        toggle: true,
-        isActive: () => false,
-        hint: {
-          title: 'Italic',
-          description: 'CMD + I',
+        onActivate: activate('pin'),
+        confirmation: {
+          icon,
+          title: 'Sure?',
+          name: 'pin-confirm',
+          onActivate: activate('pin-confirm'),
         },
-        onActivate: activate('italic'),
-      },
-      /**
-       * Item without an on/off state (no toggle, no isActive), e.g. a "Convert to" button
-       */
-      {
-        icon,
-        title: 'Link',
-        name: 'link',
-        onActivate: activate('link'),
       },
     ],
   });

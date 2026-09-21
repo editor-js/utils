@@ -307,3 +307,11 @@ test.describe('mobile dialog focus edge cases', () => {
     expect(await isArrowDownClaimed()).toBe(false);
   });
 });
+
+test.describe('mobile dialog name', () => {
+  test('is named even without a label of its own', async ({ page }) => {
+    await showPopover(page, 'mobile');
+
+    await expect(page.getByRole('dialog', { name: 'Menu' })).toBeVisible();
+  });
+});

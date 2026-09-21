@@ -81,7 +81,8 @@ export class PopoverItemHtml extends PopoverItem {
    * @param isHidden - true if item should be hidden
    */
   public toggleHidden(isHidden: boolean): void {
-    this.nodes.root?.classList.toggle(css.hidden, isHidden);
+    this.nodes.root.classList.toggle(css.hidden, isHidden);
+    this.nodes.root.hidden = isHidden;
   }
 
   /**

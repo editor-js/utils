@@ -78,8 +78,9 @@ export interface PopoverMessages {
   results?: string;
 
   /**
-   * Accessible name of the popover items container (menu or toolbar).
-   * Not rendered visually, used by screen readers to announce what the popover is
+   * Accessible name of the popover items container (menu or toolbar), and of the dialog the
+   * mobile popover is rendered as. Not rendered visually, used by screen readers to announce
+   * what the popover is. Defaults to 'Menu', or to 'Toolbar' for the inline popover
    */
   label?: string;
 }

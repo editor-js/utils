@@ -22,6 +22,11 @@ export class PopoverInline extends PopoverDesktop {
       {
         ...params,
         class: css.popoverInline,
+        messages: {
+          /** Inline popover is a toolbar rather than a menu, so it is named as one by default */
+          label: 'Toolbar',
+          ...params.messages,
+        },
       },
       {
         [PopoverItemType.Default]: {
