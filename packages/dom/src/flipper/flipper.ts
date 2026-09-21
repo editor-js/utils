@@ -43,8 +43,16 @@ export interface FlipperOptions {
    * If true, flipper moves real DOM focus to the current item and maintains a roving tabindex
    * over the items: the current one becomes tabbable, the rest do not.
    *
-   * Off by default, since moving focus may conflict with the caret position management
-   * of the module that uses the flipper.
+   * Set it to true when the items are the thing the user is interacting with, e.g. a menu
+   * opened from a button (Block Tunes, Toolbox): screen readers only announce the element that
+   * holds the real focus, so with a highlight alone the navigation is silent for them.
+   *
+   * Leave it false when the focus has to stay somewhere else while the items are navigated,
+   * e.g. a toolbar acting on a text selection (Inline Toolbar): focusing a button drops the
+   * selection in Safari, and the formatting would have nothing left to apply to. Such a
+   * consumer can expose the highlighted item via aria-activedescendant instead.
+   *
+   * Off by default, so that the existing consumers keep their focus and caret management intact
    */
   focusItems?: boolean;
 }
@@ -92,6 +100,7 @@ export class Flipper {
 
   /**
    * True if flipper should move real DOM focus to the current item
+   * @see FlipperOptions.focusItems for when either value is expected
    */
   private readonly focusItems: boolean;
 
