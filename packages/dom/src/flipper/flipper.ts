@@ -209,6 +209,13 @@ export class Flipper {
   }
 
   /**
+   * Item the cursor currently points at, null when no item is focused
+   */
+  public get currentItem(): HTMLElement | null {
+    return this.iterator.currentItem;
+  }
+
+  /**
    * Return true if some button is focused
    */
   public hasFocus(): boolean {

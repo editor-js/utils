@@ -181,6 +181,24 @@ test.describe('active state stays in sync', () => {
   });
 });
 
+test.describe('html item popup state', () => {
+  test('an html item with children advertises the submenu on its control, not on the wrapper', async ({ page }) => {
+    await showPopover(page, 'htmlItems');
+
+    const control = page.getByRole('button', { name: 'More' });
+
+    await expect(control).toHaveAttribute('aria-haspopup', 'menu');
+    await expect(control).toHaveAttribute('aria-expanded', 'false');
+    await expect(page.locator('[data-item-name="html-parent"]')).not.toHaveAttribute('aria-haspopup');
+
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('ArrowRight');
+
+    await expect(control).toHaveAttribute('aria-expanded', 'true');
+  });
+});
+
 test.describe('hover styles', () => {
   test('items show the pointer cursor on hover', async ({ page }) => {
     /** Used to be dropped with the whole @media (--can-hover) block, left unresolved in the output */

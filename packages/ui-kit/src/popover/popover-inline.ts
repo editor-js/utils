@@ -77,6 +77,13 @@ export class PopoverInline extends PopoverDesktop {
   }
 
   /**
+   * Items are laid out in a row, so ArrowLeft/ArrowRight move along them
+   */
+  protected override get isHorizontal(): boolean {
+    return true;
+  }
+
+  /**
    * Inline popover acts on the selected text, and Safari drops the selection once the focus
    * moves to a button. Keyboard navigation therefore only moves the highlight here,
    * leaving the focus (and hence the selection) in the text being formatted.

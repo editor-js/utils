@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
-import { accessibleTreeNames, activatedItems, hidePopover, isPopoverShown, openFixture, showPopover } from './utils';
+import { accessibleTreeNames, activatedItems, activeDescendants, hidePopover, isPopoverShown, openFixture, showPopover } from './utils';
 
 /**
  * Returns the accessible name of the currently focused element
@@ -601,5 +601,100 @@ test.describe('inline popover keyboard navigation', () => {
     await page.keyboard.press('Enter');
 
     expect(await activatedItems(page)).toEqual(['bold']);
+  });
+});
+
+test.describe('inline toolbar horizontal navigation', () => {
+  test('ArrowRight and ArrowLeft move the highlight along the bar once it is entered', async ({ page }) => {
+    await openFixture(page, 'inlineSelection');
+    await selectWordAndShowPopover(page);
+
+    const editable = page.locator('#editable');
+    const bold = page.getByRole('button', { name: 'Bold',
+      exact: true });
+    const italic = page.getByRole('button', { name: 'Italic',
+      exact: true });
+
+    await page.keyboard.press('ArrowDown');
+    await expect(bold).toHaveClass(/ce-popover-item--focused/);
+
+    await page.keyboard.press('ArrowRight');
+    await expect(italic).toHaveClass(/ce-popover-item--focused/);
+    await expect(editable).toHaveAttribute('aria-activedescendant', await italic.getAttribute('id') as string);
+
+    await page.keyboard.press('ArrowLeft');
+    await expect(bold).toHaveClass(/ce-popover-item--focused/);
+
+    /** The selection the toolbar acts on stays intact, the arrows were taken by the bar */
+    expect(await selectionState(page)).toEqual({ rangeCount: 1,
+      text: 'bold' });
+  });
+
+  test('horizontal arrows are left to the text caret until the bar is entered', async ({ page }) => {
+    await openFixture(page, 'inlineSelection');
+    await selectWordAndShowPopover(page);
+
+    await page.keyboard.press('ArrowRight');
+
+    /** Native ArrowRight collapses the selection, nothing in the bar got highlighted */
+    expect((await selectionState(page)).text).toBe('');
+    await expect(page.locator('.ce-popover-item--focused')).toHaveCount(0);
+  });
+
+  test('horizontal arrows move the real focus along once Tab has put it on a button', async ({ page }) => {
+    await showPopover(page, 'inline');
+
+    await page.getByRole('button', { name: 'Open inline toolbar' }).focus();
+    await page.keyboard.press('Tab');
+    await expect(page.getByRole('button', { name: 'Bold',
+      exact: true })).toBeFocused();
+
+    await page.keyboard.press('ArrowRight');
+
+    await expect(page.getByRole('button', { name: 'Italic',
+      exact: true })).toBeFocused();
+  });
+});
+
+test.describe('html items in the keyboard navigation', () => {
+  test.beforeEach(async ({ page }) => {
+    await showPopover(page, 'htmlItems');
+  });
+
+  test('ArrowRight opens the submenu of an html item', async ({ page }) => {
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('ArrowDown');
+    await expect(page.getByRole('button', { name: 'More' })).toBeFocused();
+
+    await page.keyboard.press('ArrowRight');
+
+    await expect(page.getByRole('menuitem', { name: 'Child A' })).toBeFocused();
+  });
+
+  test('highlighting an html item\'s control reports it as the active descendant', async ({ page }) => {
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('ArrowDown');
+
+    const control = page.getByRole('button', { name: 'More' });
+
+    await expect(control).toBeFocused();
+
+    const id = await control.getAttribute('id');
+    const emitted = await activeDescendants(page);
+
+    expect(id).toBeTruthy();
+    expect(emitted[emitted.length - 1]).toBe(id);
+  });
+
+  test('checkboxes, selects and links inside an html item are navigable', async ({ page }) => {
+    /** The controls item comes last, and ArrowUp enters the list from its end */
+    await page.keyboard.press('ArrowUp');
+    await expect(page.getByRole('link', { name: 'Link' })).toBeFocused();
+
+    await page.keyboard.press('ArrowUp');
+    await expect(page.getByRole('combobox', { name: 'Pick' })).toBeFocused();
+
+    await page.keyboard.press('ArrowUp');
+    await expect(page.getByRole('checkbox', { name: 'Check' })).toBeFocused();
   });
 });

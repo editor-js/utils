@@ -11,6 +11,7 @@ export const fixtures = {
   inlineSelection: '/e2e/fixtures/inline-selection.html',
   plainMenu: '/e2e/fixtures/plain-menu.html',
   nestedInput: '/e2e/fixtures/nested-input.html',
+  htmlItems: '/e2e/fixtures/html-items.html',
 } as const;
 
 /**
@@ -162,4 +163,24 @@ export async function accessibleTreeNames(page: Page, context: BrowserContext): 
   } finally {
     await client.detach();
   }
+}
+
+/**
+ * Hook the html-items fixture exposes on the window object
+ */
+interface ActiveDescendantsWindow {
+  /**
+   * Every id PopoverEvent.ActiveDescendantChanged was emitted with, in order
+   */
+  // eslint-disable-next-line @typescript-eslint/naming-convention -- matches the global set by the fixture
+  __activeDescendants: Array<string | null>;
+}
+
+/**
+ * Returns the ids PopoverEvent.ActiveDescendantChanged was emitted with so far, in order.
+ * Only the fixtures subscribing to the event record them, see html-items.html
+ * @param page - playwright page object
+ */
+export async function activeDescendants(page: Page): Promise<Array<string | null>> {
+  return page.evaluate(() => (window as unknown as ActiveDescendantsWindow).__activeDescendants);
 }

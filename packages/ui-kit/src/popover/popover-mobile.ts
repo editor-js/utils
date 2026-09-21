@@ -7,6 +7,7 @@ import type { PopoverItemDefault } from './components/popover-item';
 import { css as popoverItemCls } from './components/popover-item';
 import { PopoverItemType } from './types';
 import { css } from './popover.const';
+import { FOCUSABLE_CONTROLS_SELECTOR } from './components/popover-item/popover-item-html/popover-item-html.const';
 import { make, Flipper } from '@editorjs/dom';
 import { keyCodes } from '@editorjs/helpers';
 
@@ -18,12 +19,7 @@ import { keyCodes } from '@editorjs/helpers';
  * points at is a tab stop, so the whole menu counts as one, as the menu pattern prescribes
  */
 const FOCUSABLE_SELECTOR = [
-  'a[href]',
-  'button:not([disabled])',
-  'input:not([disabled])',
-  'select:not([disabled])',
-  'textarea:not([disabled])',
-  '[contenteditable]:not([contenteditable="false"])',
+  ...FOCUSABLE_CONTROLS_SELECTOR.split(', '),
   '[tabindex]',
 ].map(selector => `${selector}:not([tabindex="-1"])`).join(', ');
 

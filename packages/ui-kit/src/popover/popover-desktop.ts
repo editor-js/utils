@@ -442,12 +442,27 @@ export class PopoverDesktop extends PopoverAbstract {
    * Called on flipper navigation
    */
   protected override onFlip = (): void => {
-    const focusedItem = this.itemsDefault.find(item => item.isFocused);
+    /**
+     * Read off the Flipper rather than looked up among the default items: the cursor may as
+     * well be on a control of an html item, and that one has to be reported too
+     */
+    const element = this.flipper?.currentItem ?? null;
+    const focusedItem = element !== null ? this.findItemByElement(element) : undefined;
 
-    focusedItem?.onFocus();
+    if (focusedItem instanceof PopoverItemDefault) {
+      focusedItem.onFocus();
+    }
 
-    this.emit(PopoverEvent.ActiveDescendantChanged, focusedItem?.id ?? null);
+    this.emit(PopoverEvent.ActiveDescendantChanged, element !== null && element.id !== '' ? element.id : null);
   };
+
+  /**
+   * True if the items are laid out in a row, so that the horizontal arrows move along them.
+   * Popovers are vertical menus, inline ones are horizontal bars
+   */
+  protected get isHorizontal(): boolean {
+    return false;
+  }
 
   /**
    * Deepest popover in the currently open nested chain; itself when nothing is nested
@@ -529,6 +544,16 @@ export class PopoverDesktop extends PopoverAbstract {
     }
 
     /**
+     * In a horizontal bar these arrows move along the items rather than in and out of submenus.
+     * Once a nested popover is open the keyboard belongs to it, and that one is a vertical menu
+     */
+    if (this.isHorizontal && this.nestedPopover == null) {
+      this.flipHorizontally(event);
+
+      return;
+    }
+
+    /**
      * Only act while the focus is inside the popover (the whole chain lives in its element) and
      * not in a control that needs the horizontal arrows for itself, so they keep their native
      * meaning of moving the text cursor in the search field, in a custom item's input, or in
@@ -548,8 +573,7 @@ export class PopoverDesktop extends PopoverAbstract {
       return;
     }
 
-    const deepest = this.deepestOpenPopover;
-    const focusedItem = deepest.itemsDefault.find(item => item.isFocused);
+    const focusedItem = this.deepestOpenPopover.focusedItem;
 
     if (focusedItem?.hasChildren !== true) {
       return;
@@ -560,6 +584,80 @@ export class PopoverDesktop extends PopoverAbstract {
     /** Clicking opens the submenu and moves the focus into it, see showNestedItems() */
     focusedItem.getElement()?.click();
   };
+
+  /**
+   * Moves the keyboard navigation cursor along a horizontal bar with ArrowLeft/ArrowRight,
+   * as the WAI-ARIA toolbar pattern prescribes
+   * @param event - ArrowLeft or ArrowRight keydown event
+   */
+  private flipHorizontally(event: KeyboardEvent): void {
+    /**
+     * Shift+arrows extend the text selection. And until the user has entered the bar (with
+     * ArrowDown, ArrowUp or Tab) there is no cursor in it: the focus is still in the text the
+     * bar acts on, where the horizontal arrows move the caret
+     */
+    if (event.shiftKey || this.flipper?.hasFocus() !== true) {
+      return;
+    }
+
+    const activeElement = document.activeElement;
+    const isFocusInside = activeElement instanceof HTMLElement && this.nodes.popover.contains(activeElement);
+
+    /** A custom item's text field needs the arrows to move its own caret */
+    if (isFocusInside && PopoverDesktop.consumesArrowKeys(activeElement)) {
+      return;
+    }
+
+    event.preventDefault();
+
+    if (event.key === 'ArrowLeft') {
+      this.flipper.flipLeft();
+    } else {
+      this.flipper.flipRight();
+    }
+
+    /**
+     * An inline bar only moves the highlight (see movesFocusToItems), but once Tab has put the
+     * real focus on one of its items, that focus has to travel along. Otherwise Enter and the
+     * screen reader would stay on the item the focus was left on
+     */
+    if (isFocusInside) {
+      this.flipper.currentItem?.focus();
+    }
+  }
+
+  /**
+   * Item the keyboard navigation cursor is on: the Flipper's current one, or the item holding
+   * the real focus in a popover that has no Flipper. For an html item, that is one of its controls
+   */
+  private get focusedItem(): PopoverItemDefault | PopoverItemHtml | undefined {
+    const activeElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const element = this.flipper?.currentItem ?? activeElement;
+
+    if (element === null) {
+      return undefined;
+    }
+
+    return this.findItemByElement(element);
+  }
+
+  /**
+   * Returns the item the specified navigable element belongs to
+   * @param element - item root, or a control of an html item
+   */
+  private findItemByElement(element: HTMLElement): PopoverItemDefault | PopoverItemHtml | undefined {
+    for (const item of this.items) {
+      if (item instanceof PopoverItemDefault && item.getElement() === element) {
+        return item;
+      }
+
+      if (item instanceof PopoverItemHtml && item.getControls().includes(element)) {
+        return item;
+      }
+    }
+
+    return undefined;
+  }
 
   /**
    * Walks the popover's Tab ring, wrapping around at its ends.
