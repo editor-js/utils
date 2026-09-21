@@ -1,0 +1,12 @@
+/**
+ * Custom media queries shared by the popover stylesheets.
+ *
+ * PostCSS resolves @custom-media per file, so every stylesheet using one of these has to
+ * @import this file. A definition that is only visible in another file leaves the query
+ * unresolved in the output, and browsers drop the whole @media block as invalid.
+ *
+ * Updating values in media queries should also include changes in utils.ts@isMobile
+ */
+@custom-media --mobile (width <= 650px);
+@custom-media --not-mobile (width >= 651px);
+@custom-media --can-hover (hover: hover);

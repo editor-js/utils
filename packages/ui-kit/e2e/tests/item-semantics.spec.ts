@@ -180,3 +180,16 @@ test.describe('active state stays in sync', () => {
     await expect(item).toHaveAttribute('aria-checked', 'false');
   });
 });
+
+test.describe('hover styles', () => {
+  test('items show the pointer cursor on hover', async ({ page }) => {
+    /** Used to be dropped with the whole @media (--can-hover) block, left unresolved in the output */
+    await showPopover(page, 'menu');
+
+    const item = page.getByRole('menuitem', { name: 'Simple Item' });
+
+    await item.hover();
+
+    expect(await item.evaluate(element => getComputedStyle(element).cursor)).toBe('pointer');
+  });
+});
