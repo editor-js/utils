@@ -334,6 +334,22 @@ test.describe('mobile dialog focus edge cases', () => {
   });
 });
 
+test.describe('nested levels', () => {
+  test('returns to the root level when a nested one closes itself as it opens', async ({ page }) => {
+    await showPopover(page, 'mobileSelfClosingChildren');
+
+    await page.getByText('Closes itself').click();
+
+    /**
+     * The level pushes its state before rendering, so the close that arrives while it is still
+     * opening pops that state rather than the root one underneath it
+     */
+    await expect(page.getByRole('menuitem', { name: 'Simple item' })).toBeVisible();
+    await expect(page.getByRole('menuitem', { name: 'Closes itself' })).toBeVisible();
+    await expect(page.getByRole('menuitem', { name: 'Never seen' })).toHaveCount(0);
+  });
+});
+
 test.describe('mobile dialog name', () => {
   test('is named even without a label of its own', async ({ page }) => {
     await showPopover(page, 'mobile');

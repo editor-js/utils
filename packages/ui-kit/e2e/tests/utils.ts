@@ -17,6 +17,7 @@ export const fixtures = {
   mobilePlain: '/e2e/fixtures/mobile-plain.html',
   mobileEmpty: '/e2e/fixtures/mobile-empty.html',
   mobileNestedInput: '/e2e/fixtures/mobile-nested-input.html',
+  mobileSelfClosingChildren: '/e2e/fixtures/mobile-self-closing-children.html',
 } as const;
 
 /**

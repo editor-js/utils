@@ -60,9 +60,10 @@ export class PopoverMobile extends PopoverAbstract<PopoverMobileNodes> {
   /**
    * Whether the items currently on screen take part in keyboard navigation.
    * Nested levels opt out of it via children.isFlippable, and since they are rendered into the
-   * same panel rather than into a popover of their own, the flag has to travel with the level
+   * same panel rather than into a popover of their own, the flag has to travel with the level.
+   * The root level's own value comes from the 'flippable' construction param
    */
-  private isLevelFlippable = true;
+  private isLevelFlippable: boolean;
 
   /**
    * Construct the instance
@@ -113,7 +114,9 @@ export class PopoverMobile extends PopoverAbstract<PopoverMobileNodes> {
      * A popover built with 'flippable: false' opts out of keyboard navigation altogether, and
      * then every item becomes an individual stop of the trap instead - see toggleItemsTabbable()
      */
-    if (params.flippable !== false) {
+    this.isLevelFlippable = params.flippable !== false;
+
+    if (this.isLevelFlippable) {
       this.flipper = new Flipper({
         items: this.flippableElements,
         focusedItemClass: popoverItemCls.focused,
@@ -127,7 +130,10 @@ export class PopoverMobile extends PopoverAbstract<PopoverMobileNodes> {
     }
 
     /* Save state to history for proper navigation between nested and parent popovers */
-    this.history.push({ items: params.items });
+    this.history.push({
+      items: params.items,
+      isFlippable: this.isLevelFlippable,
+    });
   }
 
   /**
@@ -227,6 +233,17 @@ export class PopoverMobile extends PopoverAbstract<PopoverMobileNodes> {
    * @param item – item object to show nested popover for
    */
   protected override showNestedItems(item: PopoverItemDefault): void {
+    /**
+     * Pushed before the level is rendered, and before onChildrenOpen() below is handed a way to
+     * close it: a close arriving synchronously from there would otherwise pop the root state,
+     * the only one on the stack at that point, and leave the popover with no state at all
+     */
+    this.history.push({
+      title: item.title,
+      items: item.children,
+      isFlippable: item.isChildrenFlippable,
+    });
+
     /** Show nested items */
     this.updateItemsAndHeader(item.children, item.title, item.isChildrenFlippable);
 
@@ -241,12 +258,6 @@ export class PopoverMobile extends PopoverAbstract<PopoverMobileNodes> {
     };
 
     item.onChildrenOpen(close);
-
-    this.history.push({
-      title: item.title,
-      items: item.children,
-      isFlippable: item.isChildrenFlippable,
-    });
   }
 
   /**
