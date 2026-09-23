@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { addItem, hidePopover, showPopover } from './utils';
+import { addItem, hidePopover, removeItemByName, showPopover } from './utils';
 
 test.describe('search input', () => {
   test.beforeEach(async ({ page }) => {
@@ -143,6 +143,44 @@ test.describe('search input', () => {
 
     await page.keyboard.press('ArrowDown');
     await expect(page.getByRole('menuitemradio', { name: 'Align Center' })).toBeFocused();
+  });
+
+  test('keeps the navigation cursor on the focused result when an item is added', async ({ page }) => {
+    await page.getByRole('searchbox', { name: 'Search' }).fill('Align');
+
+    await page.keyboard.press('ArrowDown');
+    await expect(page.getByRole('menuitemradio', { name: 'Align Left' })).toBeFocused();
+
+    /**
+     * Adding an item reapplies the query, which restarts the Flipper. Without a cursor to
+     * resume from, the next arrow press would silently start over from the top of the list
+     * while the focus stayed where the user left it
+     */
+    await addItem(page, {
+      title: 'Added item',
+      name: 'added',
+    });
+
+    await expect(page.getByRole('menuitemradio', { name: 'Align Left' })).toBeFocused();
+
+    await page.keyboard.press('ArrowDown');
+    await expect(page.getByRole('menuitemradio', { name: 'Align Center' })).toBeFocused();
+  });
+
+  test('keeps the navigation cursor on the focused result when an item is removed', async ({ page }) => {
+    await page.getByRole('searchbox', { name: 'Search' }).fill('Align');
+
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('ArrowDown');
+    await expect(page.getByRole('menuitemradio', { name: 'Align Center' })).toBeFocused();
+
+    /** Filtered out by the query, so the results the user is navigating do not change */
+    await removeItemByName(page, 'bold');
+
+    await expect(page.getByRole('menuitemradio', { name: 'Align Center' })).toBeFocused();
+
+    await page.keyboard.press('ArrowUp');
+    await expect(page.getByRole('menuitemradio', { name: 'Align Left' })).toBeFocused();
   });
 });
 

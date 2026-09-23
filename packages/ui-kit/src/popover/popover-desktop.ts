@@ -878,6 +878,15 @@ export class PopoverDesktop extends PopoverAbstract {
     const flippableElements = data.query === '' ? this.flippableElements : data.items.map(item => (item as PopoverItem).getElement());
 
     if (this.flipper?.isActivated === true) {
+      /**
+       * Noted before the Flipper is restarted: re-filtering can happen while an item rather than
+       * the search field holds the focus (adding or removing an item reapplies the query), and
+       * restarting the Flipper without a cursor leaves the highlight and the roving tabindex
+       * behind on the first item while the real focus stays where the user left it
+       */
+      const active = document.activeElement;
+      const focusedItem = active instanceof HTMLElement && this.nodes.items.contains(active) ? active : null;
+
       /** Update flipper items with only visible */
       this.flipper.deactivate();
       this.flipper.activate(flippableElements as HTMLElement[]);
@@ -888,6 +897,14 @@ export class PopoverDesktop extends PopoverAbstract {
        * scoped to the currently visible items, so Tab still reaches the filtered results.
        */
       this.toggleItemsTabbable(true, flippableElements as HTMLElement[]);
+
+      /**
+       * Only when an item was focused: typing in the search field must not move the cursor onto
+       * an item, since that is what would take the focus away from the query being typed
+       */
+      if (focusedItem !== null) {
+        this.moveCursorTo(focusedItem);
+      }
     }
   };
 
