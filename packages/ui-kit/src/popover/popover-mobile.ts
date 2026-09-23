@@ -58,6 +58,20 @@ export class PopoverMobile extends PopoverAbstract<PopoverMobileNodes> {
   private previouslyFocusedElement: HTMLElement | null = null;
 
   /**
+   * Whether the items currently on screen take part in keyboard navigation.
+   * Nested levels opt out of it via children.isFlippable, and since they are rendered into the
+   * same panel rather than into a popover of their own, the flag has to travel with the level.
+   * The root level's own value comes from the 'flippable' construction param
+   */
+  private isLevelFlippable: boolean;
+
+  /**
+   * Whether the items on screen belong to a nested level rather than to the root one.
+   * The panel renders every level into the same container, so this is what tells the two apart
+   */
+  private isNestedLevelRendered = false;
+
+  /**
    * Construct the instance
    * @param params - popover params object
    */
@@ -106,7 +120,9 @@ export class PopoverMobile extends PopoverAbstract<PopoverMobileNodes> {
      * A popover built with 'flippable: false' opts out of keyboard navigation altogether, and
      * then every item becomes an individual stop of the trap instead - see toggleItemsTabbable()
      */
-    if (params.flippable !== false) {
+    this.isLevelFlippable = params.flippable !== false;
+
+    if (this.isLevelFlippable) {
       this.flipper = new Flipper({
         items: this.flippableElements,
         focusedItemClass: popoverItemCls.focused,
@@ -120,7 +136,29 @@ export class PopoverMobile extends PopoverAbstract<PopoverMobileNodes> {
     }
 
     /* Save state to history for proper navigation between nested and parent popovers */
-    this.history.push({ items: params.items });
+    this.history.push({
+      items: params.items,
+      isFlippable: this.isLevelFlippable,
+    });
+  }
+
+  /**
+   * The items share a single Tab stop only while the level they belong to is navigable.
+   * A level that opted out is walked by Tab like a plain list instead
+   */
+  protected override get hasRovingTabindex(): boolean {
+    return this.isLevelFlippable && super.hasRovingTabindex;
+  }
+
+  /**
+   * A level that opted out of keyboard navigation has no cursor to keep in sync: moving one
+   * there would re-activate the Flipper and take the arrows away from the items that need them
+   * for themselves. The Flipper is left holding the previous level's items, which is what
+   * currently keeps the cursor from landing anywhere - this states the rule rather than
+   * relying on that
+   */
+  protected override get isFlipperCursorSyncEnabled(): boolean {
+    return this.isLevelFlippable && super.isFlipperCursorSyncEnabled;
   }
 
   /**
@@ -139,11 +177,27 @@ export class PopoverMobile extends PopoverAbstract<PopoverMobileNodes> {
       this.previouslyFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     }
 
+    /**
+     * Closing resets the history to the root level, but leaves on screen whatever level the
+     * user was on. Rendered here rather than on the way out, so that nothing changes under the
+     * closing animation, and while the dialog still counts as hidden, so this only rebuilds the
+     * items: the keyboard navigation is set up by the rest of show() below.
+     *
+     * Without it a nested level would come back up with the root's own flippability, and one
+     * that opted out of keyboard navigation would have it turned back on by the activation below
+     */
+    if (this.isNestedLevelRendered) {
+      this.updateItemsAndHeader(this.history.currentItems, this.history.currentTitle, this.history.currentIsFlippable);
+    }
+
     super.show();
 
     this.scrollLocker.lock();
 
-    this.flipper?.activate(this.flippableElements);
+    if (this.isLevelFlippable) {
+      this.flipper?.activate(this.flippableElements);
+    }
+
     this.toggleItemsTabbable(true);
 
     this.listeners.on(document, 'keydown', this.handleKeyDown as (event: Event) => void, { capture: true });
@@ -179,6 +233,7 @@ export class PopoverMobile extends PopoverAbstract<PopoverMobileNodes> {
     this.listeners.off(document, 'keydown', this.handleKeyDown as (event: Event) => void, { capture: true });
 
     this.history.reset();
+    this.isLevelFlippable = this.history.currentIsFlippable;
 
     this.isHidden = true;
 
@@ -208,8 +263,19 @@ export class PopoverMobile extends PopoverAbstract<PopoverMobileNodes> {
    * @param item – item object to show nested popover for
    */
   protected override showNestedItems(item: PopoverItemDefault): void {
+    /**
+     * Pushed before the level is rendered, and before onChildrenOpen() below is handed a way to
+     * close it: a close arriving synchronously from there would otherwise pop the root state,
+     * the only one on the stack at that point, and leave the popover with no state at all
+     */
+    this.history.push({
+      title: item.title,
+      items: item.children,
+      isFlippable: item.isChildrenFlippable,
+    });
+
     /** Show nested items */
-    this.updateItemsAndHeader(item.children, item.title);
+    this.updateItemsAndHeader(item.children, item.title, item.isChildrenFlippable);
 
     const close = (parent?: boolean): void => {
       if (parent === true) {
@@ -217,16 +283,11 @@ export class PopoverMobile extends PopoverAbstract<PopoverMobileNodes> {
       } else {
         this.history.pop();
 
-        this.updateItemsAndHeader(this.history.currentItems, this.history.currentTitle);
+        this.updateItemsAndHeader(this.history.currentItems, this.history.currentTitle, this.history.currentIsFlippable);
       }
     };
 
     item.onChildrenOpen(close);
-
-    this.history.push({
-      title: item.title,
-      items: item.children,
-    });
   }
 
   /**
@@ -303,12 +364,13 @@ export class PopoverMobile extends PopoverAbstract<PopoverMobileNodes> {
    * Moves focus inside the dialog once it is opened.
    *
    * The menu is entered at its first item, so that the arrows navigate from there right away.
-   * Without a Flipper ('flippable: false'), or with a list that has nothing for it to point at
-   * (only separators, for example), the trap's own first stop is used instead. And when there
-   * is no stop at all, the dialog itself takes the focus
+   * Without a Flipper ('flippable: false'), on a nested level that opted out of keyboard
+   * navigation, or with a list that has nothing for it to point at (only separators, for
+   * example), the trap's own first stop is used instead. And when there is no stop at all,
+   * the dialog itself takes the focus
    */
   private focusFirstElement(): void {
-    if (this.flipper !== undefined && this.flippableElements.length > 0) {
+    if (this.flipper !== undefined && this.isLevelFlippable && this.flippableElements.length > 0) {
       this.flipper.focusFirst();
 
       return;
@@ -344,8 +406,9 @@ export class PopoverMobile extends PopoverAbstract<PopoverMobileNodes> {
    * Removes rendered popover items and header and displays new ones
    * @param items - new popover items
    * @param title - new popover header text
+   * @param isFlippable - false if the new items opted out of keyboard navigation
    */
-  private updateItemsAndHeader(items: PopoverItemParams[], title?: string): void {
+  private updateItemsAndHeader(items: PopoverItemParams[], title?: string, isFlippable = true): void {
     /** Re-render header */
     if (this.header !== null && this.header !== undefined) {
       this.header.destroy();
@@ -358,7 +421,7 @@ export class PopoverMobile extends PopoverAbstract<PopoverMobileNodes> {
         onBackButtonClick: () => {
           this.history.pop();
 
-          this.updateItemsAndHeader(this.history.currentItems, this.history.currentTitle);
+          this.updateItemsAndHeader(this.history.currentItems, this.history.currentTitle, this.history.currentIsFlippable);
         },
       });
       const headerEl = this.header.getElement();
@@ -379,6 +442,11 @@ export class PopoverMobile extends PopoverAbstract<PopoverMobileNodes> {
 
     this.renderItems(this.items);
 
+    this.isLevelFlippable = isFlippable;
+
+    /** Only a nested level carries a title, the root one is titleless by construction */
+    this.isNestedLevelRendered = title !== undefined;
+
     if (!this.isHidden) {
       /**
        * Deactivated before being re-activated, so that the Flipper drops its cursor while it
@@ -386,7 +454,15 @@ export class PopoverMobile extends PopoverAbstract<PopoverMobileNodes> {
        * the cursor is left at
        */
       this.flipper?.deactivate();
-      this.flipper?.activate(this.flippableElements);
+
+      /**
+       * A level that opted out of keyboard navigation leaves the Flipper deactivated, so it
+       * stops claiming the arrows and Enter: an item holding a text input needs those for
+       * itself. Its items become individual stops of the panel's Tab trap instead
+       */
+      if (this.isLevelFlippable) {
+        this.flipper?.activate(this.flippableElements);
+      }
 
       /** Element that was focused has just been removed, so focus is moved into the new list */
       this.toggleItemsTabbable(true);

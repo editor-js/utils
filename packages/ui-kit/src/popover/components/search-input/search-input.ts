@@ -107,6 +107,24 @@ export class SearchInput extends EventsDispatcher<SearchInputEventMap> {
   }
 
   /**
+   * Runs the query that is already typed in against the item list again.
+   *
+   * Adding or removing an item leaves the results describing a list that no longer exists:
+   * the newcomer shows up among the matches whether it matches or not, and the reported count
+   * is off. Re-running the query brings both back in sync without the user retyping it
+   */
+  public reapplyQuery(): void {
+    if (this.searchQuery === undefined || this.searchQuery === '') {
+      return;
+    }
+
+    this.emit(SearchInputEvent.Search, {
+      query: this.searchQuery,
+      items: this.foundItems,
+    });
+  }
+
+  /**
    * Returns search field element
    */
   public getElement(): HTMLElement {

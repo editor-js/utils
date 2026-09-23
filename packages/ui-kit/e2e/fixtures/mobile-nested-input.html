@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>UI Kit e2e — mobile with a non-flippable nested level</title>
+</head>
+<body>
+<div style="position: relative; width: 100%; padding: 12px;">
+  <button id="before">Before</button>
+  <div style="position: relative;">
+    <button id="trigger">Open mobile popover</button>
+  </div>
+</div>
+
+<script type="module">
+  import { PopoverMobile, PopoverItemType } from '/src/index.ts';
+
+  window.__activated = [];
+
+  /**
+   * Records item activation so tests can assert it without relying on visuals
+   * @param {string} name - name of the activated item
+   */
+  const activate = (name) => () => window.__activated.push(name);
+
+  const nestedInput = document.createElement('input');
+
+  nestedInput.setAttribute('aria-label', 'Nested input');
+
+  const popover = new PopoverMobile({
+    scopeElement: document.body,
+    items: [
+      {
+        title: 'Simple item',
+        name: 'simple',
+        onActivate: activate('simple'),
+      },
+      {
+        title: 'Has children',
+        name: 'with-children',
+        children: {
+          /** The nested level is a form, not a menu: its keys belong to the input */
+          isFlippable: false,
+          items: [
+            {
+              type: PopoverItemType.Html,
+              element: nestedInput,
+              name: 'input-item',
+            },
+            /** A second stop, so an arrow press has somewhere to move the focus to */
+            {
+              title: 'Child A',
+              name: 'child-a',
+              onActivate: activate('child-a'),
+            },
+          ],
+        },
+      },
+    ],
+  });
+
+  document.body.appendChild(popover.getElement());
+  document.getElementById('trigger').addEventListener('click', () => popover.show());
+
+  window.popover = popover;
+  document.body.dataset.ready = 'true';
+</script>
+</body>
+</html>
