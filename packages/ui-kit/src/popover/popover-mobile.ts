@@ -66,6 +66,12 @@ export class PopoverMobile extends PopoverAbstract<PopoverMobileNodes> {
   private isLevelFlippable: boolean;
 
   /**
+   * Whether the items on screen belong to a nested level rather than to the root one.
+   * The panel renders every level into the same container, so this is what tells the two apart
+   */
+  private isNestedLevelRendered = false;
+
+  /**
    * Construct the instance
    * @param params - popover params object
    */
@@ -145,6 +151,17 @@ export class PopoverMobile extends PopoverAbstract<PopoverMobileNodes> {
   }
 
   /**
+   * A level that opted out of keyboard navigation has no cursor to keep in sync: moving one
+   * there would re-activate the Flipper and take the arrows away from the items that need them
+   * for themselves. The Flipper is left holding the previous level's items, which is what
+   * currently keeps the cursor from landing anywhere - this states the rule rather than
+   * relying on that
+   */
+  protected override get isFlipperCursorSyncEnabled(): boolean {
+    return this.isLevelFlippable && super.isFlipperCursorSyncEnabled;
+  }
+
+  /**
    * Open popover
    */
   public show(): void {
@@ -158,6 +175,19 @@ export class PopoverMobile extends PopoverAbstract<PopoverMobileNodes> {
      */
     if (this.isHidden) {
       this.previouslyFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    }
+
+    /**
+     * Closing resets the history to the root level, but leaves on screen whatever level the
+     * user was on. Rendered here rather than on the way out, so that nothing changes under the
+     * closing animation, and while the dialog still counts as hidden, so this only rebuilds the
+     * items: the keyboard navigation is set up by the rest of show() below.
+     *
+     * Without it a nested level would come back up with the root's own flippability, and one
+     * that opted out of keyboard navigation would have it turned back on by the activation below
+     */
+    if (this.isNestedLevelRendered) {
+      this.updateItemsAndHeader(this.history.currentItems, this.history.currentTitle, this.history.currentIsFlippable);
     }
 
     super.show();
@@ -413,6 +443,9 @@ export class PopoverMobile extends PopoverAbstract<PopoverMobileNodes> {
     this.renderItems(this.items);
 
     this.isLevelFlippable = isFlippable;
+
+    /** Only a nested level carries a title, the root one is titleless by construction */
+    this.isNestedLevelRendered = title !== undefined;
 
     if (!this.isHidden) {
       /**

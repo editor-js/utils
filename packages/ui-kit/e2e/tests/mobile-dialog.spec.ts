@@ -350,6 +350,78 @@ test.describe('nested levels', () => {
   });
 });
 
+test.describe('non-flippable nested level', () => {
+  test.beforeEach(async ({ page }) => {
+    await showPopover(page, 'mobileNestedInput');
+
+    await page.getByText('Has children').click();
+  });
+
+  test('leaves the arrows to the items, however the focus got there', async ({ page }) => {
+    const input = page.getByLabel('Nested input');
+
+    await input.focus();
+
+    /**
+     * Focus arriving on an item of a level that opted out must not move the navigation cursor
+     * there: that would re-activate the Flipper, and the arrows would stop reaching the input
+     */
+    await page.keyboard.press('ArrowDown');
+    await expect(input).toBeFocused();
+
+    await page.keyboard.press('ArrowUp');
+    await expect(input).toBeFocused();
+  });
+
+  test('walks its items with Tab instead', async ({ page }) => {
+    await page.keyboard.press('Tab');
+    await expect(page.getByLabel('Nested input')).toBeFocused();
+
+    await page.keyboard.press('Tab');
+    await expect(page.getByRole('menuitem', { name: 'Child A' })).toBeFocused();
+  });
+});
+
+test.describe('reopening', () => {
+  test('comes back to the root level after being closed on a nested one', async ({ page }) => {
+    await showPopover(page, 'mobileNestedInput');
+
+    await page.getByText('Has children').click();
+
+    await expect(page.getByRole('menuitem', { name: 'Child A' })).toBeVisible();
+
+    await page.keyboard.press('Escape');
+    await callShow(page);
+
+    /**
+     * Closing resets the level history, so the panel has to come back up showing the root items
+     * rather than the level the user happened to be on when it was dismissed
+     */
+    await expect(page.getByRole('menuitem', { name: 'Simple item' })).toBeVisible();
+    await expect(page.getByRole('menuitem', { name: 'Child A' })).toHaveCount(0);
+  });
+
+  test('does not restore keyboard navigation to a level that opted out of it', async ({ page }) => {
+    await showPopover(page, 'mobileNestedInput');
+
+    await page.getByText('Has children').click();
+    await page.keyboard.press('Escape');
+    await callShow(page);
+
+    /**
+     * The nested level is not navigable, and reopening used to leave its items on screen while
+     * restoring the root's own flippability - the arrows would then navigate a level whose
+     * items need those keys for themselves
+     */
+    await expect(page.getByRole('menuitem', { name: 'Simple item' })).toBeFocused();
+
+    await page.keyboard.press('ArrowDown');
+
+    await expect(page.getByRole('menuitem', { name: 'Has children' })).toBeFocused();
+    await expect(page.getByLabel('Nested input')).toHaveCount(0);
+  });
+});
+
 test.describe('mobile dialog name', () => {
   test('is named even without a label of its own', async ({ page }) => {
     await showPopover(page, 'mobile');
