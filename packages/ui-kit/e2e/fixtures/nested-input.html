@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>UI Kit e2e — nested popover with a custom input</title>
+</head>
+<body>
+<div style="position: relative; width: 500px; padding: 12px;">
+  <button id="before">Before</button>
+  <div style="position: relative;">
+    <button id="trigger">Open menu</button>
+  </div>
+</div>
+
+<script type="module">
+  import { PopoverDesktop, PopoverItemType } from '/src/index.ts';
+
+  window.__activated = [];
+
+  /**
+   * Records item activation so tests can assert it without relying on visuals
+   * @param {string} name - name of the activated item
+   */
+  const activate = (name) => () => window.__activated.push(name);
+
+  const nestedInput = document.createElement('input');
+
+  nestedInput.setAttribute('aria-label', 'Nested input');
+
+  const popover = new PopoverDesktop({
+    scopeElement: document.body,
+    items: [
+      {
+        title: 'Simple item',
+        name: 'simple',
+        onActivate: activate('simple'),
+      },
+      {
+        title: 'Has children',
+        name: 'with-children',
+        children: {
+          onOpen: () => nestedInput.focus(),
+          items: [
+            {
+              title: 'Child A',
+              name: 'child-a',
+              onActivate: activate('child-a'),
+            },
+            {
+              type: PopoverItemType.Html,
+              element: nestedInput,
+              name: 'input-item',
+            },
+          ],
+        },
+      },
+    ],
+  });
+
+  document.getElementById('trigger').insertAdjacentElement('afterend', popover.getElement());
+  document.getElementById('trigger').addEventListener('click', () => popover.show());
+
+  window.popover = popover;
+  document.body.dataset.ready = 'true';
+</script>
+</body>
+</html>

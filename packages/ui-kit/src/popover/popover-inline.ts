@@ -22,6 +22,11 @@ export class PopoverInline extends PopoverDesktop {
       {
         ...params,
         class: css.popoverInline,
+        messages: {
+          /** Inline popover is a toolbar rather than a menu, so it is named as one by default */
+          label: 'Toolbar',
+          ...params.messages,
+        },
       },
       {
         [PopoverItemType.Default]: {
@@ -30,6 +35,12 @@ export class PopoverInline extends PopoverDesktop {
            * @todo figure out better way to solve the issue
            */
           wrapperTag: 'button',
+
+          /**
+           * Inline popover is a toolbar of buttons, not a menu,
+           * so items get the button role and aria-pressed state
+           */
+          ariaRole: 'button',
           hint: {
             position: 'top',
             alignment: 'center',
@@ -61,6 +72,31 @@ export class PopoverInline extends PopoverDesktop {
           this.showNestedItems(item);
         }
       });
+  }
+
+  /**
+   * Inline popover is a horizontal bar of controls, not a menu
+   */
+  protected override get itemsContainerRole(): string {
+    return 'toolbar';
+  }
+
+  /**
+   * Items are laid out in a row, so ArrowLeft/ArrowRight move along them
+   */
+  protected override get isHorizontal(): boolean {
+    return true;
+  }
+
+  /**
+   * Inline popover acts on the selected text, and Safari drops the selection once the focus
+   * moves to a button. Keyboard navigation therefore only moves the highlight here,
+   * leaving the focus (and hence the selection) in the text being formatted.
+   *
+   * This is the same problem the 'button' wrapper tag works around, see the constructor
+   */
+  protected override get movesFocusToItems(): boolean {
+    return false;
   }
 
   /**

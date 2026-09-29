@@ -1,4 +1,5 @@
 import { make } from '@editorjs/dom';
+import { generateId } from '@editorjs/helpers';
 import { css } from './hint.const';
 import type { HintParams } from '../../types';
 
@@ -37,6 +38,10 @@ export class Hint {
       root: make('div', [css.root, params.alignment === 'center' ? css.alignedCenter : css.alignedStart]),
       title: make('div', css.title, { textContent: params.title }),
     };
+
+    /** Item refers to the hint via aria-describedby, so the hint needs an id and a role */
+    this.nodes.root.id = generateId(`${css.root}-`);
+    this.nodes.root.setAttribute('role', 'tooltip');
 
     this.nodes.root.appendChild(this.nodes.title);
 

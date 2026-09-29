@@ -27,6 +27,16 @@
   &__input {
     font-size: 14px;
     outline: none;
+
+    /* Input is a type="search" one for semantics, its native decorations are not needed */
+    appearance: none;
+
+    &::-webkit-search-cancel-button,
+    &::-webkit-search-decoration {
+      appearance: none;
+      display: none;
+    }
+
     font-weight: 500;
     font-family: inherit;
     border: 0;

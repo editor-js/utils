@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>UI Kit e2e — mobile plain</title>
+</head>
+<body>
+<div style="position: relative; width: 100%; padding: 12px;">
+  <button id="before">Before</button>
+  <div style="position: relative;">
+    <button id="trigger">Open mobile popover</button>
+  </div>
+</div>
+
+<script type="module">
+  import { PopoverMobile } from '/src/index.ts';
+
+  const icon = '<svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/></svg>';
+
+  window.__activated = [];
+
+  /**
+   * Records item activation so tests can assert it without relying on visuals
+   * @param {string} name - name of the activated item
+   */
+  const activate = (name) => () => window.__activated.push(name);
+
+  const popover = new PopoverMobile({
+    scopeElement: document.body,
+    flippable: false,
+    items: [
+      {
+        icon,
+        title: 'First',
+        name: 'first',
+        onActivate: activate('first'),
+      },
+      {
+        icon,
+        title: 'Second',
+        name: 'second',
+        onActivate: activate('second'),
+      },
+    ],
+  });
+
+  document.body.appendChild(popover.getElement());
+  document.getElementById('trigger').addEventListener('click', () => popover.show());
+
+  window.popover = popover;
+  document.body.dataset.ready = 'true';
+</script>
+</body>
+</html>

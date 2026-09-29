@@ -19,7 +19,29 @@ const VERSION = pkg.version;
  */
 process.env.BROWSER = 'open';
 
-export default {
+/**
+ * Sibling workspace packages resolve to their built `dist` by default, so a change in one of
+ * them stays invisible to the dev server — and hence to the e2e suite, which runs against it —
+ * until that package is rebuilt. A stale build is not an error either: it just silently tests
+ * yesterday's code. Pointing the dev server at their sources removes the rebuild step entirely.
+ *
+ * Applied to `serve` only: the library build keeps resolving them the way a consumer would.
+ */
+const workspaceSources = ['caret', 'dom', 'helpers'].map((name) => ({
+  /**
+   * Anchored, so that only the bare specifier is rewritten. A plain string alias matches by
+   * prefix, which would turn a future '@editorjs/dom/something' into a path ending in
+   * 'index.tssomething' instead of leaving it alone
+   */
+  find: new RegExp(`^@editorjs/${name}$`),
+  replacement: path.resolve(__dirname, '..', name, 'src', 'index.ts'),
+}));
+
+export default ({ command }) => ({
+  resolve: {
+    alias: command === 'serve' ? workspaceSources : [],
+  },
+
   css: {
     postcss: {
       plugins: [
@@ -56,11 +78,23 @@ export default {
 
   server: {
     port: 3300,
-    open: './preview/index.html',
+    /**
+     * NO_OPEN is set by the e2e runner, which starts the dev server itself and
+     * should not pop a browser window up on every run
+     */
+    open: process.env.NO_OPEN === 'true' ? false : './preview/index.html',
   },
 
   plugins: [
     cssInjectedByJsPlugin(),
-    dts(),
+
+    /**
+     * The package tsconfig includes every file, but the e2e declarations must not reach dist:
+     * they import from '@playwright/test', a devDependency, which a consumer's TypeScript then
+     * fails to resolve. The suite is typechecked separately, see the root 'typecheck:e2e'
+     */
+    dts({
+      exclude: ['e2e/**', 'playwright.config.ts'],
+    }),
   ],
-};
+});

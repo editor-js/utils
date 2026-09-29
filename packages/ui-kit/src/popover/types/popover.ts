@@ -58,6 +58,31 @@ export interface PopoverMessages {
 
   /** Search input label */
   search?: string;
+
+  /**
+   * Accessible name of the back button that leaves a nested popover.
+   * The button is rendered as an icon, so it has no name of its own
+   */
+  back?: string;
+
+  /**
+   * Announced after the items get filtered by the search query, when exactly one item matches.
+   * '{count}' is replaced with the number of found items
+   */
+  result?: string;
+
+  /**
+   * Announced after the items get filtered by the search query, when zero or more than one
+   * item matches. '{count}' is replaced with the number of found items
+   */
+  results?: string;
+
+  /**
+   * Accessible name of the popover items container (menu or toolbar), and of the dialog the
+   * mobile popover is rendered as. Not rendered visually, used by screen readers to announce
+   * what the popover is. Defaults to 'Menu', or to 'Toolbar' for the inline popover
+   */
+  label?: string;
 }
 
 /**
@@ -74,6 +99,12 @@ export interface PopoverEventMap {
    * Value is the item that was clicked
    */
   [PopoverEvent.ClosedOnActivate]: undefined;
+
+  /**
+   * Fired when the item highlighted by keyboard navigation changes.
+   * Value is the id of the highlighted item's root element, or null when nothing is highlighted
+   */
+  [PopoverEvent.ActiveDescendantChanged]: string | null;
 }
 
 /**
@@ -88,6 +119,9 @@ export interface PopoverNodes {
 
   /** Message displayed when no items found while searching */
   nothingFoundMessage: HTMLElement;
+
+  /** Visually hidden element used to announce dynamic changes to screen readers */
+  liveRegion: HTMLElement;
 
   /** Popover items wrapper */
   items: HTMLElement;

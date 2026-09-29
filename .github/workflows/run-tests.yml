@@ -37,3 +37,33 @@ jobs:
 
       - name: Run tests
         run: yarn test
+
+  e2e:
+    name: UI Kit e2e tests
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 22.1.0
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Build utils
+        run: yarn build
+
+      - name: Typecheck e2e suite
+        run: yarn typecheck:e2e
+
+      - name: Install Playwright browsers
+        run: yarn workspace @editorjs/ui-kit playwright install --with-deps chromium webkit
+
+      - name: Run e2e tests
+        run: yarn workspace @editorjs/ui-kit test:e2e

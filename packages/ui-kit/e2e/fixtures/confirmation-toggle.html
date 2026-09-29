@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>UI Kit e2e — confirmation toggle</title>
+</head>
+<body>
+<div style="position: relative; width: 500px; padding: 12px;">
+  <button id="before">Before</button>
+  <div style="position: relative;">
+    <button id="trigger">Open menu</button>
+  </div>
+</div>
+
+<script type="module">
+  import { PopoverDesktop } from '/src/index.ts';
+
+  const icon = '<svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/></svg>';
+
+  window.__activated = [];
+
+  /**
+   * Records item activation so tests can assert it without relying on visuals
+   * @param {string} name - name of the activated item
+   */
+  const activate = (name) => () => window.__activated.push(name);
+
+  const popover = new PopoverDesktop({
+    scopeElement: document.body,
+    items: [
+      {
+        icon,
+        title: 'Pin',
+        name: 'pin',
+        /** A toggle that asks for a confirmation too: clicking both toggles it and swaps it into confirmation mode */
+        toggle: true,
+        onActivate: activate('pin'),
+        confirmation: {
+          icon,
+          title: 'Sure?',
+          name: 'pin-confirm',
+          onActivate: activate('pin-confirm'),
+        },
+      },
+    ],
+  });
+
+  document.getElementById('trigger').insertAdjacentElement('afterend', popover.getElement());
+  document.getElementById('trigger').addEventListener('click', () => popover.show());
+
+  window.popover = popover;
+  document.body.dataset.ready = 'true';
+</script>
+</body>
+</html>

@@ -1,3 +1,5 @@
+@import './custom-media.css';
+
 /**
  * Popover styles
  *
@@ -50,6 +52,13 @@
     pointer-events: none;
     padding: 0;
     border: none;
+
+    /**
+     * opacity/max-height alone hide the popover visually but not from assistive tech - the
+     * inert attribute toggled in JS is not reliably enough on its own to pull a dynamic change
+     * like this out of Safari/VoiceOver's accessibility tree, so visibility is the backstop
+     */
+    visibility: hidden;
   }
 
   &--opened {
@@ -58,6 +67,7 @@
       padding: var(--padding);
       max-height: var(--max-height);
       pointer-events: auto;
+      visibility: visible;
       animation: panelShowing 100ms ease;
       border: 1px solid var(--color-border);
 
@@ -82,6 +92,29 @@
   &__items {
     overflow-y: auto;
     overscroll-behavior: contain;
+  }
+
+  /**
+   * Announcements for screen readers. Takes no space and is not displayed on screen
+   */
+  &__live-region {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    border: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    clip-path: inset(50%);
+  }
+
+  /**
+   * Semantic wrapper for a group of radio-like items.
+   * Generates no box, so items keep participating in the layout of the items container
+   */
+  &__items-group {
+    display: contents;
   }
 
   &__overlay {
@@ -205,6 +238,26 @@
 
   &:not(:last-of-type) {
     margin-bottom: 1px;
+  }
+
+  /**
+   * Radio group wrapper generates no box, but it does scope :last-of-type to itself.
+   * The margin of the item closing a group is restored, unless the group closes the list
+   */
+  .ce-popover__items-group:not(:last-of-type) > &:last-of-type {
+    margin-bottom: 1px;
+  }
+
+  /**
+   * Keyboard navigation moves real focus between items.
+   * The focus is already conveyed by the --focused modifier, so the default ring is suppressed
+   * to keep the popover appearance unchanged.
+   *
+   * Only where the modifier is actually there: a popover built with 'flippable: false' has no
+   * Flipper to apply it, and the default ring is the only focus indicator its items have
+   */
+  &--focused:focus-visible {
+    outline: none;
   }
 
   &__icon {
