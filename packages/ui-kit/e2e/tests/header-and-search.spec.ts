@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { hidePopover, showPopover } from './utils';
+import { addItem, hidePopover, removeItemByName, showPopover } from './utils';
 
 test.describe('search input', () => {
   test.beforeEach(async ({ page }) => {
@@ -94,6 +94,36 @@ test.describe('search input', () => {
     await expect(page.getByRole('menuitem', { name: 'Simple Item' })).toBeFocused();
   });
 
+  test('an item added while a query is typed is filtered by that query', async ({ page }) => {
+    /**
+     * Changing the item list leaves the results describing a list that no longer exists: the
+     * newcomer used to show up among the matches whether it matched or not, and the announced
+     * count went with it
+     */
+    await page.getByRole('searchbox', { name: 'Search' }).fill('Align');
+    await expect(page.getByRole('menuitemradio')).toHaveCount(2);
+
+    await addItem(page, {
+      title: 'Align Right',
+      name: 'align-right',
+      toggle: 'align',
+    });
+
+    const matchesAfterAdding = 3;
+
+    await expect(page.getByRole('menuitemradio')).toHaveCount(matchesAfterAdding);
+    await expect(page.getByRole('status').first()).toHaveText(`${matchesAfterAdding} results`);
+
+    await addItem(page, {
+      title: 'Strikethrough',
+      name: 'strike',
+    });
+
+    /** Does not match, so it stays out of the results rather than joining them */
+    await expect(page.getByRole('menuitem', { name: 'Strikethrough' })).toHaveCount(0);
+    await expect(page.locator('[data-item-name="strike"]')).toBeHidden();
+  });
+
   test('arrow navigation after clicking a result stays within the matches', async ({ page }) => {
     await page.getByRole('searchbox', { name: 'Search' }).fill('Align');
 
@@ -113,6 +143,44 @@ test.describe('search input', () => {
 
     await page.keyboard.press('ArrowDown');
     await expect(page.getByRole('menuitemradio', { name: 'Align Center' })).toBeFocused();
+  });
+
+  test('keeps the navigation cursor on the focused result when an item is added', async ({ page }) => {
+    await page.getByRole('searchbox', { name: 'Search' }).fill('Align');
+
+    await page.keyboard.press('ArrowDown');
+    await expect(page.getByRole('menuitemradio', { name: 'Align Left' })).toBeFocused();
+
+    /**
+     * Adding an item reapplies the query, which restarts the Flipper. Without a cursor to
+     * resume from, the next arrow press would silently start over from the top of the list
+     * while the focus stayed where the user left it
+     */
+    await addItem(page, {
+      title: 'Added item',
+      name: 'added',
+    });
+
+    await expect(page.getByRole('menuitemradio', { name: 'Align Left' })).toBeFocused();
+
+    await page.keyboard.press('ArrowDown');
+    await expect(page.getByRole('menuitemradio', { name: 'Align Center' })).toBeFocused();
+  });
+
+  test('keeps the navigation cursor on the focused result when an item is removed', async ({ page }) => {
+    await page.getByRole('searchbox', { name: 'Search' }).fill('Align');
+
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('ArrowDown');
+    await expect(page.getByRole('menuitemradio', { name: 'Align Center' })).toBeFocused();
+
+    /** Filtered out by the query, so the results the user is navigating do not change */
+    await removeItemByName(page, 'bold');
+
+    await expect(page.getByRole('menuitemradio', { name: 'Align Center' })).toBeFocused();
+
+    await page.keyboard.press('ArrowUp');
+    await expect(page.getByRole('menuitemradio', { name: 'Align Left' })).toBeFocused();
   });
 });
 

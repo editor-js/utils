@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>UI Kit e2e — mobile with a self-closing nested level</title>
+</head>
+<body>
+<div style="position: relative; width: 100%; padding: 12px;">
+  <div style="position: relative;">
+    <button id="trigger">Open mobile popover</button>
+  </div>
+</div>
+
+<script type="module">
+  import { PopoverMobile } from '/src/index.ts';
+
+  window.__activated = [];
+
+  /**
+   * Records item activation so tests can assert it without relying on visuals
+   * @param {string} name - name of the activated item
+   */
+  const activate = (name) => () => window.__activated.push(name);
+
+  const popover = new PopoverMobile({
+    scopeElement: document.body,
+    items: [
+      {
+        title: 'Simple item',
+        name: 'simple',
+        onActivate: activate('simple'),
+      },
+      {
+        title: 'Closes itself',
+        name: 'self-closing',
+        children: {
+          /**
+           * Closes the level it was just handed, synchronously, the way a tool that decides it
+           * has nothing to show would. The popover has to end up back on the root level
+           */
+          onOpen: (close) => close(),
+          items: [
+            {
+              title: 'Never seen',
+              name: 'never-seen',
+              onActivate: activate('never-seen'),
+            },
+          ],
+        },
+      },
+    ],
+  });
+
+  document.body.appendChild(popover.getElement());
+  document.getElementById('trigger').addEventListener('click', () => popover.show());
+
+  window.popover = popover;
+  document.body.dataset.ready = 'true';
+</script>
+</body>
+</html>
