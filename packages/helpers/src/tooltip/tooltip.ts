@@ -37,11 +37,13 @@ export function show(element: HTMLElement, content: TooltipContent, options?: To
 
 /**
  * Hides tooltip
+ *
+ * Does nothing when no tooltip has been created: there is nothing to hide, and creating one here
+ * would register its window-level listeners on teardown paths (e.g. destroying a popover item)
+ * where nothing was ever shown
  * @param skipHidingDelay — pass true to immediately hide the tooltip
  */
 export function hide(skipHidingDelay = false): void {
-  prepare();
-
   lib?.hide(skipHidingDelay);
 }
 
